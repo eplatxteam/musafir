@@ -1,0 +1,61 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardDetails"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:layoutDirection="rtl"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <!-- صورة الإعلان -->
+        <ImageView
+            android:id="@+id/itemImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <!-- Gradient أسفل الصورة -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:background="@drawable/gradient_bottom" />
+
+        <!-- النص + الزر أسفل الصورة -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
+
+            <!-- العنوان -->
+            <TextView
+                android:id="@+id/itemTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="عنوان الإعلان"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- زر السهم -->
+            <ImageView
+                android:id="@+id/adNext"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/arrow_left" />
+
+        </LinearLayout>
+    </FrameLayout>
+</androidx.cardview.widget.CardView>

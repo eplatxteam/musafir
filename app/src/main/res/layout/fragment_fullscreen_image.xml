@@ -1,0 +1,104 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_gravity="top"
+        android:background="@drawable/gradient_top_shadow" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/gradient_bottom_shadow" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="30dp"
+        android:paddingEnd="16dp">
+
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/icons8_back_to_1" />
+
+        <TextView
+            android:id="@+id/carNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="3"
+            android:text="اسم السيارة"
+            android:textColor="#FFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bottomContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:paddingBottom="20dp">
+
+        <LinearLayout
+            android:id="@+id/arrowsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/arrowLeft"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginEnd="40dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_right" />
+
+            <ImageView
+                android:id="@+id/arrowRight"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_left" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/imagesContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="80dp"
+                android:gravity="center"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+    </LinearLayout>
+
+</FrameLayout>

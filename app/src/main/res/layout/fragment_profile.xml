@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    tools:context=".AddTravelerRequests">
+
+    <ScrollView
+        android:id="@+id/scrollViewcon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:scrollbars="none"
+        android:textDirection="rtl">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:text="حسابي"
+                android:textColor="@color/primary"
+                android:textSize="23sp"
+                android:textStyle="bold" />
+            <!-- بطاقة النموذج -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:layoutDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="26dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="5dp"
+                                android:src="@drawable/profile_new" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="الاسم الكامل"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layoutDirection="rtl"
+                        app:boxBackgroundMode="outline"
+                        app:hintEnabled="true">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/fullName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                            android:imeOptions="actionNext"
+                            android:inputType="text"
+                            android:layoutDirection="rtl"
+                            android:padding="12dp"
+                            android:singleLine="true"
+                            android:textColor="@android:color/black"
+                            android:textColorHint="@android:color/transparent"
+                            android:textDirection="rtl" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/fullNameError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="26dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="5dp"
+                                android:src="@drawable/phone_new" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="رقم الهاتف"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layoutDirection="rtl"
+                        app:boxBackgroundMode="outline"
+                        app:hintEnabled="true">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/phoneNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:enabled="false"
+                            android:imeOptions="actionNext"
+                            android:inputType="number"
+                            android:layoutDirection="rtl"
+                            android:padding="12dp"
+                            android:singleLine="true"
+                            android:textColor="@android:color/black"
+                            android:textColorHint="@android:color/transparent"
+                            android:textDirection="rtl" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="15dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/phoneError"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="14sp"
+                                android:visibility="gone" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/passwordError"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="14sp"
+                                android:visibility="gone" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="26dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="5dp"
+                                android:src="@drawable/date" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="تاريخ الميلاد"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layoutDirection="rtl"
+                        app:boxBackgroundMode="outline"
+                        app:hintEnabled="true">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/dateOfBirth"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:clickable="true"
+                            android:focusable="false"
+                            android:imeOptions="actionNext"
+                            android:inputType="number"
+                            android:layoutDirection="rtl"
+                            android:padding="12dp"
+                            android:singleLine="true"
+                            android:textColor="@android:color/black"
+                            android:textColorHint="@android:color/transparent"
+                            android:textDirection="rtl" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="18dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginEnd="5dp"
+                                android:src="@drawable/location2" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="العنوان"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/address"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/edittext_background"
+                                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                                android:imeOptions="actionNext"
+                                android:inputType="text"
+                                android:maxLength="15"
+                                android:padding="10dp"
+                                android:singleLine="true"
+                                android:textColor="@android:color/black"
+                                android:textSize="16sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/icons8_toilet_1" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="الجنس"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:gravity="center"
+                        android:layoutDirection="rtl"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <RadioGroup
+                            android:id="@+id/genderRadioGroup"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+                            <!-- بطاقة ذكر -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/radioMale"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                app:cardBackgroundColor="@color/gray"
+                                app:cardCornerRadius="12dp"
+                                app:cardElevation="0dp"
+                                app:strokeColor="@color/gray"
+                                app:strokeWidth="2dp">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:orientation="horizontal"
+                                    android:padding="10dp">
+
+                                    <ImageView
+                                        android:id="@+id/iconPassenger"
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginEnd="8dp"
+                                        android:src="@drawable/man"
+                                        app:tint="#666666" />
+
+                                    <TextView
+                                        android:id="@+id/textMan"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="ذكر"
+                                        android:textColor="#000000"
+                                        android:textSize="18sp"
+                                        android:textStyle="bold" />
+
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- بطاقة أنثى -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/radioFemale"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                app:cardBackgroundColor="@color/gray"
+                                app:cardCornerRadius="12dp"
+                                app:cardElevation="0dp"
+                                app:strokeColor="@color/gray"
+                                app:strokeWidth="2dp">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:orientation="horizontal"
+                                    android:padding="10dp">
+
+                                    <ImageView
+                                        android:id="@+id/iconDriver"
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginEnd="8dp"
+                                        android:src="@drawable/woman"
+                                        app:tint="#666666" />
+
+                                    <TextView
+                                        android:id="@+id/textWoman"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="أنثى"
+                                        android:textColor="#000000"
+                                        android:textSize="18sp"
+                                        android:textStyle="bold" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+                        </RadioGroup>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/passengerFieldsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="18dp"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical|start"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="26dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="5dp"
+                                android:src="@drawable/icons8_identification_documents_1" />
+
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layoutDirection="rtl"
+                                android:text="صورة جواز السفر"
+                                android:textColor="@color/black"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="180dp"
+                            android:layout_marginBottom="12dp"
+                            android:background="@drawable/image_border">
+
+                            <ImageView
+                                android:id="@+id/passportImage"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:contentDescription="صورة جواز السفر"
+                                android:scaleType="centerCrop" />
+
+                            <LinearLayout
+                                android:id="@+id/frame_img_passport"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@android:color/transparent"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:textAlignment="center">
+
+                                <ImageView
+                                    android:layout_width="64dp"
+                                    android:layout_height="64dp"
+                                    android:layout_marginBottom="12dp"
+                                    android:src="@drawable/baseline_upload_24"
+                                    app:tint="#80000000" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:text="اضغط لإضافة صورة"
+                                    android:textColor="#80000000"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <ProgressBar
+                                android:id="@+id/progresspassportImage"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center"
+                                android:visibility="gone" />
+                        </FrameLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/driverFieldsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="18dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="26dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginEnd="5dp"
+                                    android:src="@drawable/icons8_identification_documents_1" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="رقم الهوية الوطنية"
+                                    android:textColor="@android:color/black"
+                                    android:textSize="18dp" />
+
+                            </LinearLayout>
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/nationalId"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/edittext_background"
+                                    android:imeOptions="actionNext"
+                                    android:inputType="number"
+                                    android:padding="10dp"
+                                    android:singleLine="true"
+                                    android:textColor="@android:color/black"
+
+                                    android:textSize="16sp" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="18dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="26dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginEnd="5dp"
+                                    android:src="@drawable/icons8_identification_documents_1" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="رخصة القيادة"
+                                    android:textColor="@android:color/black"
+                                    android:textSize="18dp" />
+
+                            </LinearLayout>
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/driverLicense"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/edittext_background"
+                                    android:imeOptions="actionNext"
+                                    android:inputType="number"
+                                    android:padding="10dp"
+                                    android:singleLine="true"
+                                    android:textColor="@android:color/black"
+
+                                    android:textSize="16sp" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="18dp"
+                            android:gravity="center_vertical|start"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="26dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="5dp"
+                                android:src="@drawable/icons8_identification_documents_1" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layoutDirection="rtl"
+                                android:text="صورة الهوية الوطنية"
+                                android:textColor="@color/black"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="180dp"
+                            android:layout_marginBottom="12dp"
+                            android:background="@drawable/image_border"
+                            android:paddingBottom="10dp">
+
+                            <ImageView
+                                android:id="@+id/nationalIdImage"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:contentDescription="صورة الهوية"
+                                android:scaleType="centerCrop" />
+
+                            <LinearLayout
+                                android:id="@+id/frame_img"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@android:color/transparent"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:textAlignment="center">
+
+                                <ImageView
+                                    android:id="@+id/placeholderIcon"
+                                    android:layout_width="64dp"
+                                    android:layout_height="64dp"
+                                    android:layout_marginBottom="12dp"
+                                    android:src="@drawable/baseline_upload_24"
+                                    app:tint="#80000000" />
+
+                                <TextView
+                                    android:id="@+id/placeholderText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:text="اضغط لإضافة صورة"
+                                    android:textColor="#80000000"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <ProgressBar
+                                android:id="@+id/progressNationalImage"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center"
+                                android:visibility="gone" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="18dp"
+                            android:gravity="center_vertical|start"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="26dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="5dp"
+                                android:src="@drawable/icons8_driver_license_1" />
+                            <!-- صورة رخصة القيادة -->
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layoutDirection="rtl"
+                                android:text="صورة رخصة القيادة"
+                                android:textColor="@color/black"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="180dp"
+                            android:layout_marginBottom="12dp"
+                            android:background="@drawable/image_border">
+
+                            <ImageView
+                                android:id="@+id/licenseImage"
+                                android:layout_width="match_parent"
+                                android:layout_height="180dp"
+                                android:layout_marginBottom="16dp"
+                                android:contentDescription="صورة الرخصة"
+                                android:scaleType="centerCrop" />
+
+                            <LinearLayout
+                                android:id="@+id/frame_img2"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:textAlignment="center">
+
+                                <ImageView
+                                    android:id="@+id/placeholderIcon2"
+                                    android:layout_width="64dp"
+                                    android:layout_height="64dp"
+                                    android:layout_marginBottom="12dp"
+                                    android:src="@drawable/baseline_upload_24"
+                                    app:tint="#80000000" />
+
+                                <TextView
+                                    android:id="@+id/placeholderText2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:text="اضغط لإضافة صورة"
+                                    android:textColor="#80000000"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <ProgressBar
+                                android:id="@+id/progressLicenseImage"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center"
+                                android:visibility="gone" />
+                        </FrameLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/editProfileButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginTop="18dp"
+                        android:layout_marginBottom="18dp"
+                        android:background="@drawable/bg_button"
+                        android:elevation="0dp"
+                        android:gravity="center"
+                        android:stateListAnimator="@null"
+                        android:text="حفظ البيانات"
+                        android:textAllCaps="false"
+                        android:textColor="@color/primary2"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

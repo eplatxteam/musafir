@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- الهيدر (العنوان وزر الإغلاق) -->
+        <RelativeLayout
+            android:id="@+id/dialogCancelButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:text="تنبيه هام"
+                android:textColor="@color/primary2"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_alignParentEnd="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:src="@drawable/cancel" />
+            </LinearLayout>
+        </RelativeLayout>
+
+
+        <TextView
+            android:id="@+id/tvMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:gravity="center"
+            android:lineSpacingExtra="5dp"
+            android:textColor="#555555"
+            android:textSize="14sp" />
+
+        <!-- أزرار التواصل -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <!-- زر واتساب: تم تغيير العرض ليدعم التوسط التلقائي -->
+            <LinearLayout
+                android:id="@+id/btnWhatsapp"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_margin="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_button2"
+                android:clickable="true"
+                android:elevation="2dp"
+                android:focusable="true"
+                android:gravity="center"
+                android:minWidth="140dp">
+
+                <ImageView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:src="@drawable/whatsapp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="واتساب"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCall"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_margin="6dp"
+                android:layout_weight="1"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                android:text="إتصال"
+                android:textColor="@color/primary2"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/phone"
+                app:iconGravity="textStart"
+                app:iconPadding="4dp"
+                app:iconTint="@color/primary2"
+                app:rippleColor="#20000000"
+                app:strokeColor="#e3e3e3"
+                app:strokeWidth="1dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

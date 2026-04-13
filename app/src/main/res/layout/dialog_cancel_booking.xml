@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog"
+    android:orientation="vertical">
+
+    <!-- العنوان -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:text="إلغاء الحجز"
+        android:textColor="@color/primary"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:layoutDirection="rtl"
+        android:textAlignment="viewStart"
+        app:boxBackgroundMode="none"
+        app:counterEnabled="true"
+        app:counterMaxLength="100"
+        app:hintEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_background"
+            android:gravity="top|start"
+            android:hint="سبب الإلغاء"
+            android:inputType="textMultiLine"
+            android:maxLength="100"
+            android:maxLines="4"
+            android:minHeight="48dp"
+            android:padding="12dp"
+            android:scrollbars="vertical"
+            android:singleLine="true"
+            android:textColor="@android:color/black" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:alpha="0.7"
+        android:text="لا يمكن التراجع عن هذه الخطوة"
+        android:textColor="#B91C1C"
+        android:textSize="14dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <!-- زر الموافقة -->
+        <Button
+            android:id="@+id/btnYes"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/primary3"
+            android:elevation="0dp"
+            android:padding="2dp"
+            android:stateListAnimator="@null"
+            android:text="متابعة"
+            android:textAllCaps="false"
+            android:textColor="@color/primary2"
+            android:textSize="14sp"
+            app:backgroundTint="@null" />
+
+        <!-- زر الإلغاء -->
+        <Button
+            android:id="@+id/btnNo"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/gray2"
+            android:elevation="0dp"
+            android:padding="2dp"
+            android:stateListAnimator="@null"
+            android:text="إلغاء"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
+</LinearLayout>

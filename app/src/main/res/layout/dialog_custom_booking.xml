@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <LinearLayout
+        android:id="@+id/dialogCancelButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="حجز رحلة"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:src="@drawable/cancel" />
+    </LinearLayout>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:textDirection="rtl">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="right"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="5dp"
+                        android:src="@drawable/location2" />
+
+
+                    <TextView
+                        android:id="@+id/tvLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/IdTrip2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/badge_background_details3"
+                    android:paddingVertical="4dp"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primary2"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:gravity="right"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/date" />
+
+                <!--                <TextView-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:text="تاريخ الرحلة: "-->
+                <!--                    android:textColor="@android:color/black"-->
+                <!--                    android:textSize="16sp"-->
+                <!--                    android:textStyle="bold" />-->
+
+                <TextView
+                    android:id="@+id/tvDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edittext_background"
+                    android:padding="6dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="right"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/icons8_group_1" />
+
+                <TextView
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="9dp"
+                    android:gravity="center_vertical"
+                    android:text="كبار:"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!--        <Button-->
+                <!--            android:id="@+id/btnMinus"-->
+                <!--            android:layout_width="50dp"-->
+                <!--            android:layout_height="50dp"-->
+                <!--            android:layout_marginStart="20dp"-->
+                <!--            android:background="@drawable/button_background"-->
+                <!--            android:text="-"-->
+                <!--            android:textColor="@android:color/black"-->
+                <!--            android:textSize="18sp" />-->
+                <ImageView
+                    android:id="@+id/btnMinus"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/icons8_minus_1" />
+
+                <TextView
+                    android:id="@+id/inputSeats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp"
+                    android:text="1"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <ImageView
+                    android:id="@+id/btnPlus"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/increase" />
+                <!--        <Button-->
+                <!--            android:id="@+id/btnPlus"-->
+                <!--            android:layout_width="50dp"-->
+                <!--            android:layout_height="50dp"-->
+                <!--            android:background="@drawable/button_background"-->
+                <!--            android:text="+"-->
+                <!--            android:textColor="@android:color/black"-->
+                <!--            android:textSize="18sp" />-->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="right"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/baby_face" />
+
+                <TextView
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="12dp"
+                    android:gravity="center_vertical"
+                    android:text="أطفال:"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/btnMinuschild"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/icons8_minus_1" />
+                <!--        <Button-->
+                <!--            android:id="@+id/btnMinuschild"-->
+                <!--            android:layout_width="50dp"-->
+                <!--            android:layout_height="50dp"-->
+                <!--            android:layout_marginStart="20dp"-->
+                <!--            android:background="@drawable/button_background"-->
+                <!--            android:text="-"-->
+                <!--            android:textColor="@android:color/black"-->
+                <!--            android:textSize="18sp" />-->
+
+                <TextView
+                    android:id="@+id/inputSeatschild"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp"
+                    android:text="0"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <ImageView
+                    android:id="@+id/btnPluschild"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/increase" />
+                <!--        <Button-->
+                <!--            android:id="@+id/btnPluschild"-->
+                <!--            android:layout_width="50dp"-->
+                <!--            android:layout_height="50dp"-->
+                <!--            android:background="@drawable/button_background"-->
+                <!--            android:text="+"-->
+                <!--            android:textColor="@android:color/black"-->
+                <!--            android:textSize="18sp" />-->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/icons8_group_1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="أسماء الأفراد: "
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/childrenNamesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:orientation="vertical" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!--                <TextView-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="match_parent"-->
+                <!--                    android:gravity="center_vertical"-->
+                <!--                    android:text="الإجمالي: "-->
+                <!--                    android:textColor="@color/black"-->
+                <!--                    android:textSize="16sp"-->
+                <!--                    android:textStyle="bold" />-->
+
+                <TextView
+                    android:id="@+id/totalPriceTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/secondary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/icons8_copybook_1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="ملاحظات (اختياري)"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layoutDirection="rtl"
+                android:textAlignment="viewStart"
+                android:textColorHint="@color/secondary"
+                android:textDirection="rtl"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/secondary"
+                app:counterEnabled="true"
+                app:counterMaxLength="100"
+                app:hintEnabled="true"
+                app:hintTextColor="@color/secondary">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/edittext_background"
+                    android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:maxLines="3"
+                    android:minLines="3"
+                    android:padding="12dp"
+                    android:scrollbars="vertical"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <LinearLayout
+                android:id="@+id/paymentMethodsContainerInBooking"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="6dp"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:scaleX="-1"
+            app:backgroundTint="@android:color/transparent"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/back_new2"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="20dp"
+            app:iconTint="@color/primary2"
+            app:rippleColor="#20000000"
+            app:strokeColor="#e3e3e3"
+            app:strokeWidth="1dp" />
+        <!--        <com.google.android.material.button.MaterialButton-->
+        <!--            android:id="@+id/btnCancel"-->
+        <!--            android:layout_width="50dp"-->
+        <!--            android:layout_height="50dp"-->
+        <!--            android:layout_margin="6dp"-->
+        <!--            app:strokeColor="@color/primary2"-->
+        <!--            android:elevation="1dp"-->
+        <!--            android:insetLeft="0dp"-->
+        <!--            android:insetTop="0dp"-->
+        <!--            android:insetRight="0dp"-->
+        <!--            android:insetBottom="0dp"-->
+        <!--            android:padding="0dp"-->
+        <!--            android:scaleX="-1"-->
+        <!--            android:stateListAnimator="@null"-->
+        <!--            app:backgroundTint="@null"-->
+        <!--            app:cornerRadius="25dp"-->
+        <!--            app:icon="@drawable/back_new2"-->
+        <!--            app:iconGravity="textStart"-->
+        <!--            app:iconPadding="0dp"-->
+        <!--            app:iconSize="30dp"-->
+        <!--            app:iconTint="@color/primary2" />-->
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnYes"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/ripple_button"
+            android:elevation="1dp"
+            android:stateListAnimator="@null"
+            android:text="حجز"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:translationZ="1dp"
+            app:icon="@drawable/booking_now"
+            app:iconGravity="textStart"
+            app:iconPadding="6dp"
+            app:iconSize="26dp"
+            app:iconTint="@android:color/white" />
+    </LinearLayout>
+
+</LinearLayout>

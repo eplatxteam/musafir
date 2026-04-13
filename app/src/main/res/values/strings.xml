@@ -1,0 +1,30 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">مسافر</string>
+    <string name="_556989656" tools:keep="@string/_556989656">556989656</string>
+    <string name="password" tools:keep="@string/password">Password</string>
+    <string name="forget_password" tools:keep="@string/forget_password">Forget password?</string>
+    <string name="login" tools:keep="@string/login">Login</string>
+    <string name="if_don_t_have_account" tools:keep="@string/if_don_t_have_account">If don\'t have account</string>
+    <string name="register_here" tools:keep="@string/register_here">Register here</string>
+    <string name="add_nbooking" tools:keep="@string/add_nbooking">Add\nBooking</string>
+    <string name="todo" tools:keep="@string/todo">TODO</string>
+    <string name="medical_nexaminations" tools:keep="@string/medical_nexaminations">Medical\nexaminations</string>
+    <string name="select_what_you_need" tools:keep="@string/select_what_you_need">Select What you need</string>
+    <string name="main" tools:keep="@string/main">Main</string>
+    <string name="_42_female" tools:keep="@string/_42_female">42 / Female</string>
+    <string name="mona_hajar_example" tools:keep="@string/mona_hajar_example">Mona Hajar Example</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment" tools:keep="@string/hello_blank_fragment">Hello blank fragment</string>
+    <string name="resend_underlined"><u>إعادة إرسال؟</u></string>
+    <string name="from_city_prompt" tools:keep="@string/from_city_prompt"><u>from_city_prompt</u></string>
+    <string name="to_city_prompt" tools:keep="@string/to_city_prompt"><u>to_city_prompt</u></string>
+    <string name="title_activity_main3" tools:keep="@string/title_activity_main3">MainActivity3</string>
+    <string name="title_home" tools:keep="@string/title_home">Home</string>
+    <string name="title_dashboard" tools:keep="@string/title_dashboard">Dashboard</string>
+    <string name="title_notifications" tools:keep="@string/title_notifications">Notifications</string>
+    <string name="details" tools:keep="@string/details"><![CDATA[يعود تاريخ بناء القصر إلى أواخر القرن الثامن عشر الميلادي حين أمر ملك اليمن الإمام المنصور علي بن العباس وزيره علي بن صالح العماري (1736-1798) والذي اشتهر بالهندسة المعمارية والفلك، والشعر والأدب - أمره ببناء قصر في وادي ظهر ليكون قصراً صيفياً له. ويروي المؤرخون أنه بني على أنقاض قصر سبئي قديم كان يعرف بحصن ذي سيدان الذي بناه الحميريون عام 3000 ق.م، ودمر الحصن على يد الأتراك قبل أربعمائة عام، وأُعيد ترميمه في بداية القرن العشرين على يد الإمام يحيى حميد الدين بعد أن توارثه عدد من الملوك اليمنيين. ويعد حالياً معلماً سياحياً يقصده الآلاف من أنحاء العالم. كان البناء على طريقته الأولية لسنوات، حتى قام الإمام يحيى بن حميد الدين بإضافة الطابق الأعلى (المفرج).< تتفاوت الروايات المرتبطة ببداية التأسيس والبنيان لدار الحجر وتشير بعض الحكايات أن الدار كان قد تعرض للهدم عشرات المرات إلا أنه كان يتم إعادة بنائه مرة أخرى.]]></string>
+    <string name="facebook_app_id">1956567461947889</string>
+    <string name="fb_login_protocol_scheme" tools:keep="@string/fb_login_protocol_scheme">fb1956567461947889</string>
+    <string name="facebook_client_token">f7aa8095e68f206c01b6ac024f972806</string>
+    <string name="title_activity_test" tools:keep="@string/title_activity_test">test</string>
+</resources>

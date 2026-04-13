@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".about">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:fillViewport="true"
+        android:textDirection="rtl">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+
+            <!-- العنوان الرئيسي -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:text="رحلتك تبدأ هنا"
+                android:textColor="@color/primary2"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- الخط الأزرق تحت العنوان -->
+            <!--            <View-->
+            <!--                android:layout_width="40dp"-->
+            <!--                android:layout_height="4dp"-->
+            <!--                android:layout_gravity="center"-->
+            <!--                android:layout_marginTop="6dp"-->
+            <!--                android:background="@drawable/gradient_bar" />-->
+
+            <!-- الوصف -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="نوفر لك تجربة سفر استثنائية مع أفضل الخدمات والميزات اكتشف طريقة جديدة للسفر. شارك الرحلات مع مسافرين آخرين واستمتع برحلة آمنة ومريحة بأسعار معقولة."
+                android:textColor="#555555"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:layoutDirection="rtl"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:weightSum="2">
+                <!--                <Button-->
+                <!--                    android:layout_width="0dp"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_weight="1"-->
+                <!--                    android:layout_marginEnd="8dp"-->
+                <!--                    app:backgroundTint="@null"-->
+                <!--                    android:background="@drawable/button_background"-->
+                <!--                    android:textColor="@color/secondary"-->
+                <!--                    android:text="البحث عن رحلة"-->
+                <!--                    android:elevation="50dp"-->
+                <!--                    android:textStyle="bold"-->
+                <!--                    android:id="@+id/search_travel"-->
+                <!--                    android:paddingVertical="12dp"/>-->
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layoutDirection="rtl"
+                android:orientation="vertical">
+
+                <!-- العنوان الرئيسي -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:text="لماذا تختار مسافر؟"
+                    android:textAlignment="center"
+                    android:textColor="@color/primary2"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <!-- الخط الأزرق تحت العنوان -->
+                <!--                <View-->
+                <!--                    android:layout_width="40dp"-->
+                <!--                    android:layout_height="4dp"-->
+                <!--                    android:layout_gravity="center"-->
+                <!--                    android:layout_marginTop="6dp"-->
+                <!--                    android:background="@drawable/gradient_bar" />-->
+
+                <!-- الوصف -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="نوفر لك تجربة سفر استثنائية مع أفضل الخدمات والميزات"
+                    android:textAlignment="center"
+                    android:textColor="#555555"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layoutDirection="rtl"
+                android:scrollbarSize="0dp">
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alignmentMode="alignMargins"
+                    android:columnCount="2"
+                    android:columnOrderPreserved="false"
+                    android:rowOrderPreserved="false"
+                    android:useDefaultMargins="true">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="180dp"
+                        android:layout_height="200dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="220dp"
+                            android:background="@color/white"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:elevation="8dp"
+                                android:src="@drawable/booking"
+                             />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="احجز بسهولة"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="66dp"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center"
+                                android:text="احجز رحلتك في ثوانٍ معدودة. حجز بسيط وسريع يناسب احتياجاتك."
+                                android:textAlignment="center"
+                                android:textColor="#444444"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="180dp"
+                        android:layout_height="200dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="220dp"
+                            android:background="@color/white"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:background="@drawable/support2"
+                                android:elevation="8dp"
+                                android:padding="12dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="دعم 24/7"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center"
+                                android:text="فريق دعم متاح على مدار الساعة لمساعدتك في أي وقت. خدمة عملاء متميزة."
+                                android:textAlignment="center"
+                                android:textColor="#444444"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="180dp"
+                        android:layout_height="200dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="5dp"
+                        android:padding="16dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="220dp"
+                            android:background="@color/white"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:background="@drawable/icons8_protect_1"
+                                android:elevation="8dp"
+                                android:padding="12dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="أمان وثقة"
+
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center"
+                                android:text="جميع السائقين معتمدون ومراجعون. نضمن لك رحلة آمنة مع أعلى معايير الأمان."
+                                android:textAlignment="center"
+                                android:textColor="#444444"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="180dp"
+                        android:layout_height="200dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="5dp"
+                        android:padding="16dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="220dp"
+                            android:background="@color/white"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:background="@drawable/icons8_easy_1"
+                                android:elevation="8dp"
+                                android:padding="12dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:elevation="8dp"
+                                android:text="سهولة الاستخدام"
+                                android:textColor="#000000"
+
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center"
+                                android:text="تطبيق بسيط وسهل الاستخدام. واجهة عربية مصممة خصيصاً لراحتك."
+                                android:textAlignment="center"
+                                android:textColor="#444444"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                </GridLayout>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layoutDirection="rtl"
+                android:orientation="vertical">
+
+                <!-- العنوان الرئيسي -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:text="كيف يعمل مسافر؟"
+                    android:textAlignment="center"
+                    android:textColor="@color/primary2"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <!-- الخط الأزرق تحت العنوان -->
+                <!--                <View-->
+                <!--                    android:layout_width="40dp"-->
+                <!--                    android:layout_height="4dp"-->
+                <!--                    android:layout_gravity="center"-->
+                <!--                    android:layout_marginTop="6dp"-->
+                <!--                    android:background="@color/primary" />-->
+
+                <!-- الوصف -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="خطوات بسيطة للوصول إلى وجهتك"
+                    android:textAlignment="center"
+                    android:textColor="#555555"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layoutDirection="rtl"
+                android:scrollbarSize="0dp">
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:alignmentMode="alignMargins"
+                    android:columnCount="2"
+                    android:columnOrderPreserved="false"
+                    android:layoutDirection="rtl"
+                    android:rowOrderPreserved="false"
+                    android:useDefaultMargins="true">
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="180dp"
+                        android:layout_height="200dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="5dp"
+                        android:padding="16dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:background="@color/white"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:src="@drawable/solo_traveller" />
+
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="خدمات عديدة"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center"
+                                android:text="خدمات متنوعة تلبي جميع احتياجاتك وتوفر لك تجربة مريحة وسلسة."
+                                android:textAlignment="center"
+                                android:textColor="#444444"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="180dp"
+                        android:layout_height="200dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="5dp"
+                        android:padding="16dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:background="@color/white"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:background="@drawable/icons8_search_account_1"
+                                android:gravity="center"
+                                android:padding="12dp"
+                                android:textSize="24sp"
+                                android:textStyle="bold" />
+
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="ابحث واختر"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center"
+                                android:text="ابحث عن الرحلة المناسبة لك من بين آلاف الرحلات المتاحة يومياً."
+                                android:textAlignment="center"
+                                android:textColor="#444444"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="180dp"
+                        android:layout_height="200dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="5dp"
+                        android:padding="16dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:background="@color/white"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:background="@drawable/icons8_reservation_1"
+                                android:elevation="8dp"
+                                android:gravity="center"
+                                android:padding="12dp"
+                                android:textSize="24sp"
+                                android:textStyle="bold" />
+
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="احجز"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center"
+                                android:text="احجز مقعدك بنقرة واحدة واستمتع بتجربة سفر مريحة."
+                                android:textAlignment="center"
+                                android:textColor="#444444"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="180dp"
+                        android:layout_height="200dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="5dp"
+                        android:padding="16dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:background="@color/white"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:background="@drawable/icons8_teepee_1"
+                                android:elevation="8dp"
+                                android:gravity="center"
+                                android:padding="12dp"
+
+
+                                android:textSize="24sp"
+                                android:textStyle="bold" />
+
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="استمتع بالرحلة"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center"
+                                android:text="التق بالسائق في النقطة المحددة واستمتع برحلة مريحة وآمنة."
+                                android:textAlignment="center"
+                                android:textColor="#444444"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+
+                </GridLayout>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="100dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/appVersion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="V "
+                    android:textAlignment="center"
+                    android:textColor="#555555"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

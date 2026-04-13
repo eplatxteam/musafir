@@ -1,0 +1,1038 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    tools:context=".AddVehicleFragment">
+
+    <ScrollView
+        android:id="@+id/scrollViewcon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:textDirection="rtl">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:spacing="8dp">
+
+            <!-- مجموعة معلومات عامة عن المركبة -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layoutDirection="rtl"
+                android:textDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="10dp"
+                        android:text="معلومات المركبة"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="اسم المركبة"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/vehicle_nameEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                            android:imeOptions="actionNext"
+                            android:maxLength="30"
+                            android:inputType="text"
+                            android:padding="10dp"
+                            android:singleLine="true"
+                            android:textSize="16sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <TextView
+                        android:id="@+id/vehicle_nameError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="يرجى إدخال اسم الشركة"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="نوع المركبة"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" *"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="22dp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="نوع الوقود"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" *"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="22dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            app:cardBackgroundColor="@color/gray"
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="0dp">
+
+                            <Spinner
+                                android:id="@+id/vehicleTypeSpinner"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:spinnerMode="dropdown" />
+                        </com.google.android.material.card.MaterialCardView>
+
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+
+                            android:layout_weight="1"
+                            android:visibility="gone"
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="2dp">
+
+                            <Spinner
+                                android:id="@+id/fuelTypeSpinner"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp"
+                                android:spinnerMode="dropdown" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
+                    <!-- عنوان: اسم المركبة -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="اسم الشركة"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <!-- حقل: اسم المركبة -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/makeEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                            android:imeOptions="actionNext"
+                            android:maxLength="30"
+                            android:inputType="text"
+                            android:padding="10dp"
+                            android:singleLine="true"
+                            android:textSize="16sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/makeError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="يرجى إدخال اسم الشركة"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <!-- عنوان: رقم اللوحة -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="رقم اللوحة"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <!-- حقل: رقم اللوحة -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/licensePlate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                            android:imeOptions="actionNext"
+                            android:inputType="text"
+                            android:maxLength="50"
+                            android:padding="10dp"
+                            android:singleLine="true"
+                            android:textSize="16sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- خطأ: رقم اللوحة -->
+                    <TextView
+                        android:id="@+id/licensePlateError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="يرجى إدخال رقم اللوحة"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+
+                    <!-- عنوان: سنة الصنع -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="سنة الصنع"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <!-- حقل: سنة الصنع -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/year"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:clickable="true"
+                            android:focusable="false"
+                            android:inputType="number"
+                            android:maxLength="4"
+                            android:padding="10dp"
+                            android:singleLine="true"
+                            android:textSize="16sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- خطأ: سنة الصنع -->
+                    <TextView
+                        android:id="@+id/yearError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="يرجى إدخال سنة الصنع"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+
+                    <!-- عنوان: لون المركبة -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="لون المركبة"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <!-- حقل: لون المركبة -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/color"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                            android:imeOptions="actionNext"
+                            android:inputType="text"
+                            android:maxLength="10"
+                            android:padding="10dp"
+                            android:singleLine="true"
+                            android:textSize="16sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- خطأ: لون المركبة -->
+                    <TextView
+                        android:id="@+id/colorError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="يرجى إدخال لون المركبة"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="السعر لكل مقعد"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" *"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="22dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/vh_price"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/edittext_background"
+                                android:imeOptions="actionNext"
+                                android:inputType="number"
+                                android:maxLength="7"
+                                android:padding="10dp"
+                                android:singleLine="true"
+                                android:textSize="16sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <TextView
+                            android:id="@+id/vh_priceError"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="14sp"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- مجموعة الصور -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layoutDirection="rtl"
+                android:textDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="10dp"
+                        android:text="التوثيق"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="صورة المركبة"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:background="@drawable/image_border">
+
+                        <ImageView
+                            android:id="@+id/vehicleImageView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitXY" />
+
+                        <LinearLayout
+                            android:id="@+id/frame_img"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:textAlignment="center">
+
+                            <ImageView
+                                android:id="@+id/placeholderIcon"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_marginBottom="12dp"
+                                android:src="@drawable/baseline_upload_24"
+                                app:tint="#80000000" />
+
+                            <TextView
+                                android:id="@+id/placeholderText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="اضغط لإضافة صورة"
+                                android:textColor="#80000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/vehicleImageViewError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="صورة المركبة 1"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <!--                        <TextView-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:text=" *"-->
+                        <!--                            android:textColor="@android:color/holo_red_dark"-->
+                        <!--                            android:textSize="22dp" />-->
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:background="@drawable/image_border">
+
+                        <ImageView
+                            android:id="@+id/vehicleImageView1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitXY" />
+
+                        <LinearLayout
+                            android:id="@+id/frame_img1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:textAlignment="center">
+
+                            <ImageView
+                                android:id="@+id/placeholderIcon1"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_marginBottom="12dp"
+                                android:src="@drawable/baseline_upload_24"
+                                app:tint="#80000000" />
+
+                            <TextView
+                                android:id="@+id/placeholderText1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="اضغط لإضافة صورة"
+                                android:textColor="#80000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="صورة المركبة 2"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <!--                        <TextView-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:text=" *"-->
+                        <!--                            android:textColor="@android:color/holo_red_dark"-->
+                        <!--                            android:textSize="22dp" />-->
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:background="@drawable/image_border">
+
+                        <ImageView
+                            android:id="@+id/vehicleImageView2"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitXY" />
+
+                        <LinearLayout
+                            android:id="@+id/frame_img2"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:textAlignment="center">
+
+                            <ImageView
+                                android:id="@+id/placeholderIcon22"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_marginBottom="12dp"
+                                android:src="@drawable/baseline_upload_24"
+                                app:tint="#80000000" />
+
+                            <TextView
+                                android:id="@+id/placeholderText22"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="اضغط لإضافة صورة"
+                                android:textColor="#80000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="صورة المركبة 3"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <!--                        <TextView-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:text=" *"-->
+                        <!--                            android:textColor="@android:color/holo_red_dark"-->
+                        <!--                            android:textSize="22dp" />-->
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:background="@drawable/image_border">
+
+                        <ImageView
+                            android:id="@+id/vehicleImageView3"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+
+                            android:scaleType="fitXY" />
+
+                        <LinearLayout
+                            android:id="@+id/frame_img3"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:textAlignment="center">
+
+                            <ImageView
+                                android:id="@+id/placeholderIcon3"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_marginBottom="12dp"
+                                android:src="@drawable/baseline_upload_24"
+                                app:tint="#80000000" />
+
+                            <TextView
+                                android:id="@+id/placeholderText3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="اضغط لإضافة صورة"
+                                android:textColor="#80000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="صورة المركبة 4"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <!--                        <TextView-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:text=" *"-->
+                        <!--                            android:textColor="@android:color/holo_red_dark"-->
+                        <!--                            android:textSize="22dp" />-->
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:background="@drawable/image_border">
+
+                        <ImageView
+                            android:id="@+id/vehicleImageView4"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitXY" />
+
+                        <LinearLayout
+                            android:id="@+id/frame_img4"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:textAlignment="center">
+
+                            <ImageView
+                                android:id="@+id/placeholderIcon4"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_marginBottom="12dp"
+                                android:src="@drawable/baseline_upload_24"
+                                app:tint="#80000000" />
+
+                            <TextView
+                                android:id="@+id/placeholderText4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="اضغط لإضافة صورة"
+                                android:textColor="#80000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="وثيقة التسجيل (الكارت)"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:background="@drawable/image_border">
+
+                        <ImageView
+                            android:id="@+id/registrationDocImageView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitXY" />
+
+                        <LinearLayout
+                            android:id="@+id/frame_doc"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:textAlignment="center">
+
+                            <ImageView
+                                android:id="@+id/placeholderIcon2"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_marginBottom="12dp"
+                                android:src="@drawable/baseline_upload_24"
+                                app:tint="#80000000" />
+
+                            <TextView
+                                android:id="@+id/placeholderText2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="اضغط لإضافة صورة"
+                                android:textColor="#80000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/registrationDocImageViewError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- مجموعة تفاصيل إضافية -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layoutDirection="rtl"
+                android:textDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="10dp"
+                        android:text="المقاعد"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="عدد المقاعد"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" *"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="22dp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/totalSeats"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/edittext_background"
+                                android:imeOptions="actionNext"
+                                android:inputType="number"
+                                android:maxLength="2"
+                                android:padding="10dp"
+                                android:textSize="16sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <TextView
+                            android:id="@+id/totalSeatsError"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="يرجى إدخال عدد المقاعد"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="المقاعد المتاحة"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/availableSeats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_background"
+                            android:inputType="number"
+                            android:maxLength="2"
+                            android:padding="10dp"
+                            android:textSize="16sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/availableSeatsError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="يرجى إدخال المقاعد المتاحة"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/submitBtn"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="70dp"
+                android:background="@drawable/bg_button"
+                android:gravity="center"
+                android:text="إضافة المركبة"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@color/primary2"
+                android:textSize="18sp"
+                android:stateListAnimator="@null"
+                android:elevation="0dp"
+                app:backgroundTint="@null" />
+
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

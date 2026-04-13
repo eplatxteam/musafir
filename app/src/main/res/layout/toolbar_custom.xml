@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:layoutDirection="rtl"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/action_placeholder"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="10dp"
+        android:visibility="gone"
+        android:src="@drawable/icons8_back_to_1" />
+
+    <LinearLayout
+        android:id="@+id/toolbar_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:layoutDirection="rtl"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/iconTool"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/profile_new" />
+
+        <TextView
+            android:id="@+id/textGreeting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/iconHi"
+            android:layout_width="30dp"
+            android:visibility="gone"
+            android:layout_height="30dp"
+            android:src="@drawable/hand" />
+    </LinearLayout>
+</LinearLayout>

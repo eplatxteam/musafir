@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="rtl"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    >
+
+    <!-- العنوان و زر الإغلاق -->
+    <LinearLayout
+        android:id="@+id/btnCloseDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/location2"/>
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="تحديد الوجهة"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:src="@drawable/cancel" />
+    </LinearLayout>
+
+
+
+            <EditText
+                android:id="@+id/searchBox"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:background="@drawable/edittext_background"
+                android:drawableStart="@drawable/search"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:hint="البحث عن مدينة..."
+                android:paddingStart="12dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="8dp"
+                android:textColor="@android:color/black"
+                android:textDirection="rtl"
+                android:textSize="16sp" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerCities"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@color/white" />
+
+
+
+    <!-- الحقل الرئيسي -->
+<!--    <TextView-->
+<!--        android:id="@+id/textFromCitySearch"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="48dp"-->
+<!--        android:layout_marginBottom="20dp"-->
+<!--        android:background="@drawable/edittext_background"-->
+<!--        android:drawableEnd="@drawable/baseline_keyboard_arrow_down_24"-->
+<!--        android:drawablePadding="10dp"-->
+<!--        android:gravity="center_vertical|start"-->
+<!--        android:padding="12dp"-->
+<!--        android:text="حدد الوجهة"-->
+<!--        android:textColor="@android:color/black"-->
+<!--        android:textSize="16sp" />-->
+
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        android:id="@+id/btnSelect"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="40dp"-->
+<!--        android:layout_marginBottom="20dp"-->
+<!--        android:layout_weight="1"-->
+<!--        android:background="@drawable/bg_button"-->
+<!--        android:elevation="0dp"-->
+<!--        android:stateListAnimator="@null"-->
+<!--        android:text="تحديد"-->
+<!--        android:textAllCaps="false"-->
+<!--        android:textColor="@color/primary"-->
+<!--        android:textSize="15sp"-->
+<!--        android:textStyle="bold"-->
+
+<!--        app:backgroundTint="@null" />-->
+<!--  -->
+</LinearLayout>

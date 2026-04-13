@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/home"
+        android:title="الرئيسية" />
+
+    <item
+        android:id="@+id/nav_reservation"
+        android:icon="@drawable/airplane_home"
+        android:title="رحلاتي" />
+    <item
+        android:id="@+id/fab"
+        android:title=""/>
+
+
+    <!--        <item-->
+    <!--            android:id="@+id/fab"-->
+    <!--            android:enabled="false"-->
+    <!--            android:title=""/>-->
+    <!--        <item-->
+    <!--            android:id="@+id/nav_add"-->
+    <!--            android:icon="@drawable/group"-->
+    <!--            android:title="" />-->
+
+    <item
+        android:id="@+id/nav_notifications"
+        android:icon="@drawable/notification_home"
+        android:title="الإشعارات" />
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/profile_home"
+        android:title="الملف" />
+
+</menu>

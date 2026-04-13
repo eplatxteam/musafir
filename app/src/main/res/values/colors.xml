@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--    <color name="purple_200">#BB86FC</color>-->
+    <!--    <color name="purple_500">#6200EE</color>-->
+    <!--    <color name="purple_700">#3700B3</color>-->
+    <!--    <color name="teal_200">#03DAC5</color>-->
+    <!--    <color name="teal_700">#018786</color>-->
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="gray">#F6F6F6</color>
+<!--    <color name="gray">#F6F6F6</color>-->
+    <color name="gray2">#F1F1F1</color>
+<!--    <color name="gray3">#EBEBEB</color>-->
+    <color name="gray3">#85F4F6FA</color>
+    <color name="holo_green_dark">#007e3d</color>
+    <color name="text">#E62F2F2F</color>
+    <color name="text_dark">#212121</color>
+    <color name="text_light_gray">#888888</color>
+    <!-- ====================  تغيير لون التطبيق  ==================== -->
+    <color name="primary">#E6A700</color>
+    <color name="primary2">#CC9407</color>
+    <color name="primary3">#FFEEC2</color>
+<!--    <color name="primary3">#FDECBF</color>-->
+    <color name="orange">#FFECB3</color>
+    <color name="secondary">#1A1D21</color>
+    <color name="secondary2">#9ACDDF</color>
+    <color name="primary_black">#000</color>
+    <color name="navIcon">#63767E</color>
+    <color name="primary_color_light">#6EA0B3</color>
+    <color name="primary_new">#ffb909</color>
+    <color name="secondary_new">#303030</color>
+    <!-- ============================================================= -->
+    <!--    <color name="primary2">#F36531</color>-->
+    <!--    <color name="primary_bg">#9ACDDF</color>-->
+    <!--    <color name="primary">#CC9407</color>-->
+    <!--    <color name="blue">#BEE8F6</color>-->
+    <!--    <color name="red">#CC0000</color>-->
+    <!--    <color name="primary_dark">#1976D2</color>-->
+    <!--    <color name="oklab_color">#e8f4f9</color>-->
+    <!--    <color name="light_selected">#FFF3F0</color>-->
+    <!--    <color name="brandBlue">#4F86F7</color>-->
+    <!--    <color name="brandBlueDark">#3F51B5</color>-->
+    <!--    <color name="background">#F5F7FB</color>-->
+    <!--    <color name="social_background">#E3F2FD</color>-->
+
+</resources>
+

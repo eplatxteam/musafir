@@ -1,0 +1,15 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- اللون الداخلي -->
+    <solid android:color="@color/primary" />
+
+    <!-- الحواف الدائرية -->
+    <corners android:radius="50dp" />
+
+    <!-- الحجم العام -->
+    <size
+        android:width="30dp"
+        android:height="6dp" />
+
+</shape>

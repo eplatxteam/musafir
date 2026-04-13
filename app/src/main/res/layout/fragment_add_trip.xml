@@ -1,0 +1,946 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    tools:context=".AddTripFragment">
+
+    <ScrollView
+        android:id="@+id/scrollViewcon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:textDirection="rtl">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- مجموعة تصنيف المركبة -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layoutDirection="rtl"
+                android:textDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="بيانات الرحلة"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layoutDirection="rtl">
+
+
+                        <LinearLayout
+                            android:id="@+id/fromLayout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintRight_toRightOf="parent">
+
+                            <!-- أيقونة الموقع في أقصى اليمين -->
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginLeft="6dp"
+                                android:src="@drawable/location2"
+                                />
+
+                            <!-- النصوص -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="من"
+                                    android:textColor="@color/navIcon"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical">
+
+                                    <TextView
+                                        android:id="@+id/textFromCity"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="حدد المدينة"
+                                        android:textColor="@color/black"
+                                        android:textSize="16sp" />
+
+                                    <ImageView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginLeft="4dp"
+                                        android:src="@drawable/baseline_arrow_drop_down_24"
+                                        app:tint="@color/secondary" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <!-- السيارة في المنتصف -->
+                        <ImageView
+                            android:id="@+id/carIcon"
+                            android:layout_width="80dp"
+                            android:layout_height="50dp"
+                            android:src="@drawable/big_car"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <!-- إلى (يسار) -->
+                        <LinearLayout
+                            android:id="@+id/toLayout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="start"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintLeft_toLeftOf="parent">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="إلى"
+                                android:textStyle="bold"
+                                android:textSize="12sp"
+                                android:textColor="@color/navIcon" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:id="@+id/textToCity"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="حدد المدينة"
+                                    android:textSize="16sp"
+                                    android:textColor="@color/black" />
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="4dp"
+                                    android:src="@drawable/baseline_arrow_drop_down_24"
+                                    app:tint="@color/secondary" />
+
+                            </LinearLayout>
+                        </LinearLayout>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                    <TextView
+                        android:id="@+id/fromCityError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/toCityError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_margin="4dp"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="26dp"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginEnd="5dp"
+                                android:src="@drawable/location2"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="المسار"
+                                android:textColor="@android:color/black"
+                                android:textSize="18dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" *"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="22dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            app:cardBackgroundColor="@color/gray"
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="0dp"
+                            app:useCompatPadding="false">
+
+                            <FrameLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <Spinner
+                                    android:id="@+id/routeSpinner"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="48dp"
+                                    android:hint=" المسار"
+                                    android:spinnerMode="dropdown" />
+
+                                <ProgressBar
+                                    android:id="@+id/routeLoading"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:layout_gravity="center"
+                                    android:visibility="gone" />
+                            </FrameLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/routeError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="vertical">
+
+                        <!-- عنوان المركبة -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="26dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="6dp"
+                                android:src="@drawable/solo_traveller"
+                                />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="المركبة"
+                                android:textColor="@android:color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" *"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="22sp" />
+                        </LinearLayout>
+
+                        <!-- السبيـنر داخل كارت -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            app:cardBackgroundColor="@color/gray"
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="0dp">
+
+                            <Spinner
+                                android:id="@+id/vehicleSpinner"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:spinnerMode="dropdown" />
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- خطأ المركبة -->
+                        <TextView
+                            android:id="@+id/vehicleError"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- مجموعة المدن والعناوين -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layoutDirection="rtl"
+                android:textDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="العناوين"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+
+                    <!-- عنوان الانطلاق والوصول -->
+                    <!-- عنوان الانطلاق -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/location2" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="عنوان الانطلاق"
+                            android:textColor="@android:color/black"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22sp" />
+                    </LinearLayout>
+
+                    <!-- حقل الانطلاق -->
+                    <EditText
+                        android:id="@+id/fromAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_background"
+                        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                        android:imeOptions="actionNext"
+                        android:inputType="text"
+                        android:maxLength="50"
+                        android:padding="12dp"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
+                    <!-- خطأ الانطلاق -->
+                    <TextView
+                        android:id="@+id/fromAddressError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="يرجى إدخال عنوان الانطلاق"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/location2"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="عنوان الوصول"
+                            android:textColor="@android:color/black"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22sp" />
+                    </LinearLayout>
+
+                    <!-- حقل الوصول -->
+                    <EditText
+                        android:id="@+id/toAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_background"
+                        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                        android:imeOptions="actionNext"
+                        android:inputType="text"
+                        android:maxLength="50"
+                        android:padding="12dp"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
+                    <!-- خطأ الوصول -->
+                    <TextView
+                        android:id="@+id/toAddressError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="يرجى إدخال عنوان الوصول"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layoutDirection="rtl"
+                android:textDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="الوقت والفترة"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <!-- العنوان: تاريخ الانطلاق -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/date" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="تاريخ الانطلاق"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <!-- الحقل: تاريخ الانطلاق -->
+                    <!--                    <EditText-->
+                    <!--                        android:id="@+id/departureDate"-->
+                    <!--                        android:layout_width="match_parent"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:background="@drawable/edittext_background"-->
+                    <!--                        android:focusable="false"-->
+                    <!--                        android:imeOptions="actionNext"-->
+                    <!--                        android:inputType="text"-->
+                    <!--                        android:padding="12dp"-->
+                    <!--                        android:singleLine="true"-->
+                    <!--                        android:textColor="@android:color/black"-->
+                    <!--                        android:textSize="16sp" />-->
+                    <!-- أيام الأسبوع -->
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none">
+
+                        <LinearLayout
+                            android:id="@+id/week_containerAddtrip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="8dp" />
+                    </HorizontalScrollView>
+
+
+                    <!-- العنوان: وقت الانطلاق -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/time_machine_1"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="وقت الانظلاق"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <!-- الحقل: وقت الانطلاق -->
+                    <EditText
+                        android:id="@+id/departureTime"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_background"
+                        android:focusable="false"
+                        android:imeOptions="actionNext"
+                        android:inputType="text"
+                        android:padding="12dp"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
+                    <!-- خطأ وقت الانطلاق -->
+                    <TextView
+                        android:id="@+id/departureTimeError"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="18dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/time_machine_1" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="الفترة"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+                    <!-- الفترة -->
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <HorizontalScrollView
+                            android:id="@+id/dayTimeScrollView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:fillViewport="true"
+                            android:scrollbars="none">
+
+                            <RadioGroup
+                                android:id="@+id/dayTimeRadioGroup"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layoutDirection="rtl"
+                                android:orientation="horizontal"
+                                android:padding="4dp" />
+                        </HorizontalScrollView>
+                    </RelativeLayout>
+
+                    <TextView
+                        android:id="@+id/dayTimeError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- مجموعة السعر وعدد المقاعد -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layoutDirection="rtl"
+                android:textDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="السعر وعدد المقاعد"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <!-- العنوان: السعر لكل مقعد -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/price" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="السعر لكل مقعد"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <!-- الحقل: السعر لكل مقعد -->
+                    <EditText
+                        android:id="@+id/price"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_background"
+                        android:enabled="false"
+                        android:imeOptions="actionNext"
+                        android:inputType="number"
+                        android:maxLength="7"
+                        android:padding="12dp"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/priceError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                    <!-- العنوان: عدد المقاعد المتاحة -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/seat"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="عدد المقاعد المتاحة"
+                            android:textColor="@android:color/black"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" *"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="22dp" />
+                    </LinearLayout>
+
+                    <!-- الحقل: عدد المقاعد المتاحة -->
+                    <EditText
+                        android:id="@+id/availableSeats"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_background"
+                        android:enabled="false"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:padding="12dp"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
+
+                    <TextView
+                        android:id="@+id/carCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/text"
+                        android:textSize="14sp" />
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+
+                        <TextView
+                            android:id="@+id/availableSeatsError"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- مجموعة الملاحظات -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:layoutDirection="rtl"
+                android:textDirection="rtl"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="معلومات إضافية"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/icons8_copybook_1" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="ملاحظات"
+                            android:textColor="@color/black"
+                            android:textSize="18dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:layoutDirection="rtl"
+                        android:textAlignment="viewStart"
+                        android:textColorHint="@color/secondary"
+                        android:textDirection="rtl"
+                        app:boxBackgroundMode="outline"
+                        app:boxStrokeColor="@color/secondary"
+                        app:counterEnabled="true"
+                        app:counterMaxLength="100"
+                        app:hintEnabled="true"
+                        app:hintTextColor="@color/secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/notes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="20dp"
+                            android:background="@drawable/edittext_background"
+                            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
+                            android:gravity="top|start"
+                            android:inputType="textMultiLine"
+                            android:maxLines="6"
+                            android:minLines="6"
+                            android:padding="12dp"
+                            android:scrollbars="vertical"
+                            android:textColor="@android:color/black"
+                            android:textSize="16sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!--                    <EditText-->
+                    <!--                        android:id="@+id/notes"-->
+                    <!--                        android:layout_width="match_parent"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:background="@drawable/edittext_background"-->
+                    <!--                        android:gravity="top|start"-->
+                    <!--                        android:imeOptions="actionNext"-->
+                    <!--                        android:inputType="textMultiLine"-->
+                    <!--                        android:maxLength="255"-->
+                    <!--                        android:maxLines="6"-->
+                    <!--                        android:minLines="6"-->
+                    <!--                        android:padding="10dp"-->
+                    <!--                        android:scrollbars="vertical"-->
+                    <!--                        android:textColor="@android:color/black"-->
+                    <!--                        android:textSize="16sp" />-->
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- زر الإضافة -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/submitBtn"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/bg_button"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:stateListAnimator="@null"
+                android:text="إضافة الرحلة"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                android:textColor="@color/primary2"
+                android:textSize="16sp"
+                app:backgroundTint="@null" />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

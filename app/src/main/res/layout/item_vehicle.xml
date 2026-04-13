@@ -1,0 +1,147 @@
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:cardUseCompatPadding="true"
+    app:cardPreventCornerOverlap="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- الصورة + السنة -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="135dp">
+
+            <!-- السنة فوق الصورة -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/vehicleImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                app:shapeAppearanceOverlay="@style/CircularImageView" />
+
+            <TextView
+                android:id="@+id/yearText"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_margin="6dp"
+                android:background="@drawable/badge_background_details2"
+                android:padding="6dp"
+                android:text="2020"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                tools:ignore="RtlCompat" />
+        </FrameLayout>
+
+        <!-- النصوص -->
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical"-->
+<!--            android:layout_marginTop="12dp">-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/driver_name"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textAlignment="center"-->
+<!--                android:textColor="@android:color/black"-->
+<!--                android:textSize="18sp"-->
+<!--                android:textStyle="bold"-->
+<!--                android:text="اسم السائق" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/carPlate"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="4dp"-->
+<!--                android:text="رقم اللوحة"-->
+<!--                android:textColor="#777"-->
+<!--                android:textSize="16sp" />-->
+<!--        </LinearLayout>-->
+
+        <!-- صف اللون والمقاعد -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.3"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:padding="4dp"
+                    android:src="@drawable/local"/>
+
+                <TextView
+                    android:id="@+id/driver_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="4dp"
+                android:src="@drawable/seat" />
+
+            <TextView
+                android:id="@+id/seatText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5 مقاعد"
+                android:textColor="#000"
+                android:textSize="16sp" />
+        </LinearLayout>
+        <!-- الزر -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/edit_vehicle"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:text="تعديل"
+            android:textAllCaps="false"
+            android:textColor="@color/primary2"
+            android:textSize="14sp"
+            android:stateListAnimator="@null"
+            android:elevation="0dp"
+            app:backgroundTint="@null"
+            app:cornerRadius="5dp"
+            android:background="@drawable/bg_button"
+
+            />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

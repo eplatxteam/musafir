@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="cardTransport" type="id" />
+    <item name="tag_status_icon" type="id" />
+    <item name="tag_upload_button" type="id" />
+    <item name="card_vip" type="id" />
+    <item name="card_wallet" type="id" />
+    <item name="card_help" type="id" />
+</resources>

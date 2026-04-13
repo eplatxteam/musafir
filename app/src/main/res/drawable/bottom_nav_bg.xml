@@ -1,0 +1,12 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- اللون الأبيض للخلفية -->
+    <solid android:color="@color/white" />
+    <!-- الزوايا الدائرية -->
+    <corners android:topLeftRadius="35dp"
+        android:topRightRadius="35dp"
+        android:bottomLeftRadius="0dp"
+        android:bottomRightRadius="0dp" />
+    <!-- ظل خفيف لو حبيت -->
+    <padding android:top="2dp" />
+</shape>

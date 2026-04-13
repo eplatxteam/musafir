@@ -1,0 +1,96 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'com.google.firebase.crashlytics'
+}
+
+android {
+    namespace 'com.example.musafir'
+    compileSdk 35
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+    defaultConfig {
+        applicationId "com.EplatX.musafir"
+        minSdk 23
+        targetSdk 35
+        versionCode 17
+        versionName "1.3"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildFeatures {
+        buildConfig true
+        compose true
+    }
+    buildTypes {
+        release {
+            // تفعيل تقليص الكود والتعمية
+            minifyEnabled true
+
+            // تفعيل تقليص الموارد (اختياري لكن ينصح به)
+            shrinkResources true
+
+            // تحديد ملفات القواعد
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            ndk {
+                debugSymbolLevel 'SYMBOL_TABLE'
+            }
+        }
+        debug {
+            debuggable true
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.android.volley:volley:1.2.1'
+    implementation 'io.github.shiyd0516.pictureSelector:ucrop:v3.11.5'
+    implementation 'com.google.firebase:firebase-messaging:23.0.3'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.work:work-runtime:2.9.0'
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
+    implementation platform('androidx.compose:compose-bom:2024.09.00')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-crashlytics:20.0.5'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'com.airbnb.android:lottie:6.3.0'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    androidTestImplementation platform('androidx.compose:compose-bom:2024.09.00')
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
+    implementation 'jp.wasabeef:blurry:4.0.0'
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+    implementation 'com.facebook.android:facebook-android-sdk:17.0.0'
+    implementation 'com.scottyab:rootbeer-lib:0.1.1'
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+    implementation 'com.github.takusemba:spotlight:2.0.5'
+    implementation 'com.github.mreram:showcaseview:1.4.1'
+
+}

@@ -1,0 +1,351 @@
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipeRefreshLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    android:layoutDirection="rtl">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+                <LinearLayout
+                    android:id="@+id/k"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_collapseMode="parallax">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="اسحب لاسفل للتحديث"
+                        android:textAlignment="center"
+                        android:textSize="12dp"
+                        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+                    <!-- العنوان + أيقونة الفلتر -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="25dp"
+                        android:layout_marginEnd="25dp"
+                        android:gravity="center_vertical"
+                        android:layoutDirection="rtl"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/title"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="إلى أين وجهتك اليوم"
+                            android:textAlignment="textStart"
+                            android:textColor="@android:color/black"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/filterIcon"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/filter" />
+                    </LinearLayout>
+
+                    <!-- البحث / اختيار المدينة -->
+                    <HorizontalScrollView
+                        android:id="@+id/searchContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fillViewport="true"
+                        android:layoutDirection="rtl"
+                        android:padding="4dp"
+                        android:scrollbarSize="0dp"
+                        android:scrollbars="none"
+                        android:visibility="gone">
+
+                        <RadioGroup
+                            android:id="@+id/toCityRadioGroup"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:button="@null"
+                            android:layoutDirection="rtl"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
+
+                    <!-- بطاقة الرحلة -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="20dp"
+                        android:backgroundTint="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="10dp">
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <!-- من -->
+                                <LinearLayout
+                                    android:id="@+id/fromLayout"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent">
+
+                                    <ImageView
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:src="@drawable/location2"
+                                       />
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="6dp"
+                                        android:gravity="start"
+                                        android:orientation="vertical">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="من"
+                                            android:textColor="@color/navIcon"
+                                            android:textSize="12sp"
+                                            android:textStyle="bold" />
+
+                                        <LinearLayout
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:gravity="center_vertical"
+                                            android:orientation="horizontal"
+                                            app:layout_constraintBottom_toBottomOf="parent"
+                                            app:layout_constraintEnd_toEndOf="parent"
+                                            app:layout_constraintStart_toEndOf="@id/carIcon"
+                                            app:layout_constraintTop_toTopOf="parent">
+
+                                            <TextView
+                                                android:id="@+id/textFromCity"
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:text="حدد المدينة"
+                                                android:textColor="@color/black"
+                                                android:textSize="16sp" />
+
+                                            <ImageView
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_marginStart="4dp"
+                                                android:src="@drawable/baseline_arrow_drop_down_24"
+                                                app:tint="@color/secondary" />
+                                        </LinearLayout>
+                                    </LinearLayout>
+                                </LinearLayout>
+
+                                <ImageView
+                                    android:id="@+id/carIcon"
+                                    android:layout_width="80dp"
+                                    android:layout_height="50dp"
+                                    android:src="@drawable/big_car"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+                                <LinearLayout
+                                    android:id="@+id/toLayout"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="start"
+                                    android:orientation="vertical"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintStart_toEndOf="@id/carIcon"
+                                    app:layout_constraintTop_toTopOf="parent">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="إلى"
+                                        android:textColor="@color/navIcon"
+                                        android:textSize="12sp"
+                                        android:textStyle="bold" />
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center_vertical"
+                                        android:orientation="horizontal"
+                                        app:layout_constraintBottom_toBottomOf="parent"
+                                        app:layout_constraintEnd_toEndOf="parent"
+                                        app:layout_constraintStart_toEndOf="@id/carIcon"
+                                        app:layout_constraintTop_toTopOf="parent">
+
+                                        <!-- النص الرئيسي -->
+                                        <TextView
+                                            android:id="@+id/textToCity"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="حدد المدينة"
+                                            android:textColor="@color/black"
+                                            android:textSize="16sp" />
+
+                                        <!-- السهم بجانب النص -->
+                                        <ImageView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginStart="4dp"
+                                            android:src="@drawable/baseline_arrow_drop_down_24"
+                                            app:tint="@color/secondary" />
+
+                                    </LinearLayout>
+
+                                </LinearLayout>
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="4dp"
+                                android:layout_marginVertical="12dp"
+                                android:background="@drawable/line_2" />
+
+                            <!-- أيام الأسبوع -->
+                            <HorizontalScrollView
+                                android:id="@+id/days_scroll_view"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layoutDirection="rtl"
+                                android:scrollbars="none">
+
+                                <LinearLayout
+                                    android:id="@+id/week_container"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal"
+                                    android:paddingHorizontal="8dp" />
+                            </HorizontalScrollView>
+
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+
+                </LinearLayout>
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- RecyclerView للرحلات -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewTrips"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingLeft="15dp"
+            android:paddingTop="9dp"
+            android:paddingRight="15dp"
+            android:paddingBottom="20dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+        <ProgressBar
+            android:id="@+id/mainProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:elevation="10dp"
+            android:indeterminateTint="@color/secondary"
+            android:visibility="gone" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottieWaveHome"
+                android:layout_width="match_parent"
+                android:layout_height="520dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:scaleType="fitXY"
+                android:visibility="gone"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/loadinganimation" />
+
+
+            <LinearLayout
+                android:id="@+id/noDataText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:src="@drawable/travelcar" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="لا توجد رحلات"
+                    android:textColor="#888888"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/noInternet"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="30dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/wifi" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="تأكد من إتصاللك بالإنترنت. \nأو حاول مرة أخرى"
+                    android:textColor="#888888"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+

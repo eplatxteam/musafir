@@ -1,0 +1,16 @@
+<!-- res/drawable/image_border.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- خلفية -->
+    <solid android:color="#F5F5F5" />
+
+    <!-- حدود متقطعة -->
+    <stroke
+        android:width="1dp"
+        android:color="@color/primary2"
+        android:dashGap="2dp" />
+
+    <!-- الحواف مدورة -->
+    <corners android:radius="8dp" />
+</shape>

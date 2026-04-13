@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_toast"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/toast_text"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_marginStart="6dp"
+        android:textAlignment="center"
+        android:text="تم الحفظ بنجاح"
+        android:textStyle="bold"
+        android:textColor="@color/secondary"
+        android:textSize="16sp" />
+
+</LinearLayout>

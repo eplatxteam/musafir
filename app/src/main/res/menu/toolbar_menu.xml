@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- زر الإشعارات -->
+
+
+    <item
+        android:id="@+id/action_placeholder2"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/ai_chat"
+        android:icon="@drawable/robot2"
+        android:title="مساعد"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_notifications"
+        android:icon="@drawable/notification_new"
+        android:title="الإشعارات"
+        app:actionLayout="@layout/notification_badge"
+        app:showAsAction="always" />
+    <!--    <item-->
+    <!--        android:id="@+id/action_placeholder"-->
+    <!--        android:visible="false"-->
+    <!--        app:actionLayout="@layout/custom_item"-->
+    <!--        app:showAsAction="always" />-->
+</menu>

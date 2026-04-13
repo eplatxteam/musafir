@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="rtl"
+    android:orientation="vertical"
+    android:paddingLeft="20dp"
+    android:paddingRight="25dp">
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <!-- إشعار 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="8dp">
+
+            <!-- العمود النصي -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- العنوان -->
+                <TextView
+                    android:id="@+id/txtNotificationTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="إشعارات أساسية"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- التفاصيل -->
+                <TextView
+                    android:id="@+id/txtNotificationDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="تنبيهات خاصة بحجوزاتك"
+                    android:textColor="@color/text"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- السويتش -->
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchNotification"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:thumbTint="@color/switch_text_color"
+                android:trackTint="@color/switch_track_color" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="8dp">
+
+            <!-- العمود النصي -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtNotificationTitle3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="إشعارات عامة"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtNotificationDetails2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="تلقي إشعارات عند بدء أو انتهاء الرحلات وغيرها"
+                    android:textColor="@color/text"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchNotification3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:thumbTint="@color/switch_text_color"
+                android:trackTint="@color/switch_track_color" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/routeNotfiy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:paddingVertical="8dp">
+
+            <!-- العمود النصي -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtNotificationTitle2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="إشعارات المسارات"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtNotificationDetails3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="إشعار عند طلب رحلة من المسافر في نفس مسارك"
+                    android:textColor="@color/text"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!--        <androidx.appcompat.widget.SwitchCompat-->
+            <!--            android:id="@+id/switchNotification2"-->
+            <!--            android:layout_width="wrap_content"-->
+            <!--            android:layout_height="wrap_content"-->
+            <!--            android:checked="true"-->
+            <!--            android:thumbTint="@color/switch_text_color"-->
+            <!--            android:trackTint="@color/switch_track_color" />-->
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

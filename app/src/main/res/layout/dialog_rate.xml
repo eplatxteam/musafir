@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="rtl">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:text="قيم وشارك رأيك"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <RatingBar
+        android:id="@+id/ratingBar"
+        android:progressBackgroundTint="@color/gray2"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
+
+    <EditText
+        android:id="@+id/etReview"
+        android:hint="اكتب رأيك هنا..."
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:background="@drawable/bg_dialog"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:gravity="top"
+        android:padding="12dp"
+        android:inputType="textMultiLine"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <!-- زر الموافقة -->
+        <Button
+            android:id="@+id/btnPost"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            app:backgroundTint="@null"
+            android:backgroundTint="@color/primary3"
+            android:elevation="0dp"
+            android:text="تقييم"
+            android:textAllCaps="false"
+            android:textColor="@color/primary2"
+            android:textSize="14sp" />
+
+        <!-- زر الإلغاء -->
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/gray2"
+            android:elevation="0dp"
+            android:text="التقييم لاحقا"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout>

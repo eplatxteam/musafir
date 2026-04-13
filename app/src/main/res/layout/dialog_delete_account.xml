@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:src="@drawable/delete2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="طلب حذف الحساب"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="يرجى اختيار سبب الحذف:"
+        android:textColor="#666"
+        android:textSize="14sp" />
+
+    <RadioGroup
+        android:id="@+id/rgDeleteReason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp">
+
+        <RadioButton
+            android:id="@+id/rbAnotherNum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="استخدام رقم آخر"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/rbNotNeeded"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="لا أحتاج للحساب"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/rbOther"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="أخرى"
+            android:textSize="14sp" />
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/etDeleteNotes"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/edittext_background"
+        android:gravity="top"
+        android:hint="ملاحظات إضافية (اختياري)..."
+        android:padding="10dp"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnYes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:backgroundTint="#D32F2F"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:text="تأكيد الطلب"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btnNo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/gray2"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:text="إلغاء"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
+</LinearLayout>

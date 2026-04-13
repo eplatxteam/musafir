@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:layoutDirection="rtl"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:id="@+id/dialogCancelButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="البحث عن رحلة"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:src="@drawable/cancel" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+
+<!--            &lt;!&ndash; من &ndash;&gt;-->
+<!--            <LinearLayout-->
+<!--                android:id="@+id/fromLayout"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center_vertical"-->
+<!--                android:orientation="horizontal"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent">-->
+
+<!--                <ImageView-->
+<!--                    android:layout_width="24dp"-->
+<!--                    android:layout_height="24dp"-->
+<!--                    android:src="@drawable/location2"-->
+<!--                    app:tint="@color/secondary" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="6dp"-->
+<!--                    android:gravity="start"-->
+<!--                    android:orientation="vertical">-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="من"-->
+<!--                        android:textColor="@color/navIcon"-->
+<!--                        android:textSize="12sp"-->
+<!--                        android:textStyle="bold" />-->
+
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent"-->
+<!--                        app:layout_constraintStart_toEndOf="@id/carIcon"-->
+<!--                        app:layout_constraintTop_toTopOf="parent">-->
+
+<!--                        &lt;!&ndash; النص الرئيسي &ndash;&gt;-->
+<!--                        <TextView-->
+<!--                            android:id="@+id/textFromCity"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:text="حدد المدينة"-->
+<!--                            android:textColor="@color/black"-->
+<!--                            android:textSize="16sp" />-->
+
+<!--                        &lt;!&ndash; السهم بجانب النص &ndash;&gt;-->
+<!--                        <ImageView-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_marginStart="4dp"-->
+<!--                            android:src="@drawable/baseline_arrow_drop_down_24"-->
+<!--                            app:tint="@color/secondary" />-->
+
+<!--                    </LinearLayout>-->
+<!--                </LinearLayout>-->
+<!--            </LinearLayout>-->
+
+<!--            &lt;!&ndash; أيقونة السيارة &ndash;&gt;-->
+<!--            <ImageView-->
+<!--                android:id="@+id/carIcon"-->
+<!--                android:layout_width="120dp"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:src="@drawable/big_car"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent" />-->
+
+<!--            &lt;!&ndash; إلى &ndash;&gt;-->
+<!--            <LinearLayout-->
+<!--                android:id="@+id/toLayout"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="start"-->
+<!--                android:orientation="vertical"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toEndOf="@id/carIcon"-->
+<!--                app:layout_constraintTop_toTopOf="parent">-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="إلى"-->
+<!--                    android:textColor="@color/navIcon"-->
+<!--                    android:textSize="12sp"-->
+<!--                    android:textStyle="bold" />-->
+
+
+<!--                <LinearLayout-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:gravity="center_vertical"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toEndOf="@id/carIcon"-->
+<!--                    app:layout_constraintTop_toTopOf="parent">-->
+
+<!--                    &lt;!&ndash; النص الرئيسي &ndash;&gt;-->
+<!--                    <TextView-->
+<!--                        android:id="@+id/textToCity"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="حدد المدينة"-->
+<!--                        android:textColor="@color/black"-->
+<!--                        android:textSize="16sp" />-->
+
+<!--                    &lt;!&ndash; السهم بجانب النص &ndash;&gt;-->
+<!--                    <ImageView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginStart="4dp"-->
+<!--                        android:src="@drawable/baseline_arrow_drop_down_24"-->
+<!--                        app:tint="@color/secondary" />-->
+
+<!--                </LinearLayout>-->
+<!--            </LinearLayout>-->
+
+<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+<!--        <View-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="4dp"-->
+<!--            android:layout_marginVertical="12dp"-->
+<!--            android:background="@drawable/line_2" />-->
+
+        <!-- أيام الأسبوع -->
+        <!--        <HorizontalScrollView-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:scrollbars="none">-->
+
+        <!--            <LinearLayout-->
+        <!--                android:id="@+id/week_container"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:gravity="center_vertical"-->
+        <!--                android:orientation="horizontal"-->
+        <!--                android:paddingHorizontal="8dp" />-->
+        <!--        </HorizontalScrollView>-->
+        <LinearLayout
+            android:id="@+id/dateSelectorLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/edittext_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/date" />
+
+            <TextView
+                android:id="@+id/selectedDateText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="اختر التاريخ"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/baseline_arrow_drop_down_24"
+                app:tint="@color/navIcon" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginVertical="12dp"
+            android:background="@drawable/line_2" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/seat" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="عدد المقاعد: "
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/btnMinus"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/icons8_minus_1" />
+        <!--        <Button-->
+        <!--            android:id="@+id/btnMinus"-->
+        <!--            android:layout_width="40dp"-->
+        <!--            android:layout_height="40dp"-->
+        <!--            android:background="@drawable/button_background"-->
+        <!--            android:backgroundTint="@null"-->
+        <!--            android:stateListAnimator="@null"-->
+        <!--            android:elevation="0dp"-->
+        <!--            android:text=""-->
+        <!--            android:drawablePadding="0dp"-->
+        <!--            android:gravity="center"-->
+        <!--            android:drawableStart="@drawable/increase" />-->
+
+
+        <TextView
+            android:id="@+id/passengersTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="1"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/btnPlus"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/increase"/>
+        <!--        <Button-->
+        <!--            android:id="@+id/btnPlus"-->
+        <!--            android:layout_width="40dp"-->
+        <!--            android:layout_height="40dp"-->
+        <!--            android:background="@drawable/button_background"-->
+        <!--            android:backgroundTint="@null"-->
+        <!--            android:text="+" />-->
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_margin="10dp"
+        android:layout_marginVertical="12dp"
+        android:background="@drawable/line_2" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/local" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="نوع المركبة:"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        app:cardBackgroundColor="@color/gray"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp">
+
+        <Spinner
+            android:id="@+id/vehicleTypeSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:spinnerMode="dropdown" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_margin="10dp"
+        android:layout_marginVertical="12dp"
+        android:background="@drawable/line_2" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/baseline_location_city_24" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="الشركة:"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        app:cardBackgroundColor="@color/gray"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp">
+
+        <Spinner
+            android:id="@+id/companySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:spinnerMode="dropdown" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_margin="10dp"
+        android:layout_marginVertical="12dp"
+        android:background="@drawable/line_2" />
+    <CheckBox
+        android:id="@+id/checkboxFamiliesOnly"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/selector_checkbox_color"
+        android:text="عوائل"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <Button
+            android:id="@+id/dialogSearchButton"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_weight="0.85"
+            android:background="@drawable/bg_button"
+            android:backgroundTint="@color/primary3"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:text="بحث"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="@color/primary2"
+            android:textSize="18sp"
+            app:backgroundTint="@null" />
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="1dp" />
+
+        <ImageView
+            android:id="@+id/btnResetFilter"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_weight="0.15"
+            android:background="@drawable/edittext_background"
+            android:backgroundTint="#FFE5E5"
+            android:padding="10dp"
+            android:src="@drawable/cancel3"
+            app:tint="#E53935" />
+
+    </LinearLayout>
+
+</LinearLayout>

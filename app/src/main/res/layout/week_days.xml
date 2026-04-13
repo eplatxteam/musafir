@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/day_item"
+    android:layout_width="50dp"
+    android:layout_height="80dp"
+    android:layout_weight="1"
+    android:layout_margin="2dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/day_bg_selector">
+
+    <TextView
+        android:id="@+id/day_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="السبت"
+        android:textColor="@color/secondary"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/day_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:textColor="@color/secondary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <View
+        android:id="@+id/day_dot"
+        android:layout_width="6dp"
+        android:layout_height="6dp"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="center"
+        android:background="@drawable/dot_bg"/>
+
+</LinearLayout>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- ارتفاع 3 عناصر بالضبط: كل عنصر 48dp → 144dp -->
+    <ListView
+        android:id="@+id/yearList"
+        android:layout_width="match_parent"
+        android:layout_height="144dp"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        android:fadingEdgeLength="0dp"
+        android:paddingVertical="4dp"/>
+</LinearLayout>

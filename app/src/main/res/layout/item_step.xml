@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <!-- العمود: دائرة + خط -->
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp">
+
+        <!-- الدائرة -->
+        <FrameLayout
+            android:id="@+id/circleContainer"
+            android:layout_width="28dp"
+            android:layout_height="28dp">
+
+            <!-- الأيقونة داخل الدائرة -->
+            <ImageView
+                android:id="@+id/circleIcon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:src="@drawable/step" />
+        </FrameLayout>
+
+        <!-- الخط -->
+        <View
+            android:id="@+id/lineView"
+            android:layout_width="3dp"
+            android:layout_height="35dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/bg_logo" />
+    </FrameLayout>
+
+    <!-- اسم المدينة أمام الدائرة -->
+    <TextView
+        android:id="@+id/cityName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="صنعاء"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+</LinearLayout>

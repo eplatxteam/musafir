@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "947592087991",
+    "project_id": "musafirpro-f452c",
+    "storage_bucket": "musafirpro-f452c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:947592087991:android:844cbea1d0afd0a2840032",
+        "android_client_info": {
+          "package_name": "com.EplatX.musafir"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB88I9w0D3pQsTPOREwCLKqRpo0gCsUW38"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <!-- بطاقة الإشعارات -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:backgroundTint="@color/white"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/RecyclerViewSharing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:clipToPadding="false"
+                android:layoutDirection="rtl"
+                android:padding="6dp"
+                android:scrollbars="none"
+                android:textDirection="rtl" />
+        </com.google.android.material.card.MaterialCardView>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/noDataText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!--        <ImageView-->
+        <!--            android:layout_width="100dp"-->
+        <!--            android:layout_height="100dp"-->
+        <!--            android:layout_gravity="center"-->
+        <!--            android:src="@drawable/remove" />-->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="لا يوجد أعضاء منضمون"
+            android:textColor="#888888"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/noInternet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:src="@drawable/wifi" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="تأكد من إتصالك بالإنترنت. \nأو حاول مرة أخرى"
+            android:textColor="#888888"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <!-- لوتي التحميل -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottieWaveNot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:visibility="gone"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
+        app:lottie_rawRes="@raw/loadinganimation" />
+</FrameLayout>

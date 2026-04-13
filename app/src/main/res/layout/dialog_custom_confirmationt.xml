@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_dialog"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <!-- العنوان -->
+    <TextView
+        android:layout_marginTop="20dp"
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="تأكيد!"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- الرسالة -->
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="هل تريد حفظ التعديلات قبل الخروج؟"
+        android:textColor="@color/text"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <!-- زر الموافقة -->
+        <Button
+            android:id="@+id/btnYes"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            app:backgroundTint="@null"
+            android:backgroundTint="@color/primary3"
+            android:elevation="0dp"
+            android:text="نعم"
+            android:stateListAnimator="@null"
+            android:textAllCaps="false"
+            android:padding="2dp"
+            android:textStyle="bold"
+            android:textColor="@color/primary2"
+            android:textSize="14sp" />
+
+        <!-- زر الإلغاء -->
+        <Button
+            android:id="@+id/btnNo"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/gray2"
+            android:elevation="0dp"
+            android:text="إلغاء"
+            android:padding="2dp"
+            android:stateListAnimator="@null"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog"
+    android:orientation="vertical">
+
+    <!-- العنوان -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="تأكيد!"
+        android:textColor="@color/primary"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:layoutDirection="rtl"
+        android:textAlignment="viewStart"
+        app:boxBackgroundMode="none"
+        app:hintEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputprice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_background"
+            android:gravity="top|start"
+            android:hint="أدخل السعر هنا"
+            android:inputType="number"
+            android:maxLength="7"
+            android:maxLines="4"
+            android:minHeight="48dp"
+            android:padding="12dp"
+            android:scrollbars="vertical"
+            android:singleLine="true"
+            android:textColor="@android:color/black" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+    <TextView
+        android:id="@+id/car_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:textColor="#000"
+        android:textSize="14sp" />
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:layoutDirection="rtl"
+        android:textAlignment="viewStart"
+        app:boxBackgroundMode="none"
+        app:counterEnabled="true"
+        app:hintEnabled="false"
+        app:counterMaxLength="100">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_background"
+            android:gravity="top|start"
+            android:hint="أدخل ملاحظتك هنا"
+            android:inputType="textMultiLine"
+            android:maxLength="100"
+            android:maxLines="4"
+            android:minHeight="48dp"
+            android:padding="12dp"
+            android:scrollbars="vertical"
+            android:singleLine="true"
+            android:textColor="@android:color/black" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <!-- زر الموافقة -->
+        <Button
+            android:id="@+id/btnYes"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/primary3"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:text="تأكيد"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="@color/primary2"
+            android:textSize="14sp"
+            app:backgroundTint="@null" />
+
+        <!-- زر الإلغاء -->
+        <Button
+            android:id="@+id/btnNo"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/gray2"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:text="إلغاء"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout>
