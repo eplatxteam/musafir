@@ -11,11 +11,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -31,9 +31,6 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 import java.net.URLEncoder;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,7 +43,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
     private final List<JSONObject> bookingList;
     private OnCancelBookingListener cancelListener;
-    private OnApproveBookingListener approveListener; // أضف هذا السطر
+    OnApproveBookingListener approveListener;
 
     public interface OnCancelBookingListener {
         void onCancelBooking(int bookingId);
@@ -67,13 +64,14 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                     break;
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
     }
 
     // Constructor
-    public BookingAdapter(List<JSONObject> bookingList, OnCancelBookingListener cancelListener, OnApproveBookingListener approveListener) {
+    public BookingAdapter(List<JSONObject> bookingList, OnCancelBookingListener cancelListener,
+                          OnApproveBookingListener approveListener) {
         this.bookingList = bookingList != null ? bookingList : new ArrayList<>();
         this.cancelListener = cancelListener;
         this.approveListener = approveListener;
@@ -104,7 +102,8 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         JSONObject bookingInfo = booking.optJSONObject("trip_info");
         int bookingId = booking.optInt("booking_id", -1);
         String bookingStatus = booking.optString("booking_status", "");
-        int pay_type = booking.optInt("pay_type", -1);
+        String payment_status = booking.optString("payment_status", "");
+
         Context ctx = holder.itemView.getContext();
         DBHelper dbHelper = new DBHelper(ctx);
         SharedPreferences prefs = SharedPrefsHelper.get(ctx);
@@ -113,11 +112,17 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
         int passengerId = prefs.getInt("user_id", -1);
 
+        String booking_date = booking.optString("booking_date", "");
 
+        if (booking_date != null && !booking_date.isEmpty()) {
+            holder.tvOrderTime.setText(UserUtils.getTimeAgo(booking_date));
+        } else {
+            holder.tvOrderTime.setText("منذ قليل");
+        }
         holder.btnCancelBooking.setOnClickListener(v -> {
             Activity activity = (Activity) v.getContext();
 
-            if (pay_type == 1 || "verified".equals(bookingStatus)) {
+            if ("verified".equals(payment_status) || "verified".equals(bookingStatus)) {
                 View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_contact_support, null);
                 Dialog customDialog = new Dialog(activity);
                 customDialog.setContentView(dialogView);
@@ -136,10 +141,12 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
                 LinearLayout btnWhatsapp = dialogView.findViewById(R.id.btnWhatsapp);
                 Button btnCall = dialogView.findViewById(R.id.btnCall);
-                RelativeLayout btnCloseHeader = dialogView.findViewById(R.id.dialogCancelButton);
+                FrameLayout btnCloseHeader = dialogView.findViewById(R.id.dialogCancelButton);
                 TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
-
-//                tvMessage.setText("لقد قمت بتأكيد أو دفع رسوم هذه الرحلة، سوف يتم رفع طلبك للإدارة، يرجى التواصل مع خدمة العملاء لإتمام الإلغاء.");
+                TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
+                LinearLayout containerNote = dialogView.findViewById(R.id.containerNote);
+                containerNote.setVisibility(View.GONE);
+                tvTitle.setText("تنبيه هام");
                 UserUtils.getMessageFromLocal(294, dbHelper, new UserUtils.MessageCallback() {
                     @Override
                     public void onSuccess(String message) {
@@ -148,34 +155,42 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
                     @Override
                     public void onError(String error) {
-                        tvMessage.setText("حجزك مؤكد. لمزيد من التفاصيل أو للاستفسار، يسعدنا تواصلك مع خدمة العملاء.");
+                        tvMessage.setText(UserUtils.getMessageFromLocalNew(391, dbHelper));
                     }
 
                 });
 
                 btnWhatsapp.setOnClickListener(v1 -> {
-                    String whatsappNo = prefs.getString("whatsapp_no", "967785050270");
-                    String msg = "أرغب في إلغاء الحجز رقم: " + bookingId;
+                    String countryCode = prefs.getString("country_code", "967785050270");
+
+                    int messageId = "YE".equals(countryCode) ? 349 : 362;
+                    String phone = UserUtils.getMessageFromLocalNew(messageId, dbHelper);
+//                    String whatsappNo = prefs.getString("whatsapp_no", UserUtils.getMessageFromLocalNew(349, dbHelper));
+                    String msg = UserUtils.getMessageFromLocalNew(320, dbHelper) + " " + bookingId;
                     try {
-                        String url = "https://api.whatsapp.com/send?phone=" + whatsappNo + "&text=" + URLEncoder.encode(msg, "UTF-8");
+                        String url = "https://api.whatsapp.com/send?phone=" + phone + "&text=" + URLEncoder.encode(msg, "UTF-8");
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(Uri.parse(url));
                         activity.startActivity(intent);
                         customDialog.dismiss();
                     } catch (Exception e) {
-                        Toast.makeText(ctx, "تطبيق واتساب غير مثبت", Toast.LENGTH_SHORT).show();
+                        UserUtils.ToastMessages(activity, UserUtils.getMessageFromLocalNew(321, dbHelper));
                     }
                 });
 
                 btnCall.setOnClickListener(v1 -> {
-                    String phoneNo = prefs.getString("phone_no", "785050270");
+                    String countryCode = prefs.getString("country_code", "967785050270");
+
+                    int messageId = "YE".equals(countryCode) ? 349 : 362;
+                    String phone = UserUtils.getMessageFromLocalNew(messageId, dbHelper);
+//                    String phoneNo = prefs.getString("phone_no", UserUtils.getMessageFromLocalNew(349, dbHelper));
                     try {
                         Intent intent = new Intent(Intent.ACTION_DIAL);
-                        intent.setData(Uri.parse("tel:" + phoneNo));
+                        intent.setData(Uri.parse("tel:" + phone));
                         activity.startActivity(intent);
                         customDialog.dismiss();
                     } catch (Exception e) {
-                        Toast.makeText(ctx, "فشل فتح لوحة الاتصال", Toast.LENGTH_SHORT).show();
+                        UserUtils.ToastMessages(activity, "فشل فتح لوحة الاتصال");
                     }
                 });
 
@@ -262,32 +277,6 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         holder.tvRoute.setText("من " + (startCity.isEmpty() ? "?" : startCity) + "  إلى " + (endCity.isEmpty() ? "?" : endCity));
         holder.tvDate.setText(departureDate.isEmpty() ? "-" : departureDate);
         holder.tvTime.setText(formattedTime.isEmpty() ? "-" : formattedTime);
-//        holder.conBooking.setOnClickListener(v -> {
-//            Fragment fragment = null;
-//            Bundle args = new Bundle();
-//            args.putString("related_object_id", String.valueOf(bookingId));
-//            fragment = new BookingDetailsFragment();
-//            fragment.setArguments(args);
-//            ((androidx.fragment.app.FragmentActivity) v.getContext()).getSupportFragmentManager()
-//                    .beginTransaction()
-//                    .replace(R.id.full_screen_container, fragment)
-//                    .addToBackStack(null)
-//                    .commit();
-//            ((HomePage) v.getContext()).updateToolbar("تفاصيل الحجز", false, R.drawable.booking, 2);
-//        });
-//        holder.btnDetails.setOnClickListener(v -> {
-//            Fragment fragment = null;
-//            Bundle args = new Bundle();
-//            args.putString("related_object_id", String.valueOf(bookingId));
-//            fragment = new BookingDetailsFragment();
-//            fragment.setArguments(args);
-//            ((androidx.fragment.app.FragmentActivity) v.getContext()).getSupportFragmentManager()
-//                    .beginTransaction()
-//                    .replace(R.id.full_screen_container, fragment)
-//                    .addToBackStack(null)
-//                    .commit();
-//            ((HomePage) v.getContext()).updateToolbar("تفاصيل الحجز", false, R.drawable.booking, 2);
-//        });
         View.OnClickListener openDetailsListener = v -> {
             Fragment fragment = new BookingDetailsFragment();
             Bundle args = new Bundle();
@@ -347,7 +336,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
     }
 
     static class BookingViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDriverName, tvRoute, tvTime, tvDate, tvSeats, tvPrice, tvStatus, tvDriverCompany;
+        TextView tvDriverName, tvRoute, tvTime, tvDate, tvSeats, tvPrice, tvStatus, tvDriverCompany, tvOrderTime;
         ImageView btnCancelBooking, btnDetails;
         LinearLayout containerCompany;
 
@@ -365,6 +354,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             tvSeats = itemView.findViewById(R.id.tvSeats);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             conBooking = itemView.findViewById(R.id.conBooking);
+            tvOrderTime = itemView.findViewById(R.id.tvOrderTime);
             tvStatus = itemView.findViewById(R.id.tvStatus);
             btnCancelBooking = itemView.findViewById(R.id.btnCancelBooking);
             btnDetails = itemView.findViewById(R.id.btnDetails);

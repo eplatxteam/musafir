@@ -19,14 +19,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/gray"
-            app:tabBackground="@android:color/transparent"
+            app:tabMaxWidth="0dp"
             app:tabGravity="fill"
-            app:tabIndicatorHeight="0dp"
             app:tabMode="fixed"
-            app:tabRippleColor="@android:color/transparent"
-            app:tabTextAppearance="@style/CustomTabText"
-            app:tabTextColor="@color/black" />
-
+            app:tabIndicatorHeight="0dp"
+            app:tabRippleColor="@android:color/transparent"/>
         <!--        <com.google.android.material.tabs.TabLayout-->
         <!--            android:id="@+id/tabLayout"-->
         <!--            android:layout_width="match_parent"-->

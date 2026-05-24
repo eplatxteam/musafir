@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.Musafir" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
@@ -15,7 +15,7 @@
 
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:layoutDirection">rtl</item>
-        <item name="android:fontFamily">@font/ibmplexsansarabic_regular</item>
+        <item name="android:fontFamily">@font/rptregular</item>
 
     </style>
 </resources>

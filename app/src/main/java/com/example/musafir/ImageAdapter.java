@@ -1,17 +1,14 @@
 package com.example.musafir;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -44,7 +41,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 //        return Math.min(imageUrls.size(), 5) + 1;
 //    }
     public int getItemCount() {
-        return Math.min(imageUrls.size(), 6);
+        return imageUrls.size();
     }
 
     @NonNull
@@ -54,8 +51,9 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             View view = LayoutInflater.from(context).inflate(R.layout.item_image, parent, false);
             return new ImageViewHolder(view);
         } else {
-            View view = LayoutInflater.from(context).inflate(R.layout.item_add_button, parent, false);
-            return new AddButtonViewHolder(view);
+//            View view = LayoutInflater.from(context).inflate(R.layout.item_add_button, parent, false);
+//            return new AddButtonViewHolder(view);
+            return null;
         }
     }
 
@@ -77,14 +75,6 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .into(((ImageViewHolder) holder).imageView);
 
             String finalImgId = imgId;
-//            ((ImageViewHolder) holder).imageView.setOnClickListener(v -> {
-//                Advertisements fragment = new Advertisements();
-//
-//                Bundle bundle = new Bundle();
-//                bundle.putString("img_id", finalImgId);
-//                fragment.setArguments(bundle);
-//                ((HomePage) context).openFullScreenFragment(fragment, "تفاصيل الإعلان", R.drawable.ads, 0);
-//            });
 
         } else if (holder instanceof AddButtonViewHolder) {
             ((AddButtonViewHolder) holder).addButton.setOnClickListener(v -> {
@@ -92,11 +82,6 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 Bundle args = new Bundle();
                 args.putInt("inHomePage", inHomePage);
                 fragment.setArguments(args);
-//                ((AppCompatActivity) context).getSupportFragmentManager()
-//                        .beginTransaction()
-//                        .replace(R.id.full_screen_container, fragment)
-//                        .addToBackStack(null)
-//                        .commit();
                 ((HomePage) context).openFullScreenFragment(fragment, "الإعلانات", R.drawable.ads, 0);
 //                ((HomePage) context).updateToolbar("الإعلانات", false, R.drawable.ads, 0);
             });
@@ -117,7 +102,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         public AddButtonViewHolder(@NonNull View itemView) {
             super(itemView);
-            addButton = itemView.findViewById(R.id.addButton);
+//            addButton = itemView.findViewById(R.id.addButton);
         }
     }
 }

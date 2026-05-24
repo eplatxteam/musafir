@@ -58,7 +58,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_marginEnd="8dp"
-                            android:src="@drawable/kaaba_new"/>
+                            android:src="@drawable/kaaba_new" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -118,10 +118,10 @@
                                 android:checked="true"
                                 android:paddingLeft="20dp"
                                 android:paddingRight="20dp"
-                                android:textStyle="bold"
                                 android:text="عمرة"
                                 android:textColor="@color/radio_text_color"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
 
 
                             <RadioButton
@@ -142,6 +142,7 @@
                         <View
                             android:layout_width="30dp"
                             android:layout_height="1dp" />
+
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/downloadDocument"
                             android:layout_width="0dp"
@@ -210,9 +211,9 @@
                             android:gravity="center"
                             android:paddingVertical="10dp"
                             android:text="ضمانة تجارية"
-                            android:textStyle="bold"
                             android:textColor="@color/radio_text_color"
-                            android:textSize="16sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <RadioButton
                             android:id="@+id/host"
@@ -240,6 +241,7 @@
                         <!--                                android:textColor="@color/radio_text_color"-->
                         <!--                                android:textSize="16sp" />-->
                     </RadioGroup>
+
                     <LinearLayout
                         android:id="@+id/FlightContainer"
                         android:layout_width="match_parent"
@@ -256,7 +258,7 @@
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:layout_marginEnd="8dp"
-                                android:src="@drawable/travel_diary"/>
+                                android:src="@drawable/travel_diary" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -291,9 +293,9 @@
                                 android:gravity="center"
                                 android:paddingVertical="10dp"
                                 android:text="ذهاب وعودة"
-                                android:textStyle="bold"
                                 android:textColor="@color/radio_text_color"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
 
                             <RadioButton
                                 android:id="@+id/go"
@@ -308,18 +310,18 @@
                                 android:textColor="@color/radio_text_color"
                                 android:textSize="16sp" />
 
-<!--                            <RadioButton-->
-<!--                                android:id="@+id/back"-->
-<!--                                android:layout_width="0dp"-->
-<!--                                android:layout_height="wrap_content"-->
-<!--                                android:layout_weight="1"-->
-<!--                                android:background="@drawable/custom_radio"-->
-<!--                                android:button="@null"-->
-<!--                                android:gravity="center"-->
-<!--                                android:paddingVertical="10dp"-->
-<!--                                android:text="عودة"-->
-<!--                                android:textColor="@color/radio_text_color"-->
-<!--                                android:textSize="16sp" />-->
+                            <!--                            <RadioButton-->
+                            <!--                                android:id="@+id/back"-->
+                            <!--                                android:layout_width="0dp"-->
+                            <!--                                android:layout_height="wrap_content"-->
+                            <!--                                android:layout_weight="1"-->
+                            <!--                                android:background="@drawable/custom_radio"-->
+                            <!--                                android:button="@null"-->
+                            <!--                                android:gravity="center"-->
+                            <!--                                android:paddingVertical="10dp"-->
+                            <!--                                android:text="عودة"-->
+                            <!--                                android:textColor="@color/radio_text_color"-->
+                            <!--                                android:textSize="16sp" />-->
                         </RadioGroup>
 
 
@@ -340,7 +342,7 @@
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_marginEnd="8dp"
-                                    android:src="@drawable/date"/>
+                                    android:src="@drawable/date" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -542,7 +544,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="عدد الأفراد"
+                            android:text="عدد المسافرين"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
@@ -565,8 +567,8 @@
                             android:id="@+id/passengersTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
                             android:text="1"
                             android:textColor="@color/black"
                             android:textSize="20sp" />
@@ -577,6 +579,18 @@
                             android:layout_height="34dp"
                             android:layout_marginStart="5dp"
                             android:src="@drawable/increase" />
+
+                        <TextView
+                            android:id="@+id/txtPlus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_gravity="center"
+                            android:layout_marginStart="5dp"
+                            android:gravity="center"
+                            android:text="إضافة مسافر"
+                            android:textColor="@color/text_light_gray"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -594,7 +608,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="أسماء الأفراد"
+                            android:text="أسماء المسافرين"
                             android:textColor="@android:color/black"
                             android:textSize="16sp" />
 
@@ -689,8 +703,9 @@
                             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
                             android:gravity="top|start"
                             android:inputType="textMultiLine"
-                            android:maxLines="6"
-                            android:minLines="6"
+                            android:maxLength="100"
+                            android:maxLines="2"
+                            android:minLines="2"
                             android:padding="12dp"
                             android:scrollbars="vertical"
                             android:textColor="@android:color/black"
@@ -700,18 +715,12 @@
 
                     <Button
                         android:id="@+id/addRequest"
+                        style="@style/PrimaryButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="46dp"
                         android:layout_marginBottom="1dp"
-                        android:background="@drawable/bg_button"
-                        android:elevation="0dp"
-                        android:stateListAnimator="@null"
                         android:text="طلب الخدمة"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary2"
-                        android:textSize="18sp"
-                        app:backgroundTint="@null" />
+                        android:textAllCaps="false" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

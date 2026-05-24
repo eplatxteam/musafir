@@ -1,15 +1,7 @@
 package com.example.musafir;
 
-import static com.example.musafir.LocationWorker.getCityNameFromIp;
-import static com.example.musafir.R.drawable.radio_button_text_color;
-
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -18,14 +10,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,9 +22,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,21 +29,17 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -75,9 +56,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
-import android.app.TimePickerDialog;
-import android.widget.TimePicker;
 
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
@@ -114,7 +92,7 @@ public class AddTripFragment extends Fragment {
 
     private List<String> Car_codes = new ArrayList<>();
     ProgressBar routeLoading;
-    private boolean isDataChanged = false;
+    boolean isDataChanged = false;
 
     public AddTripFragment() {
     }
@@ -123,16 +101,22 @@ public class AddTripFragment extends Fragment {
 
     TextView carCode, routeError, vehicleError, fromCityError, toCityError, fromAddressError, toAddressError, departureTimeError, dayTimeError, priceError, availableSeatsError;
     TextView textFromCity, textToCity;
-    private LinearLayout fromLayout, toLayout;
+    LinearLayout fromLayout, toLayout;
     String selectedDate;
     int selectedDayId = -1;
+    private AlertDialog exitDialog;
+    private int dt_no = 0;
+    private JSONArray resultsArray;
+    DBHelper dbHelper;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_trip, container, false);
-        setHasOptionsMenu(true);
+
+        dbHelper = new DBHelper(requireContext());
+//        setHasOptionsMenu(true);
         dayTimeRadioGroup = view.findViewById(R.id.dayTimeRadioGroup);
         carCode = view.findViewById(R.id.carCode);
 
@@ -203,6 +187,31 @@ public class AddTripFragment extends Fragment {
         SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE", new Locale("ar"));
         SimpleDateFormat dateFormat = new SimpleDateFormat("d", new Locale("ar"));
         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        UserUtils.updateProfile(getActivity(), new UserUtils.ProfileUpdateCallback() {
+            @Override
+            public void onProfileUpdated(boolean isVerified, boolean isActive) {
+                if (!isActive) {
+                    if (isAdded() && getActivity() != null) {
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+
+                        getActivity().finish();
+                    }
+                    UserUtils.getMessageFromLocal(22, dbHelper, new UserUtils.MessageCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            UserUtils.ToastMessages(getActivity(), message);
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                        }
+
+                    });
+                }
+            }
+        });
 
         int today = calendar.get(Calendar.DAY_OF_MONTH);
         LinearLayout[] dayViews = new LinearLayout[14];
@@ -290,15 +299,6 @@ public class AddTripFragment extends Fragment {
             public void afterTextChanged(Editable s) {
             }
         };
-//        requireActivity().getOnBackPressedDispatcher().addCallback(
-//                getViewLifecycleOwner(),
-//                new OnBackPressedCallback(true) {
-//                    @Override
-//                    public void handleOnBackPressed() {
-//                        ((HomePage) requireActivity()).selectTab(R.id.nav_home);
-//                    }
-//                }
-//        );
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -311,10 +311,19 @@ public class AddTripFragment extends Fragment {
         toAddress.addTextChangedListener(watcher);
         price.addTextChangedListener(watcher);
         departureTime.addTextChangedListener(watcher);
-
         submitBtn.setOnClickListener(v -> {
+            if (!isUserVerified()) {
+                UserUtils.showErrorDialog(getActivity(),
+                        UserUtils.getMessageFromLocalNew(490, dbHelper),
+                        null, null, "تنبيه التفعيل", 1, null);
+                return;
+            }
+
             validateAndSendData();
         });
+//        submitBtn.setOnClickListener(v -> {
+//            validateAndSendData();
+//        });
         departureTime.setOnClickListener(v -> showTimePicker());
         vehicleSpinner = view.findViewById(R.id.vehicleSpinner);
 
@@ -365,18 +374,6 @@ public class AddTripFragment extends Fragment {
         });
 
 
-        // getCityNameFromIp(getContext(), cityAr -> {
-        //     prefs.edit().putString("default_city", cityAr).apply();
-
-        //     ((Activity) getContext()).runOnUiThread(() -> {
-        //         textFromCity.setText(cityAr);
-        DBHelper dbHelper = new DBHelper(getContext());
-        //         DBHelper.City defaultCity = db.getCityByName(cityAr);
-        //         if (defaultCity != null) {
-        //             textFromCity.setTag(defaultCity.getId());
-        //         }
-        //     });
-        // });
         String defaultCity = prefs.getString("default_city", "حدد المدينة");
         textFromCity.setText(defaultCity);
         DBHelper.City defaultCityObj = dbHelper.getCityByName(defaultCity);
@@ -386,6 +383,12 @@ public class AddTripFragment extends Fragment {
         }
 
         return view;
+    }
+
+    private boolean isUserVerified() {
+        SharedPreferences prefs = SharedPrefsHelper.get(getContext());
+        return prefs.getBoolean("is_verified", false);
+
     }
 
     private void updateRoutesByCities() {
@@ -465,12 +468,10 @@ public class AddTripFragment extends Fragment {
 
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_select_city, null);
 
-        // عناصر الديالوج
         EditText searchCity = dialogView.findViewById(R.id.searchBox);
         RecyclerView recyclerCities = dialogView.findViewById(R.id.recyclerCities);
         LinearLayout closeBtn = dialogView.findViewById(R.id.btnCloseDialog);
 
-        // إنشاء الديالوج
         Dialog dialog = new Dialog(requireContext(), R.style.KeyboardAwareDialog);
         dialog.setContentView(dialogView);
 
@@ -490,7 +491,6 @@ public class AddTripFragment extends Fragment {
             window.getAttributes().windowAnimations = R.style.DialogSlideUpAnimation;
         }
 
-        // Blur الخلفية
         ViewGroup decorView = (ViewGroup) requireActivity().getWindow().getDecorView();
         Blurry.with(requireContext()).radius(15).sampling(2).onto(decorView);
         dialog.setOnDismissListener(d -> Blurry.delete(decorView));
@@ -500,7 +500,6 @@ public class AddTripFragment extends Fragment {
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
         dialog.show();
 
-        // جلب المدن
         DBHelper db = new DBHelper(getContext());
         List<DBHelper.City> allCities = db.getAllCities2();
 
@@ -524,7 +523,6 @@ public class AddTripFragment extends Fragment {
 
         CityAdapter adapter2 = new CityAdapter(filtered, city -> {
 
-            // عند اختيار مدينة
             targetTextView.setText(city.getNameAr());
             targetTextView.setTag(city.getId());
 
@@ -725,28 +723,27 @@ public class AddTripFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//
+//        AppCompatActivity activity = (AppCompatActivity) requireActivity();
+//        if (activity.getSupportActionBar() != null) {
+//            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//        }
+//
+//    }
 
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        if (activity.getSupportActionBar() != null) {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false); // ❌ يخفي سهم الرجوع
-        }
-    }
-
-    private AlertDialog exitDialog;
 
     @SuppressLint({"ResourceType", "UseCompatLoadingForColorStateLists"})
     private void populateDayTimeRadioButtons(List<String> displayDays, Set<Integer> disabledPositions) {
         try {
             dayTimeRadioGroup.removeAllViews();
 
-            // إنشاء ColorStateList لتغيير اللون حسب الحالة
             int[][] states = new int[][]{
-                    new int[]{android.R.attr.state_enabled, android.R.attr.state_checked}, // checked
-                    new int[]{android.R.attr.state_enabled}, // enabled but not checked
-                    new int[]{-android.R.attr.state_enabled} // disabled
+                    new int[]{android.R.attr.state_enabled, android.R.attr.state_checked},
+                    new int[]{android.R.attr.state_enabled},
+                    new int[]{-android.R.attr.state_enabled}
             };
             int[] colors = new int[]{
                     ContextCompat.getColor(getContext(), R.color.secondary),
@@ -756,172 +753,138 @@ public class AddTripFragment extends Fragment {
             ColorStateList colorStateList = new ColorStateList(states, colors);
 
             for (int i = 0; i < displayDays.size(); i++) {
+
+                if (disabledPositions.contains(i)) {
+                    continue;
+                }
+
                 RadioButton radioButton = new RadioButton(getContext());
                 radioButton.setText(displayDays.get(i));
-                radioButton.setTag(i + 1);
+
+                radioButton.setTag(dayIds.get(i));
+
                 radioButton.setId(View.generateViewId());
                 radioButton.setButtonDrawable(null);
                 radioButton.setPadding(45, 16, 45, 16);
                 radioButton.setGravity(Gravity.CENTER);
                 radioButton.setTextSize(16);
-
-                if (disabledPositions.contains(i + 1)) {
-                    radioButton.setEnabled(false);
-                } else {
-                    radioButton.setEnabled(true);
-                }
-
                 radioButton.setTextColor(colorStateList);
 
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-                params.setMargins(0, 0, 10, 0);
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                params.setMargins(20, 0, 0, 0);
                 radioButton.setLayoutParams(params);
                 radioButton.setBackgroundResource(R.drawable.radio_button_home);
 
                 dayTimeRadioGroup.addView(radioButton);
             }
 
+            dayTimeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                RadioButton selected = group.findViewById(checkedId);
+                if (selected != null) {
+                    dt_no = (int) selected.getTag();
+                }
+            });
+
             dayTimeScrollView.post(() -> dayTimeScrollView.fullScroll(View.FOCUS_RIGHT));
+
         } catch (Exception e) {
-            UserUtils.sendLog(getContext(), "populateDayTimeRadioButtons", e.toString(), e.toString(), "add trip");
-//            throw new RuntimeException(e);
+            UserUtils.sendLog(getContext(), "populateDayTimeRadioButtons", e.toString(), e.toString(), "add trip request");
         }
     }
 
     private void updateDayAdapter() {
-        if (selectedDate == null) return;
+        if (selectedDate == null || resultsArray == null || resultsArray.length() == 0) return;
+
         selectedDayId = -1;
         dayTimeRadioGroup.removeAllViews();
         dayTimeRadioGroup.clearCheck();
+
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(new Date());
+        Calendar now = Calendar.getInstance();
+        int currentHour = now.get(Calendar.HOUR_OF_DAY);
 
         List<String> displayDays = new ArrayList<>(dayNames);
         Set<Integer> disabledPositions = new HashSet<>();
 
-        if (selectedDate.equals(todayDate)) {
-            Calendar now = Calendar.getInstance();
-            int currentHour = now.get(Calendar.HOUR_OF_DAY);
 
-            for (int i = 0; i < displayDays.size(); i++) {
-                String period = displayDays.get(i);
-                try {
-                    String[] parts = period.split(" - ");
-                    if (parts.length >= 2) {
-                        String endPart = parts[1].trim();
-                        int endHour = Integer.parseInt(endPart.split(" ")[0]);
-                        String ampm = endPart.contains("ص") ? "AM" : "PM";
+        for (int i = 0; i < resultsArray.length(); i++) {
+            try {
+                JSONObject obj = resultsArray.getJSONObject(i);
+                int startHour = obj.getInt("dt_start");
+                int endHour = obj.getInt("dt_end");
 
-                        if (ampm.equals("PM") && endHour < 12) endHour += 12;
-                        if (ampm.equals("AM") && endHour == 12) endHour = 0;
+                boolean isOver = true;
 
-                        if (endHour <= currentHour) {
-                            displayDays.set(i, period);
-                            disabledPositions.add(i);
-                        }
-                    }
-                } catch (Exception e) {
-                    UserUtils.sendLog(getContext(), "updateDayAdapter", e.toString(), e.toString(), "add trip");
-//            throw new RuntimeException(e);
+                if (startHour >= currentHour || endHour >= currentHour) {
+                    isOver = false;
                 }
+
+                if (!selectedDate.equals(todayDate)) {
+                    isOver = false;
+                }
+
+                if (isOver) {
+                    disabledPositions.add(i);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-        dayTimeRadioGroup.removeAllViews();
-        dayTimeRadioGroup.clearCheck();
-
-        // إنشاء RadioButtons بنفس طريقة ArrayAdapter
         populateDayTimeRadioButtons(displayDays, disabledPositions);
-
     }
 
     private void fetchDayTime() {
-        DBHelper dbHelper = new DBHelper(getContext());
+        resultsArray = dbHelper.getAllDayTimes();
 
-        new Thread(() -> {
+        if (resultsArray != null && resultsArray.length() > 0) {
+            dayNames.clear();
+            dayIds.clear();
             try {
-                URL url = new URL(BASE_URL + "day-time");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-                SharedPreferences prefs = SharedPrefsHelper.get(getContext());
-//                SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", getContext().MODE_PRIVATE);
-                String token = prefs.getString("auth_token", null);
-
-                if (token != null) {
-                    conn.setRequestProperty("Authorization", "Bearer " + token);
+                for (int i = 0; i < resultsArray.length(); i++) {
+                    JSONObject obj = resultsArray.getJSONObject(i);
+                    dayNames.add(obj.getString("dt_dsply"));
+                    dayIds.add(obj.getInt("dt_no"));
                 }
-                int responseCode = conn.getResponseCode();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        (responseCode == 200) ? conn.getInputStream() : conn.getErrorStream()));
-
-                StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-                reader.close();
-                conn.disconnect();
-
-                if (responseCode == 200) {
-                    JSONArray resultsArray = new JSONArray(result.toString());
-
-                    dayNames.clear();
-                    dayIds.clear();
-
-                    for (int i = 0; i < resultsArray.length(); i++) {
-                        JSONObject obj = resultsArray.getJSONObject(i);
-                        dayNames.add(obj.getString("dt_dsply"));
-                        dayIds.add(obj.getInt("dt_no"));
-                    }
-
-                    getActivity().runOnUiThread(() -> {
-                        updateDayAdapter(); // سيتم استدعاء populateDayTimeRadioButtons داخله
-                    });
-
-                } else {
-                    getActivity().runOnUiThread(() -> {
-                        UserUtils.getMessageFromLocal(2, dbHelper, new UserUtils.MessageCallback() {
-                            @Override
-                            public void onSuccess(String message) {
-                                UserUtils.ToastMessages(getActivity(), message);
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                            }
-                        });
-                    });
-                }
+                updateDayAdapter();
             } catch (Exception e) {
-                if (isAdded()) {
-                    requireActivity().runOnUiThread(() -> {
-                                UserUtils.getMessageFromLocal(2, dbHelper, new UserUtils.MessageCallback() {
-                                    @Override
-                                    public void onSuccess(String message) {
-                                        UserUtils.ToastMessages(getActivity(), message);
-                                    }
-
-                                    @Override
-                                    public void onError(String error) {
-                                    }
-                                });
-                            }
-                    );
+                e.printStackTrace();
+            }
+        } else {
+            UserUtils.syncDayTimesFromServer(getContext(), new UserUtils.DayTimeCallback() {
+                @Override
+                public void onSuccess() {
+                    if (isAdded()) {
+                        getActivity().runOnUiThread(() -> fetchDayTime());
+                    }
                 }
 
-                UserUtils.sendLog(getContext(), "fetchDayTime", e.toString(), e.toString(), "add trip");
-            }
-
-        }).start();
+                @Override
+                public void onError(String error) {
+                    // التعامل مع الخطأ
+                }
+            });
+        }
     }
 
     private void fetchVehicles(int ownerId) {
-        DBHelper dbHelper = new DBHelper(getContext());
 
+        DBHelper dbHelper = new DBHelper(getContext());
+        if (!UserUtils.isNetworkAvailable(getContext())) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(getActivity(), message);
+                }
+
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         new Thread(() -> {
             try {
                 URL url = new URL(BASE_URL + "vehicles/?owner=" + ownerId);
@@ -960,12 +923,6 @@ public class AddTripFragment extends Fragment {
                         vehicleSeats.add(vehicleObj.optInt("available_seats", 0)); // ← نخزن المقاعد
                         vh_price.add(vehicleObj.optInt("vh_price", 0)); // ← نخزن المقاعد
                     }
-//                    for (int i = 0; i < resultsArray.length(); i++) {
-//                        JSONObject vehicleObj = resultsArray.getJSONObject(i);
-//                        String name = vehicleObj.optString("make", "") + " - " + vehicleObj.optString("model", "");
-//                        vehicleNames.add(name);
-//                        vehicleIds.add(vehicleObj.getInt("vehicle_id"));  // أو اسم الحقل المعرف حسب API
-//                    }
                     if (isAdded() && getActivity() != null) {
                         getActivity().runOnUiThread(() -> {
                             if (vehicleNames.isEmpty()) {
@@ -1011,7 +968,7 @@ public class AddTripFragment extends Fragment {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() ->
                             {
-                                UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                                UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                                     @Override
                                     public void onSuccess(String message) {
                                         UserUtils.ToastMessages(getActivity(), message);
@@ -1123,18 +1080,16 @@ public class AddTripFragment extends Fragment {
         }).start();
     }
 
-
     private void sendTripData() {
         DBHelper dbHelper = new DBHelper(getContext());
-
+//        if (!UserUtils.isNetworkAvailable(getContext())) {
+//            UserUtils.showErrorDialog(getActivity(), UserUtils.getMessageFromLocalNew(4, dbHelper), null, null, "تعذر إتمام الحجز"
+//                    , true,null);
+//        }
         if (isAdded() && getActivity() != null) {
             getActivity().runOnUiThread(() -> {
                 UserUtils.showSuccessGif(2, requireActivity(), null);
 
-//                progressDialog = new ProgressDialog(getActivity());
-//                progressDialog.setMessage("جاري إرسال بيانات الرحلة...");
-//                progressDialog.setCancelable(false);
-//                progressDialog.show();
             });
         }
         new Thread(() -> {
@@ -1180,11 +1135,6 @@ public class AddTripFragment extends Fragment {
                     selectedDayId = (Integer) selectedRadio.getTag();
 
                 }
-//                if (checkedRadioButtonId != -1) {
-//                    RadioButton selectedRadio = fromCityRadioGroup.findViewById(checkedRadioButtonId);
-//                    fromCityId = (Integer) selectedRadio.getTag();
-//                }
-//                lastFromCityId = fromCityId;
                 boolean isValid = true;
 
                 if (textFromCity.getText().toString().isEmpty() || textFromCity.getText().toString().equals("حدد المدينة")) {
@@ -1206,13 +1156,6 @@ public class AddTripFragment extends Fragment {
                         lastFromCityId = null;
                     }
                 }
-//                int checkedRadioButtonId2 = toCityRadioGroup.getCheckedRadioButtonId();
-//                Integer fromCityId2 = null;
-//                if (checkedRadioButtonId2 != -1) {
-//                    RadioButton selectedRadio = toCityRadioGroup.findViewById(checkedRadioButtonId2);
-//                    fromCityId2 = (Integer) selectedRadio.getTag();
-//                }
-//                lastToCityId = fromCityId2;
                 int selectedVehicleId = vehicleIds.get(vehiclePosition);
                 data.put("vehicle", selectedVehicleId);
                 data.put("departure_date", selectedDate);
@@ -1271,82 +1214,49 @@ public class AddTripFragment extends Fragment {
                                 UserUtils.hideSuccessGif(getActivity());
 
                                 if (getActivity() != null) {
-                                        if (getActivity() != null) {
-                                            ((HomePage) requireActivity()).selectTab(R.id.nav_reservation);
-                                            openHomeFragment("1");
+                                    if (getActivity() != null) {
+                                        ((HomePage) requireActivity()).selectTab(R.id.nav_reservation);
+                                        openHomeFragment("1");
 
-                                            UserUtils.getMessageFromLocal(6, dbHelper, new UserUtils.MessageCallback() {
-                                                @Override
-                                                public void onSuccess(String message) {
-                                                    UserUtils.ToastMessages(getActivity(), message);
-                                                }
+                                        UserUtils.getMessageFromLocal(6, dbHelper, new UserUtils.MessageCallback() {
+                                            @Override
+                                            public void onSuccess(String message) {
+                                                UserUtils.ToastMessages(getActivity(), message);
+                                            }
 
-                                                @Override
-                                                public void onError(String error) {
-                                                }
-                                            });
-                                            isDataChanged = false;
+                                            @Override
+                                            public void onError(String error) {
+                                            }
+                                        });
+                                        isDataChanged = false;
 
-                                        }
+                                    }
                                 }
-//                                openHomeFragment("1");
-//
-//                                UserUtils.getMessageFromLocal(6, dbHelper, new UserUtils.MessageCallback() {
-//                                    @Override
-//                                    public void onSuccess(String message) {
-//                                        UserUtils.ToastMessages(getActivity(), message);
-//                                    }
-//
-//                                    @Override
-//                                    public void onError(String error) {
-//                                    }
-//                                });
                             } else if (jsonResponse.has("non_field_errors")) {
                                 JSONArray errors = jsonResponse.getJSONArray("non_field_errors");
                                 if (errors.length() > 0) {
                                     JSONObject firstError = errors.getJSONObject(0);
                                     String errorMessage = firstError.optString("message", "فشل في إضافة الرحلة");
-                                    UserUtils.getMessageFromLocal(121, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-                                            UserUtils.ToastMessages(getActivity(), message);
-                                        }
+                                    UserUtils.showErrorDialog(getActivity(), UserUtils.getMessageFromLocalNew(121, dbHelper),
+                                            null, null, "تعذر إتمام الطلب", 1,null);
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
                                 }
                                 UserUtils.hideSuccessGif(getActivity());
 
                             } else {
                                 UserUtils.sendLog(getContext(), "sendTripData else", String.valueOf(jsonResponse), finalS, "add trip");
-                                UserUtils.getMessageFromLocal(7, dbHelper, new UserUtils.MessageCallback() {
-                                    @Override
-                                    public void onSuccess(String message) {
-                                        UserUtils.ToastMessages(getActivity(), message);
-                                    }
+                                UserUtils.showErrorDialog(getActivity(), UserUtils.getMessageFromLocalNew(7, dbHelper), null,
+                                        null, "تعذر إتمام الطلب", 1,null);
 
-                                    @Override
-                                    public void onError(String error) {
-                                    }
-                                });
                                 UserUtils.hideSuccessGif(getActivity());
 
                             }
 
                         } catch (Exception e) {
                             UserUtils.sendLog(getContext(), "sendTripData catch", e.toString(), finalS, "add trip");
-                            UserUtils.getMessageFromLocal(7, dbHelper, new UserUtils.MessageCallback() {
-                                @Override
-                                public void onSuccess(String message) {
-                                    UserUtils.ToastMessages(getActivity(), message);
-                                }
+                            UserUtils.showErrorDialog(getActivity(), UserUtils.getMessageFromLocalNew(7, dbHelper), null,
+                                    null, "تعذر إتمام الطلب", 1,null);
 
-                                @Override
-                                public void onError(String error) {
-                                }
-                            });
                             UserUtils.hideSuccessGif(getActivity());
 
                         }
@@ -1358,17 +1268,8 @@ public class AddTripFragment extends Fragment {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         UserUtils.hideSuccessGif(getActivity());
-
-                        UserUtils.getMessageFromLocal(8, dbHelper, new UserUtils.MessageCallback() {
-                            @Override
-                            public void onSuccess(String message) {
-                                UserUtils.ToastMessages(getActivity(), message);
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                            }
-                        });
+                        UserUtils.showErrorDialog(getActivity(), UserUtils.getMessageFromLocalNew(8, dbHelper), null,
+                                null, "تعذر إتمام الطلب", 1,null);
                     });
                 }
             }
@@ -1381,25 +1282,29 @@ public class AddTripFragment extends Fragment {
         bundle.putString("trip_type", tripType);
         fragment.setArguments(bundle);
 
-        getActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.full_screen_container, fragment)
-                .addToBackStack(null)
-                .commit();
+        String title = "";
+        int icon = R.drawable.local;
+        int pageId = 0;
 
         switch (tripType) {
             case "1":
-                UserUtils.app_Page(getContext(), 43);
-                ((HomePage) requireActivity()).updateToolbar("رحلات تشاركية", false, R.drawable.big_car, 0);
+                title = "رحلات تشاركية";
+                pageId = 43;
+                icon = R.drawable.big_car;
                 break;
             case "2":
-                UserUtils.app_Page(getContext(), 44);
-                ((HomePage) requireActivity()).updateToolbar("نقل دولي", false, R.drawable.world_new, 0);
+                title = "نقل دولي";
+                pageId = 44;
+                icon = R.drawable.world_new;
                 break;
             case "3":
-                UserUtils.app_Page(getContext(), 45);
-                ((HomePage) requireActivity()).updateToolbar("رحلات محلية", false, R.drawable.bus_2, 0);
+                title = "رحلات محلية";
+                pageId = 45;
+                icon = R.drawable.bus_2;
                 break;
         }
+        UserUtils.app_Page(getContext(), pageId);
+//        ((HomePage) requireActivity()).updateToolbar("رحلات محلية", false, R.drawable.bus_2, 0);
+        ((HomePage) requireActivity()).openFullScreenFragment(fragment, title, icon, 0);
     }
 }

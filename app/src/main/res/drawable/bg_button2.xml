@@ -1,15 +1,33 @@
+<!--<selector xmlns:android="http://schemas.android.com/apk/res/android">-->
+<!--    <item android:state_pressed="true">-->
+<!--        <shape android:shape="rectangle">-->
+<!--            &lt;!&ndash; لون أغمق قليلاً عند الضغط &ndash;&gt;-->
+<!--            <gradient android:angle="0" android:endColor="@color/primary2" android:startColor="@color/primary" />-->
+<!--            <corners android:radius="12dp" />-->
+<!--        </shape>-->
+<!--    </item>-->
+<!--    <item>-->
+<!--        <shape android:shape="rectangle">-->
+<!--            &lt;!&ndash; التدرج اللوني الظاهر في الصورة &ndash;&gt;-->
+<!--            <gradient android:angle="0" android:endColor="@color/primary" android:startColor="@color/primary2" />-->
+<!--            <corners android:radius="12dp" />-->
+<!--        </shape>-->
+<!--    </item>-->
+<!--</selector>-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <!-- لون أغمق قليلاً عند الضغط -->
-            <gradient android:angle="0" android:endColor="@color/primary2" android:startColor="@color/primary" />
+            <gradient android:angle="0"
+                android:endColor="@color/secondary_light"
+                android:startColor="@color/secondary2" />
             <corners android:radius="12dp" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <!-- التدرج اللوني الظاهر في الصورة -->
-            <gradient android:angle="0" android:endColor="@color/primary" android:startColor="@color/primary2" />
+            <gradient android:angle="0"
+                android:endColor="@color/secondary2"
+                android:startColor="@color/secondary_light" />
             <corners android:radius="12dp" />
         </shape>
     </item>

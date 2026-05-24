@@ -5,31 +5,39 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.FragmentManager;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.airbnb.lottie.L;
 import com.airbnb.lottie.LottieAnimationView;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -43,7 +51,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.net.URL;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,9 +92,11 @@ public class SettingFragment extends Fragment {
 //        LinearLayout addTravelBtn = view.findViewById(R.id.add_travel);
         LinearLayout addtripBtn = view.findViewById(R.id.add_trip);
         LinearLayout about = view.findViewById(R.id.about);
+        LinearLayout phoneNumber = view.findViewById(R.id.phoneNumber);
         LinearLayout profileBtn = view.findViewById(R.id.profile);
         LinearLayout logout = view.findViewById(R.id.logout);
-        LinearLayout deleteAccount = view.findViewById(R.id.deleteAccount);
+        LinearLayout guide = view.findViewById(R.id.guide);
+//        LinearLayout deleteAccount = view.findViewById(R.id.deleteAccount);
 //        TextView shortname = view.findViewById(R.id.shortname);
         TextView appVersion = view.findViewById(R.id.appVersion);
         TextView add_trip_text = view.findViewById(R.id.add_trip_text);
@@ -96,7 +106,7 @@ public class SettingFragment extends Fragment {
         LinearLayout supportHeader = view.findViewById(R.id.supportHeader);
         LinearLayout changepass = view.findViewById(R.id.changepass);
 //        LinearLayout supportMenu = view.findViewById(R.id.supportMenu);
-        LinearLayout share = view.findViewById(R.id.share);
+//        LinearLayout share = view.findViewById(R.id.share);
         LinearLayout sharing = view.findViewById(R.id.sharing);
         LinearLayout refresh = view.findViewById(R.id.refresh);
         LinearLayout balance = view.findViewById(R.id.balance);
@@ -105,10 +115,37 @@ public class SettingFragment extends Fragment {
         View lineDriverTrip = view.findViewById(R.id.lineDriverTrip);
         View line_notification = view.findViewById(R.id.line_notification);
         View line_balance = view.findViewById(R.id.line_balance);
+        LinearLayout btnStartTutorial = view.findViewById(R.id.btnStartTutorial);
+        DBHelper dbHelper = new DBHelper(getContext());
+        guide.setOnClickListener(v -> {
+            ((HomePage) requireActivity()).openFullScreenFragment(new GuideFragment(), "دليل المسافر", R.drawable.solo_traveller, 0);
+        });
+        btnStartTutorial.setOnClickListener(v -> {
+            SharedPreferences appPrefs = getContext().getSharedPreferences("AppConfig", Context.MODE_PRIVATE);
+            // استخدام commit لضمان الحفظ الفوري
+            appPrefs.edit().putBoolean("FORCE_SHOW_TUTORIAL", true).commit();
+
+            if (getActivity() != null) {
+                // العودة للرئيسية وتحديد التبويب الأول
+                ((HomePage) getActivity()).selectTab(R.id.nav_home);
+                getActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            }
+        });
+
         lottieWave = view.findViewById(R.id.lottieWaveRef);
         SharedPreferences prefs = SharedPrefsHelper.get(getContext());
         LinearLayout supportSubMenu = view.findViewById(R.id.supportSubMenu);
 
+        phoneNumber.setOnClickListener(v -> {
+            String countryCode = prefs.getString("country_code", "967785050270");
+
+            int messageId = "YE".equals(countryCode) ? 349 : 362;
+            String phone = UserUtils.getMessageFromLocalNew(messageId, dbHelper);
+
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:" + phone));
+            startActivity(intent);
+        });
         supportHeader.setOnClickListener(v -> {
             if (supportSubMenu.getVisibility() == View.GONE) {
                 supportSubMenu.setVisibility(View.VISIBLE);
@@ -125,8 +162,12 @@ public class SettingFragment extends Fragment {
         });
 
         view.findViewById(R.id.contact_support).setOnClickListener(v -> {
-            String phoneNumber = "967785050270";
-            String url = "https://wa.me/" + phoneNumber;
+            String countryCode = prefs.getString("country_code", "967785050270");
+
+            int messageId = "YE".equals(countryCode) ? 349 : 362;
+            String phone = UserUtils.getMessageFromLocalNew(messageId, dbHelper);
+
+            String url = "https://wa.me/" + phone;
 
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
@@ -135,40 +176,27 @@ public class SettingFragment extends Fragment {
             try {
                 v.getContext().startActivity(intent);
             } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
 //        SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", getActivity().MODE_PRIVATE);
-        DBHelper dbHelper = new DBHelper(getContext());
-        appVersion.append(UserUtils.app_version);
-//        supportHeader.setOnClickListener(v -> {
-//            String phoneNumber = "967785050270";
-//            String url = "https://wa.me/" + phoneNumber;
+        appVersion.append(UserUtils.app_version + ".0524");
 //
-//            Intent intent = new Intent(Intent.ACTION_VIEW);
-//            intent.setData(Uri.parse(url));
-//            intent.setPackage("com.whatsapp");
+//        share.setOnClickListener(v -> {
+//            SharedPreferences prefsLink = requireActivity().getSharedPreferences("prefsLink", Context.MODE_PRIVATE);
+//            SharedPreferences prefs2 = SharedPrefsHelper.get(getContext());
+////            SharedPreferences prefs2 = requireActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+//            String linkApp = prefsLink.getString("link_app", "");
+//            String user_phone = prefs2.getString("user_phone", "");
+//            String playStoreLink = linkApp + "&referrer=invite%3D" + user_phone;
 //
-//            try {
-//                v.getContext().startActivity(intent);
-//            } catch (Exception e) {
-//            }
+//            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+//            shareIntent.setType("text/plain");
+//            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "تطبيق مسافر");
+//            shareIntent.putExtra(Intent.EXTRA_TEXT, "حمّل تطبيق مسافر الآن واحصل على أفضل الرحلات:\n" + playStoreLink);
+//
+//            startActivity(Intent.createChooser(shareIntent, "دعوة صديق عبر"));
 //        });
-
-        share.setOnClickListener(v -> {
-            SharedPreferences prefsLink = requireActivity().getSharedPreferences("prefsLink", Context.MODE_PRIVATE);
-            SharedPreferences prefs2 = SharedPrefsHelper.get(getContext());
-//            SharedPreferences prefs2 = requireActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-            String linkApp = prefsLink.getString("link_app", "");
-            String user_phone = prefs2.getString("user_phone", "");
-            String playStoreLink = linkApp + "&referrer=invite%3D" + user_phone;
-
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "تطبيق مسافر");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, "حمّل تطبيق مسافر الآن واحصل على أفضل الرحلات:\n" + playStoreLink);
-
-            startActivity(Intent.createChooser(shareIntent, "دعوة صديق عبر"));
-        });
 //        share.setOnClickListener(v -> {
 //            SharedPreferences prefsLink = requireActivity().getSharedPreferences("prefsLink", Context.MODE_PRIVATE);
 //            SharedPreferences prefs2 = requireActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
@@ -192,7 +220,21 @@ public class SettingFragment extends Fragment {
         refresh.setOnClickListener(v -> {
             lottieWave.setVisibility(View.VISIBLE);
             lottieWave.playAnimation();
+            UserUtils.fetchBalance(getContext());
+
             UserUtils.checkAppUpdate(getContext());
+            UserUtils.app_Pages(getContext());
+            UserUtils.fetchAndSavePayTypes(getContext(), new UserUtils.GenericCallback() {
+
+                @Override
+                public void onSuccess(String message) {
+                }
+
+                @Override
+                public void onError(String error) {
+
+                }
+            });
             UserUtils.fetchAndSavecities(getContext(), new UserUtils.citiesCallback() {
                 @Override
                 public void onSuccess(String message) {
@@ -203,17 +245,7 @@ public class SettingFragment extends Fragment {
 
                 @Override
                 public void onError(String error) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-
-                    });
                 }
             });
             UserUtils.fetchAndSaveCountry(getContext(), new UserUtils.FetchCallback() {
@@ -225,16 +257,7 @@ public class SettingFragment extends Fragment {
 
                 @Override
                 public void onError(String error) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
                 }
             });
             UserUtils.fetchCashBankData(getContext(), dbHelper, new UserUtils.OnCashBankFetchedListener() {
@@ -244,20 +267,21 @@ public class SettingFragment extends Fragment {
 
                 @Override
                 public void onError(String error) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-
-                    });
                 }
             });
+            UserUtils.syncDayTimesFromServer(getContext(), new UserUtils.DayTimeCallback() {
 
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onError(String error) {
+
+                }
+            });
             UserUtils.fetchAndSaveMessages(getContext(), new UserUtils.FetchCallback() {
                 @Override
                 public void onSuccess(String message) {
@@ -276,16 +300,7 @@ public class SettingFragment extends Fragment {
                     lottieWave.setProgress(0f); // مهم
                     lottieWave.setVisibility(View.GONE);
 
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
                 }
 
 
@@ -298,16 +313,7 @@ public class SettingFragment extends Fragment {
 
                 @Override
                 public void onError(String error) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
                 }
             });
             UserUtils.fetchTypeTravelerRequests(getContext(), dbHelper, new TravelerRequests.OnTypeRequestsFetchedListener() {
@@ -318,18 +324,11 @@ public class SettingFragment extends Fragment {
 
                 @Override
                 public void onError(String error) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
                 }
             });
+            UserUtils.fetchAndSaveContactInfo(getContext(), dbHelper);
+
             UserUtils.fetchRoutes(getContext(), new UserUtils.FetchCallback() {
                 @Override
                 public void onSuccess(String message) {
@@ -348,19 +347,7 @@ public class SettingFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
 
@@ -371,19 +358,7 @@ public class SettingFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
 
@@ -409,7 +384,7 @@ public class SettingFragment extends Fragment {
             line_balance.setVisibility(View.GONE);
             balance.setVisibility(View.GONE);
         } else {
-            add_trip_text.setText("طلب رحلة");
+            add_trip_text.setText("طلب رحلة خاصة");
             DriverTripRequest.setVisibility(View.GONE);
             Favorite.setVisibility(View.GONE);
             addVehicleBtn.setVisibility(View.GONE);
@@ -422,56 +397,104 @@ public class SettingFragment extends Fragment {
 
         addVehicleBtn.setOnClickListener(v -> {
             UserUtils.app_Page(getContext(), 5);
-            openFullScreenFragment(new VehicleFragment(), "ييانات المركبات", R.drawable.local, 0);
+            ((HomePage) requireActivity()).openFullScreenFragment(new VehicleFragment(), "ييانات المركبات", R.drawable.local, 0);
+//            openFullScreenFragment(new VehicleFragment(), "ييانات المركبات", R.drawable.local, 0);
         });
 
         balance.setOnClickListener(v -> {
             UserUtils.app_Page(getContext(), 121);
-            openFullScreenFragment(new BalanceFragment(), "رصيدي", R.drawable.wallet, 0);
+            ((HomePage) requireActivity()).openFullScreenFragment(new BalanceFragment(), "رصيدي", R.drawable.wallet, 0);
+
+//            openFullScreenFragment(new BalanceFragment(), "رصيدي", R.drawable.wallet, 0);
         });
 
         sharing.setOnClickListener(v -> {
             UserUtils.app_Page(getContext(), 5);
-            openFullScreenFragment(new SharingFragment(), "الأعضاء المنضمون", R.drawable.frame_5__1_, 0);
+            ((HomePage) requireActivity()).openFullScreenFragment(new SharingFragment(), "الأعضاء المنضمون", R.drawable.frame, 0);
+
+//            openFullScreenFragment(new SharingFragment(), "الأعضاء المنضمون", R.drawable.frame, 0);
         });
 
         Favorite.setOnClickListener(v -> {
             UserUtils.app_Page(getContext(), 7);
-            openFullScreenFragment(new Setting_Notification(), "إدارة الإشعارات", R.drawable.notification_new, 0);
+            ((HomePage) requireActivity()).openFullScreenFragment(new Setting_Notification(), "إدارة الإشعارات", R.drawable.notification_new, 0);
+
+//            openFullScreenFragment(new Setting_Notification(), "إدارة الإشعارات", R.drawable.notification_new, 0);
 
         });
-
         changepass.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             LayoutInflater inflater2 = getLayoutInflater();
-//            View dialogView = inflater2.inflate(R.layout.dialog_change_password, null);
-//            builder.setView(dialogView);
             View dialogView = inflater2.inflate(R.layout.dialog_change_password, null);
             builder.setView(dialogView);
-            ViewGroup decorView = getActivity().getWindow().getDecorView().findViewById(android.R.id.content);
 
-//            AlertDialog dialog = builder.create();
-//            dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
-//            dialog.show();
+            ViewGroup decorView = (ViewGroup) getActivity().getWindow().getDecorView();
 
-
-            exitDialog = builder.create();
-
-            Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
-            exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
+            AlertDialog exitDialog = builder.create();
 
             if (exitDialog.getWindow() != null) {
-                exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
+                exitDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             }
+
+            exitDialog.setOnShowListener(d -> {
+                Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
+            });
+
+            exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
+
             exitDialog.show();
+
+            if (exitDialog.getWindow() != null) {
+                int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.80);
+                exitDialog.getWindow().setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT);
+            }
+
             EditText etCurrent = dialogView.findViewById(R.id.etCurrentPassword);
             EditText etNew = dialogView.findViewById(R.id.etNewPassword);
             EditText etConfirm = dialogView.findViewById(R.id.etConfirmPassword);
             Button btnChange = dialogView.findViewById(R.id.btnChange);
+            RelativeLayout dialogCancelButton = dialogView.findViewById(R.id.dialogCancelButton);
 
             ImageView ivToggleCurrent = dialogView.findViewById(R.id.ivToggleCurrent);
             ImageView ivToggleNew = dialogView.findViewById(R.id.ivToggleNew);
             ImageView ivToggleConfirm = dialogView.findViewById(R.id.ivToggleConfirm);
+
+            etCurrent.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (s.length() == 6) {
+                        etNew.requestFocus(); // الانتقال للحقل الجديد
+                    }
+                }
+            });
+
+            etNew.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (s.length() == 6) {
+                        etConfirm.requestFocus(); // الانتقال لحقل التأكيد
+                    }
+                }
+            });
+            // ---------------------------------------------------
+
+            dialogCancelButton.setOnClickListener(view1 -> exitDialog.dismiss());
 
             ivToggleCurrent.setOnClickListener(v1 -> {
                 if (isCurrentVisible) {
@@ -509,7 +532,6 @@ public class SettingFragment extends Fragment {
                 etConfirm.setSelection(etConfirm.getText().length());
             });
 
-
             btnChange.setOnClickListener(v1 -> {
                 String current = etCurrent.getText().toString().trim();
                 String newPass = etNew.getText().toString().trim();
@@ -539,11 +561,6 @@ public class SettingFragment extends Fragment {
                     etConfirm.setError("تأكيد كلمة المرور يجب أن لا تقل عن 6 خانات");
                     return;
                 }
-
-//                if (!newPass.equals(confirm)) {
-//                    etConfirm.setError("كلمة المرور الجديدة وغير متطابقة");
-//                    return;
-//                }
 
                 if (!current.equals(savedPassword)) {
                     UserUtils.getMessageFromLocal(165, dbHelper, new UserUtils.MessageCallback() {
@@ -590,146 +607,312 @@ public class SettingFragment extends Fragment {
                 sendPasswordToServer(newPass);
                 exitDialog.dismiss();
             });
-
         });
+//        changepass.setOnClickListener(v -> {
+//            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+//            LayoutInflater inflater2 = getLayoutInflater();
+//            View dialogView = inflater2.inflate(R.layout.dialog_change_password, null);
+//            builder.setView(dialogView);
+//            ViewGroup decorView = getActivity().getWindow().getDecorView().findViewById(android.R.id.content);
+//
+//
+//            exitDialog = builder.create();
+//
+//            Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
+//            exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
+//
+//            if (exitDialog.getWindow() != null) {
+//                exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
+//            }
+//            exitDialog.show();
+//            EditText etCurrent = dialogView.findViewById(R.id.etCurrentPassword);
+//            EditText etNew = dialogView.findViewById(R.id.etNewPassword);
+//            EditText etConfirm = dialogView.findViewById(R.id.etConfirmPassword);
+//            Button btnChange = dialogView.findViewById(R.id.btnChange);
+//            RelativeLayout dialogCancelButton = dialogView.findViewById(R.id.dialogCancelButton);
+//
+//            ImageView ivToggleCurrent = dialogView.findViewById(R.id.ivToggleCurrent);
+//            ImageView ivToggleNew = dialogView.findViewById(R.id.ivToggleNew);
+//            ImageView ivToggleConfirm = dialogView.findViewById(R.id.ivToggleConfirm);
+//            dialogCancelButton.setOnClickListener(view1 -> exitDialog.dismiss());
+//            ivToggleCurrent.setOnClickListener(v1 -> {
+//                if (isCurrentVisible) {
+//                    etCurrent.setTransformationMethod(new PasswordTransformationMethod());
+//                    ivToggleCurrent.setImageResource(R.drawable.baseline_visibility_off_24);
+//                } else {
+//                    etCurrent.setTransformationMethod(new HideReturnsTransformationMethod());
+//                    ivToggleCurrent.setImageResource(R.drawable.baseline_remove_red_eye_24);
+//                }
+//                isCurrentVisible = !isCurrentVisible;
+//                etCurrent.setSelection(etCurrent.getText().length());
+//            });
+//
+//            ivToggleNew.setOnClickListener(v2 -> {
+//                if (isNewVisible) {
+//                    etNew.setTransformationMethod(new PasswordTransformationMethod());
+//                    ivToggleNew.setImageResource(R.drawable.baseline_visibility_off_24);
+//                } else {
+//                    etNew.setTransformationMethod(new HideReturnsTransformationMethod());
+//                    ivToggleNew.setImageResource(R.drawable.baseline_remove_red_eye_24);
+//                }
+//                isNewVisible = !isNewVisible;
+//                etNew.setSelection(etNew.getText().length());
+//            });
+//
+//            ivToggleConfirm.setOnClickListener(v3 -> {
+//                if (isConfirmVisible) {
+//                    etConfirm.setTransformationMethod(new PasswordTransformationMethod());
+//                    ivToggleConfirm.setImageResource(R.drawable.baseline_visibility_off_24);
+//                } else {
+//                    etConfirm.setTransformationMethod(new HideReturnsTransformationMethod());
+//                    ivToggleConfirm.setImageResource(R.drawable.baseline_remove_red_eye_24);
+//                }
+//                isConfirmVisible = !isConfirmVisible;
+//                etConfirm.setSelection(etConfirm.getText().length());
+//            });
+//
+//
+//            btnChange.setOnClickListener(v1 -> {
+//                String current = etCurrent.getText().toString().trim();
+//                String newPass = etNew.getText().toString().trim();
+//                String confirm = etConfirm.getText().toString().trim();
+//
+//                String savedPassword = prefs.getString("password", "");
+//                if (current.isEmpty()) {
+//                    etCurrent.setError("الرجاء إدخال كلمة المرور الحالية");
+//                    return;
+//                } else if (current.length() < 6) {
+//                    etCurrent.setError("كلمة المرور يجب أن لا تقل عن 6 خانات");
+//                    return;
+//                }
+//
+//                if (newPass.isEmpty()) {
+//                    etNew.setError("الرجاء إدخال كلمة المرور الجديدة");
+//                    return;
+//                } else if (newPass.length() < 6) {
+//                    etNew.setError("كلمة المرور الجديدة يجب أن لا تقل عن 6 خانات");
+//                    return;
+//                }
+//
+//                if (confirm.isEmpty()) {
+//                    etConfirm.setError("الرجاء تأكيد كلمة المرور الجديدة");
+//                    return;
+//                } else if (confirm.length() < 6) {
+//                    etConfirm.setError("تأكيد كلمة المرور يجب أن لا تقل عن 6 خانات");
+//                    return;
+//                }
+//
+//                if (!current.equals(savedPassword)) {
+//                    UserUtils.getMessageFromLocal(165, dbHelper, new UserUtils.MessageCallback() {
+//                        @Override
+//                        public void onSuccess(String message) {
+//                            UserUtils.ToastMessages(getActivity(), message);
+//                        }
+//
+//                        @Override
+//                        public void onError(String error) {
+//                        }
+//                    });
+//                    return;
+//                }
+//
+//                if (current.equals(newPass)) {
+//                    UserUtils.getMessageFromLocal(166, dbHelper, new UserUtils.MessageCallback() {
+//                        @Override
+//                        public void onSuccess(String message) {
+//                            UserUtils.ToastMessages(getActivity(), message);
+//                        }
+//
+//                        @Override
+//                        public void onError(String error) {
+//                        }
+//                    });
+//                    return;
+//                }
+//
+//                if (!newPass.equals(confirm)) {
+//                    UserUtils.getMessageFromLocal(167, dbHelper, new UserUtils.MessageCallback() {
+//                        @Override
+//                        public void onSuccess(String message) {
+//                            UserUtils.ToastMessages(getActivity(), message);
+//                        }
+//
+//                        @Override
+//                        public void onError(String error) {
+//                        }
+//                    });
+//                    return;
+//                }
+//
+//                sendPasswordToServer(newPass);
+//                exitDialog.dismiss();
+//            });
+//
+//        });
 
 
         about.setOnClickListener(v -> {
             UserUtils.app_Page(getContext(), 9);
-            openFullScreenFragment(new about(), "معلومات التطبيق", R.drawable.icons8_info_1, 0);
+            ((HomePage) requireActivity()).openFullScreenFragment(new about(), "معلومات التطبيق", R.drawable.icons8_info_1, 0);
+
+//            openFullScreenFragment(new about(), "معلومات التطبيق", R.drawable.icons8_info_1, 0);
         });
 
 // زر "طلبات المسافرين"
         DriverTripRequest.setOnClickListener(v -> {
             UserUtils.app_Page(getContext(), 8);
-            openFullScreenFragment(new DriverTripRequest(), "طلبات المسافرين", R.drawable.solo_traveller, 0);
+            ((HomePage) requireActivity()).openFullScreenFragment(new DriverTripRequest(), "طلبات المسافرين", R.drawable.solo_traveller, 0);
+
+//            openFullScreenFragment(new DriverTripRequest(), "طلبات المسافرين", R.drawable.solo_traveller, 0);
         });
 
 // زر "إضافة/طلب رحلة"
         addtripBtn.setOnClickListener(v -> {
             if (userType.equalsIgnoreCase("driver")) {
                 UserUtils.app_Page(getContext(), 6);
-                openFullScreenFragment(new AddTripFragment(), "إضافة رحلة", R.drawable.solo_traveller, 1);
+                ((HomePage) requireActivity()).openFullScreenFragment(new AddTripFragment(), "إضافة رحلة", R.drawable.locations, 0);
+
+//                openFullScreenFragment(new AddTripFragment(), "إضافة رحلة", R.drawable.solo_traveller, 1);
 
                 // تحديث حالة الـ Bottom Nav والـ FAB
                 ((HomePage) requireActivity()).selectTab(R.id.fab);
                 ((HomePage) requireActivity()).fab.setImageTintList(ContextCompat.getColorStateList(getContext(), R.color.primary));
             } else {
-                openFullScreenFragment(new AddTripRequests(), "طلب رحلة", R.drawable.locations, 1);
+                ((HomePage) requireActivity()).openFullScreenFragment(new AddTripRequests(), "طلب رحلة خاصة", R.drawable.locations, 0);
+
+//                openFullScreenFragment(new AddTripRequests(), "طلب رحلة خاصة", R.drawable.locations, 1);
 
                 ((HomePage) requireActivity()).selectTab(R.id.fab);
                 ((HomePage) requireActivity()).fab.setImageTintList(ContextCompat.getColorStateList(getContext(), R.color.primary));
             }
         });
-        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            if (getActivity() != null && getActivity() instanceof HomePage) {
-                HomePage activity = (HomePage) getActivity();
-
-                // البحث عن الفراجمنت داخل الحاوية الجديدة
-                Fragment currentFragment = activity.getSupportFragmentManager()
-                        .findFragmentById(R.id.full_screen_container);
-
-                if (currentFragment != null) {
-                    if (currentFragment instanceof DriverTripRequest) {
-                        activity.updateToolbar("طلبات المسافرين", false, R.drawable.solo_traveller, 0);
-                    } else if (currentFragment instanceof AddTripFragment) {
-                        activity.updateToolbar("إضافة رحلة", false, R.drawable.locations, 0);
-                    } else if (currentFragment instanceof Setting_Notification) {
-                        activity.updateToolbar("إدارة الإشعارات", false, R.drawable.notification_new, 0);
-                    } else if (currentFragment instanceof AddTripRequests) {
-                        activity.updateToolbar("طلب رحلة", false, R.drawable.locations, 1);
-                    } else if (currentFragment instanceof SharingFragment) {
-                        activity.updateToolbar("الأعضاء المنضمون", false, R.drawable.frame_5__1_, 0);
-                    } else if (currentFragment instanceof VehicleFragment) {
-                        activity.updateToolbar("بيانات المركبات", false, R.drawable.local, 0);
-                    } else if (currentFragment instanceof BalanceFragment) {
-                        updateToolbar("رصيدي", false, R.drawable.wallet, 0);
-                    } else if (currentFragment instanceof about) {
-                        activity.updateToolbar("معلومات التطبيق", false, R.drawable.icons8_info_1, 0);
-                    } else if (currentFragment instanceof AddVehicleFragment) {
-                        Bundle args = currentFragment.getArguments();
-                        String title = (args != null && args.containsKey("vehicle_id")) ? "تعديل المركبة" : "إضافة مركبة";
-                        activity.updateToolbar(title, true, R.drawable.local, 0);
-                    } else if (currentFragment instanceof ProfileFragment) {
-                        updateToolbar("الملف الشخصي", false, R.drawable.profile_new, 0);
-                    }
-                } else {
-                    activity.findViewById(R.id.viewPager).setVisibility(View.VISIBLE);
-                    activity.findViewById(R.id.full_screen_container).setVisibility(View.GONE);
-                    activity.updateHomeToolbar();
-                }
-            }
-        });
 //        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-//            FragmentActivity activity = getActivity();
-//            if (activity != null) {
+//            if (getActivity() != null && getActivity() instanceof HomePage) {
+//                HomePage activity = (HomePage) getActivity();
+//
+//                // البحث عن الفراجمنت داخل الحاوية الجديدة
 //                Fragment currentFragment = activity.getSupportFragmentManager()
 //                        .findFragmentById(R.id.full_screen_container);
-//                if (currentFragment instanceof DriverTripRequest) {
-//                    updateToolbar("طلبات المسافرين", false, R.drawable.solo_traveller, 0);
-//                } else if (currentFragment instanceof AddTripFragment) {
-//                    updateToolbar("إضافة رحلة", false, R.drawable.locations, 0);
-//                } else if (currentFragment instanceof Setting_Notification) {
-//                    updateToolbar("إدارة الإشعارات", false, R.drawable.notification_new, 0);
-//                } else if (currentFragment instanceof AddTripRequests) {
-//                    updateToolbar("طلب رحلة", false, R.drawable.locations, 1);
-//                } else if (currentFragment instanceof SharingFragment) {
-//                    updateToolbar("الأعضاء المنضمون", false, R.drawable.frame_5__1_, 0);
-//                } else if (currentFragment instanceof VehicleFragment) {
-//                    updateToolbar("بيانات المركبات", false, R.drawable.local, 0);
-//                } else if (currentFragment instanceof about) {
-//                    updateToolbar("معلومات التطبيق", false, R.drawable.icons8_info_1, 0);
-//                } else if (currentFragment instanceof AddVehicleFragment) {
 //
-//                    Bundle args = currentFragment.getArguments();
-//
-//                    if (args != null && args.containsKey("vehicle_id")) {
-//                        // وضع التعديل
-//                        updateToolbar("تعديل المركبة", false, R.drawable.local, 0);
+//                if (currentFragment != null) {
+//                    if (currentFragment instanceof HomeFragment) {
+//                        Bundle args = currentFragment.getArguments();
+//                        String tripType = args != null ? args.getString("trip_type", "1") : "1";
+//                        switch (tripType) {
+//                            case "1":
+//                                updateToolbar("رحلات تشاركية", false, R.drawable.big_car, 0);
+//                                break;
+//                            case "2":
+//                                updateToolbar("نقل دولي", false, R.drawable.world_new, 0);
+//                                break;
+//                            case "3":
+//                                updateToolbar("رحلات محلية", false, R.drawable.bus_2, 0);
+//                                break;
+//                        }
+//                    } else if (currentFragment instanceof BookingFragment) {
+//                        updateToolbar("رحلاتي", false, R.drawable.airplane_t, 1);
+//                    } else if (currentFragment instanceof DriverTripRequest) {
+//                        updateToolbar("طلبات المسافرين", false, R.drawable.solo_traveller, 0);
+//                    } else if (currentFragment instanceof AddTripFragment) {
+//                        updateToolbar("إضافة رحلة", false, R.drawable.locations, 0);
+//                    } else if (currentFragment instanceof NotificationFragment) {
+//                        updateToolbar("الإشعارات", false, R.drawable.notification_new, 1);
+//                    } else if (currentFragment instanceof AddTripRequests) {
+//                        updateToolbar("طلب رحلة خاصة", false, R.drawable.locations, 0);
+//                    } else if (currentFragment instanceof TravelerRequests) {
+//                        updateToolbar("خدمات المسافرين", false, R.drawable.solo_traveller, 0);
+//                    } else if (currentFragment instanceof BookingDetailsFragment) {
+//                        updateToolbar("تفاصيل الحجز", false, R.drawable.checklist, 0);
+//                    } else if (currentFragment instanceof CustomBooking) {
+//                        updateToolbar("حجز رحلة", false, R.drawable.booking, 0);
+//                    } else if (currentFragment instanceof VehicleFragment) {
+//                        updateToolbar("بيانات المركبات", false, R.drawable.local, 0);
+//                    } else if (currentFragment instanceof AddVehicleFragment) {
+//                        Bundle args = currentFragment.getArguments();
+//                        String title = (args != null && args.containsKey("vehicle_id")) ? "تعديل المركبة" : "إضافة مركبة";
+//                        updateToolbar(title, false, R.drawable.local, 0);
+//                    } else if (currentFragment instanceof SharingFragment) {
+//                        updateToolbar("الأعضاء المنضمون", false, R.drawable.frame, 0);
+//                    } else if (currentFragment instanceof BalanceFragment) {
+//                        updateToolbar("رصيدي", false, R.drawable.wallet, 0);
+//                    } else if (currentFragment instanceof TripDetailsFragment) {
+//                        updateToolbar("تفاصيل الطلب", false, R.drawable.add_trip, 0);
+//                    } else if (currentFragment instanceof AllTravelerRequests) {
+//                        updateToolbar("طلبات الخدمات", false, R.drawable.solo_traveller, 0);
+//                    } else if (currentFragment instanceof ProfileFragment) {
+//                        updateToolbar("الملف الشخصي", false, R.drawable.profile_new, 0);
+//                    } else if (currentFragment instanceof TravelerRequestsDetails) {
+//                        updateToolbar("تفاصيل الخدمة", false, R.drawable.solo_traveller, 0);
+//                    } else if (currentFragment instanceof AddTravelerRequests) {
+//                        Bundle args = currentFragment.getArguments();
+//                        String title = (args != null) ? args.getString("type_tr_name", "طلب خدمة") : "طلب خدمة";
+//                        int icon = (args != null) ? args.getInt("icon_tr", 0) : 0;
+//                        updateToolbar(title, false, icon, 0);
+//                    } else if (currentFragment instanceof AllImagesFragment) {
+//                        updateToolbar("الإعلانات", false, R.drawable.ads, 0);
+//                    } else if (currentFragment instanceof Advertisements) {
+//                        updateToolbar("تفاصيل الإعلان", false, R.drawable.ads, 0);
+//                    } else if (currentFragment instanceof MoreDetails) {
+//                        updateToolbar("تفاصيل الرحلة", false, R.drawable.booking, 0);
+//                    } else if (currentFragment instanceof GuideFragment) {
+//                        updateToolbar("دليل المسافر", false, R.drawable.solo_traveller, 0);
+//                    } else if (currentFragment instanceof SettingFragment) {
+//                        updateToolbar("الملف الشخصي", false, R.drawable.profile_new, 1);
 //                    } else {
-//                        // وضع الإضافة
-//                        updateToolbar("إضافة مركبة", false, R.drawable.local, 0);
+//                        String full_name = prefs.getString("full_name", "");
+//                        Toolbar toolbar = requireActivity().findViewById(R.id.main_toolbar);
+//                        String fullNames = full_name.trim();
+//                        String firstName = "";
+//                        if (!fullNames.isEmpty()) {
+//                            String[] parts = fullNames.split("\\s+");
+//                            if (parts.length > 0) {
+//                                firstName = parts[0];
+//                                if (!firstName.isEmpty()) {
+//                                    firstName = firstName.substring(0, 1).toUpperCase() +
+//                                            firstName.substring(1).toLowerCase();
+//                                }
+//                            }
+//                        }
+//                        for (int i = 0; i < toolbar.getChildCount(); i++) {
+//                            View child = toolbar.getChildAt(i);
+//                            if (child.getId() == R.id.textGreeting || (child.findViewById(R.id.textGreeting) != null)) {
+//                                toolbar.removeViewAt(i);
+//                                break;
+//                            }
+//                        }
+//
+//                        View customView = getLayoutInflater().inflate(R.layout.toolbar_custom, null);
+//                        TextView textGreeting = customView.findViewById(R.id.textGreeting);
+//                        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+//                        String greeting = (hour >= 5 && hour < 12) ? "صباح الخير" : "مساء الخير";
+//                        String fullText = greeting + " " + firstName;
+//                        textGreeting.setText(fullText);
+//                        toolbar.addView(customView);
 //                    }
-//                } else if (currentFragment instanceof ProfileFragment) {
-//                    updateToolbar("الملف الشخصي", false, R.drawable.profile, 0);
+//
+//
 //                } else {
-//                    updateToolbar("الملف الشخصي", false, R.drawable.profile, 1);
+//                    activity.findViewById(R.id.viewPager).setVisibility(View.VISIBLE);
+//                    activity.findViewById(R.id.full_screen_container).setVisibility(View.GONE);
+//                    activity.updateHomeToolbar();
 //                }
 //            }
 //        });
+//
         profileBtn.setOnClickListener(v -> {
             UserUtils.app_Page(getContext(), 4);
-            openFullScreenFragment(new ProfileFragment(), "الملف الشخصي", R.drawable.profile_new, 0);
+            ((HomePage) requireActivity()).openFullScreenFragment(new ProfileFragment(), "الملف الشخصي", R.drawable.profile_new, 0);
 
-//            if (getActivity() != null) {
-//                View viewPager = getActivity().findViewById(R.id.viewPager);
-//                View fullContainer = getActivity().findViewById(R.id.full_screen_container);
-//
-//                if (viewPager != null) viewPager.setVisibility(View.GONE);
-//                if (fullContainer != null) {
-//                    fullContainer.setVisibility(View.VISIBLE);
-//
-//
-//                    getActivity().getSupportFragmentManager()
-//                            .beginTransaction()
-//                            .replace(R.id.full_screen_container, new ProfileFragment())
-//                            .addToBackStack("profile")
-//                            .commit();
-//
-//
-//                    if (getActivity() instanceof HomePage) {
-//                        ((HomePage) getActivity()). updateToolbar("الملف الشخصي", false, R.drawable.profile, 0);
-//                    }
-//                }
-//            }
+//            openFullScreenFragment(new ProfileFragment(), "الملف الشخصي", R.drawable., 0);
+
         });
 
         logout.setOnClickListener(v -> {
             showExitConfirmationDialog(getContext());
         });
-        deleteAccount.setOnClickListener(v -> {
-            showDeleteConfirmationDialog(getContext());
-        });
+//        deleteAccount.setOnClickListener(v -> {
+//            showDeleteConfirmationDialog(getContext());
+//        });
         UserUtils.updateProfile(getActivity(), new UserUtils.ProfileUpdateCallback() {
             @Override
             public void onProfileUpdated(boolean isVerified, boolean isActive) {
@@ -760,27 +943,27 @@ public class SettingFragment extends Fragment {
     }
 
 
-    private void openFullScreenFragment(Fragment fragment, String title, int iconRes, int fragmentId) {
-        if (getActivity() != null && getActivity() instanceof HomePage) {
-            HomePage home = (HomePage) getActivity();
+//    private void openFullScreenFragment(Fragment fragment, String title, int iconRes, int fragmentId) {
+//        if (getActivity() != null && getActivity() instanceof HomePage) {
+//            HomePage home = (HomePage) getActivity();
+//
+//            View viewPager = home.findViewById(R.id.viewPager);
+//            View fullContainer = home.findViewById(R.id.full_screen_container);
+//
+//            if (viewPager != null) viewPager.setVisibility(View.GONE);
+//            if (fullContainer != null) {
+//                fullContainer.setVisibility(View.VISIBLE);
+//
+//                home.getSupportFragmentManager().beginTransaction()
+//                        .replace(R.id.full_screen_container, fragment)
 
-            View viewPager = home.findViewById(R.id.viewPager);
-            View fullContainer = home.findViewById(R.id.full_screen_container);
-
-            if (viewPager != null) viewPager.setVisibility(View.GONE);
-            if (fullContainer != null) {
-                fullContainer.setVisibility(View.VISIBLE);
-
-                home.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.full_screen_container, fragment)
-//                        .addToBackStack(null)
-                        .commitNowAllowingStateLoss();
-
-                ((HomePage) getActivity()).updateToolbar(title, false, iconRes, fragmentId);
-            }
-        }
-    }
-
+    /// /                        .addToBackStack(null)
+//                        .commitNowAllowingStateLoss();
+//
+//                ((HomePage) getActivity()).updateToolbar(title, false, iconRes, fragmentId);
+//            }
+//        }
+//    }
     private void updateToolbar(String title, boolean showBackArrow, int iconRes, int fragmentId) {
         HomePage activity = (HomePage) getActivity();
         if (activity.getSupportActionBar() != null) {
@@ -933,22 +1116,13 @@ public class SettingFragment extends Fragment {
         btnNo.setTextSize(18);
 
         // الأحداث
-//        btnYes.setOnClickListener(v -> {
-//            prefs.edit().clear().apply();
-//            Intent intent = new Intent(getActivity(), MainActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//            startActivity(intent);
-//
-//            if (exitDialog != null && exitDialog.isShowing()) {
-//                exitDialog.dismiss(); // إغلاق الـ dialog قبل الانتقال
-//            }
-//        });
         btnYes.setOnClickListener(v -> {
             String fileName = "MyAppPrefs_Secure";
             try {
                 SharedPreferences prefs2 = SharedPrefsHelper.get(getContext());
                 prefs2.edit().clear().apply();
             } catch (Exception e) {
+                throw new RuntimeException(e);
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -978,10 +1152,8 @@ public class SettingFragment extends Fragment {
 
         exitDialog = builder.create();
 
-        // ✅ إضافة الضبابية
+
         ViewGroup decorView = requireActivity().getWindow().getDecorView().findViewById(android.R.id.content);
-//        Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
-//        exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
 
         if (exitDialog.getWindow() != null) {
             exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
@@ -989,54 +1161,12 @@ public class SettingFragment extends Fragment {
 
         if (isAdded() && !getActivity().isFinishing()) {
             exitDialog.show();
+            if (exitDialog.getWindow() != null) {
+                int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.80);
+                exitDialog.getWindow().setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT);
+            }
         }
     }
-
-    private void showDeleteConfirmationDialog(Context context) {
-        if (getActivity() == null || getActivity().isFinishing()) return;
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_delete_account, null);
-        builder.setView(dialogView);
-
-        Button btnYes = dialogView.findViewById(R.id.btnYes);
-        Button btnNo = dialogView.findViewById(R.id.btnNo);
-        RadioGroup rgReason = dialogView.findViewById(R.id.rgDeleteReason);
-        EditText etNotes = dialogView.findViewById(R.id.etDeleteNotes);
-
-        ViewGroup decorView = getActivity().getWindow().getDecorView().findViewById(android.R.id.content);
-
-        btnYes.setOnClickListener(v -> {
-            int selectedId = rgReason.getCheckedRadioButtonId();
-            if (selectedId == -1) {
-                UserUtils.ToastMessages(getActivity(), "يرجى اختيار سبب الحذف أولاً");
-                return;
-            }
-
-            RadioButton rb = dialogView.findViewById(selectedId);
-            String reason = rb.getText().toString();
-            String notes = etNotes.getText().toString();
-
-            deleteUser(reason, notes);
-        });
-
-        btnNo.setOnClickListener(v -> {
-            if (exitDialog != null && exitDialog.isShowing()) {
-                exitDialog.dismiss();
-            }
-        });
-
-        exitDialog = builder.create();
-
-        Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
-        exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
-
-        if (exitDialog.getWindow() != null) {
-            exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
-        }
-        exitDialog.show();
-    }
-
 
 //    private void showDeleteConfirmationDialog(Context context) {
 //        if (getActivity() == null || getActivity().isFinishing()) return;
@@ -1049,6 +1179,8 @@ public class SettingFragment extends Fragment {
 //        Button btnNo = dialogView.findViewById(R.id.btnNo);
 //        RadioGroup rgReason = dialogView.findViewById(R.id.rgDeleteReason);
 //        EditText etNotes = dialogView.findViewById(R.id.etDeleteNotes);
+//
+//        ViewGroup decorView = getActivity().getWindow().getDecorView().findViewById(android.R.id.content);
 //
 //        btnYes.setOnClickListener(v -> {
 //            int selectedId = rgReason.getCheckedRadioButtonId();
@@ -1071,139 +1203,105 @@ public class SettingFragment extends Fragment {
 //        });
 //
 //        exitDialog = builder.create();
+//
+//        Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
+//        exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
+//
 //        if (exitDialog.getWindow() != null) {
 //            exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
 //        }
 //        exitDialog.show();
 //    }
-
-    private void deleteUser(String reason, String notes) {
-        SharedPreferences prefs = SharedPrefsHelper.get(getContext());
-        String token = prefs.getString("auth_token", "");
-        int userId = prefs.getInt("user_id", -1);
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.ENGLISH);
-        String currentDate = sdf.format(new java.util.Date());
-        DBHelper dbHelper = new DBHelper(getContext());
-        if (token.isEmpty() || userId == -1) return;
-
-        showLoading();
-        String deviceId = UserUtils.getDeviceID(getContext());
-        String deviceInfo = UserUtils.getDeviceInfo();
-        String url = BASE_URL + "auth/profile/?device_id=" + deviceId + "&device_info=" + deviceInfo;
-
-        JSONObject postData = new JSONObject();
-        try {
-            postData.put("reason_deletion", reason);
-            postData.put("token", token);
-            postData.put("note_deletion", notes);
-            postData.put("date_request", currentDate);
-            postData.put("device_info", deviceInfo);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.PATCH,
-                url,
-                postData,
-                response -> {
-                    hideLoading();
-                    if (exitDialog != null && exitDialog.isShowing()) exitDialog.dismiss();
-
-                    prefs.edit().clear().apply();
-
-                    if (getActivity() != null) {
-                        Intent intent = new Intent(getActivity(), MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        getActivity().finish();
-                        UserUtils.getMessageFromLocal(241, dbHelper, new UserUtils.MessageCallback() {
-                            @Override
-                            public void onSuccess(String message) {
-                                UserUtils.ToastMessages(getActivity(), message);
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                            }
-
-                        });
-                    }
-                },
-                error -> {
-                    hideLoading();
-                    UserUtils.ToastMessages(getActivity(), "حدث خطأ أثناء حذف الحساب");
-                    UserUtils.sendLog(getContext(), "deleteUser", error.toString(), "user_id = " + userId, "SettingFragment");
-
-                }
-        ) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + token);
-                headers.put("Accept", "application/json");
-                return headers;
-            }
-        };
-
-        Volley.newRequestQueue(getContext()).add(request);
-    }
-
-//    private void showDeleteConfirmationDialog(Context context) {
-//        if (getActivity() == null || getActivity().isFinishing()) return;
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_custom_confirm, null);
-//        builder.setView(dialogView);
-//
-//        Button btnYes = dialogView.findViewById(R.id.btnYes);
-//        Button btnNo = dialogView.findViewById(R.id.btnNo);
-//        TextView tvMessage = dialogView.findViewById(R.id.tvMessage);
-//        ImageView icon = dialogView.findViewById(R.id.icon);
-//        tvMessage.setText("هل أنت متأكد من أنك تريد حذف الحساب؟");
-//        icon.setImageResource(R.drawable.delete2);
-//        btnYes.setTextSize(18);
-//        btnNo.setTextSize(18);
-//
-//        // الأحداث
-//        btnYes.setOnClickListener(v -> {
-//            deleteUser();
-//        });
-//
-//        btnNo.setOnClickListener(v -> {
-//            if (exitDialog != null && exitDialog.isShowing()) {
-//                exitDialog.dismiss();
-//            }
-//        });
-//
-//        exitDialog = builder.create();
 //
 //
-//        if (exitDialog.getWindow() != null) {
-//            exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
+//    private void deleteUser(String reason, String notes) {
+//        SharedPreferences prefs = SharedPrefsHelper.get(getContext());
+//        String token = prefs.getString("auth_token", "");
+//        int userId = prefs.getInt("user_id", -1);
+//        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.ENGLISH);
+//        String currentDate = sdf.format(new java.util.Date());
+//        DBHelper dbHelper = new DBHelper(getContext());
+//        if (token.isEmpty() || userId == -1) return;
+//
+//        showLoading();
+//        String deviceId = UserUtils.getDeviceID(getContext());
+//        String deviceInfo = UserUtils.getDeviceInfo();
+//        String url = BASE_URL + "auth/profile/?device_id=" + deviceId + "&device_info=" + deviceInfo;
+//
+//        JSONObject postData = new JSONObject();
+//        try {
+//            postData.put("reason_deletion", reason);
+//            postData.put("token", token);
+//            postData.put("note_deletion", notes);
+//            postData.put("date_request", currentDate);
+//            postData.put("device_info", deviceInfo);
+//        } catch (JSONException e) {
+
+    /// /            e.printStackTrace();
+//            throw new RuntimeException(e);
 //        }
 //
-//        if (isAdded() && !getActivity().isFinishing()) {
-//            exitDialog.show();
+//        JsonObjectRequest request = new JsonObjectRequest(
+//                Request.Method.PATCH,
+//                url,
+//                postData,
+//                response -> {
+//                    hideLoading();
+//                    if (exitDialog != null && exitDialog.isShowing()) exitDialog.dismiss();
+//
+//                    prefs.edit().clear().apply();
+//
+//                    if (getActivity() != null) {
+//                        Intent intent = new Intent(getActivity(), MainActivity.class);
+//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                        startActivity(intent);
+//                        getActivity().finish();
+//                        UserUtils.getMessageFromLocal(241, dbHelper, new UserUtils.MessageCallback() {
+//                            @Override
+//                            public void onSuccess(String message) {
+//                                UserUtils.ToastMessages(getActivity(), message);
+//                            }
+//
+//                            @Override
+//                            public void onError(String error) {
+//                            }
+//
+//                        });
+//                    }
+//                },
+//                error -> {
+//                    hideLoading();
+//                    UserUtils.ToastMessages(getActivity(), "حدث خطأ أثناء حذف الحساب");
+//                    UserUtils.sendLog(getContext(), "deleteUser", error.toString(), "user_id = " + userId, "SettingFragment");
+//
+//                }
+//        ) {
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                Map<String, String> headers = new HashMap<>();
+//                headers.put("Authorization", "Bearer " + token);
+//                headers.put("Accept", "application/json");
+//                return headers;
+//            }
+//        };
+//
+//        Volley.newRequestQueue(getContext()).add(request);
+//    }
+//
+//    private ProgressDialog progressDialog;
+//
+//    private void showLoading() {
+//        progressDialog = new ProgressDialog(getContext());
+//        progressDialog.setMessage("جاري حذف الحساب...");
+//        progressDialog.setCancelable(false);
+//        progressDialog.show();
+//    }
+//
+//    private void hideLoading() {
+//        if (progressDialog != null && progressDialog.isShowing()) {
+//            progressDialog.dismiss();
 //        }
 //    }
-
-    private ProgressDialog progressDialog;
-
-    private void showLoading() {
-        progressDialog = new ProgressDialog(getContext());
-        progressDialog.setMessage("جاري حذف الحساب...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-    }
-
-    private void hideLoading() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
-    }
-
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();

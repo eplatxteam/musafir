@@ -1,9 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
 
     <!-- المرحلة الرئيسية: قيد المعالجة -->
     <LinearLayout
@@ -49,155 +47,155 @@
             android:textSize="16dp" />
     </LinearLayout>
 
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:orientation="horizontal">-->
 
-<!--        &lt;!&ndash; دائرة + خط &ndash;&gt;-->
-<!--        <FrameLayout-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginEnd="12dp">-->
+    <!--        &lt;!&ndash; دائرة + خط &ndash;&gt;-->
+    <!--        <FrameLayout-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_marginEnd="12dp">-->
 
-<!--            <FrameLayout-->
-<!--                android:layout_width="28dp"-->
-<!--                android:layout_height="28dp">-->
+    <!--            <FrameLayout-->
+    <!--                android:layout_width="28dp"-->
+    <!--                android:layout_height="28dp">-->
 
-<!--                <ImageView-->
-<!--                    android:layout_width="28dp"-->
-<!--                    android:layout_height="28dp"-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:src="@drawable/uncheck1" />-->
-<!--            </FrameLayout>-->
+    <!--                <ImageView-->
+    <!--                    android:layout_width="28dp"-->
+    <!--                    android:layout_height="28dp"-->
+    <!--                    android:layout_gravity="center"-->
+    <!--                    android:src="@drawable/uncheck1" />-->
+    <!--            </FrameLayout>-->
 
 
-<!--            <View-->
-<!--                android:layout_width="3dp"-->
-<!--                android:layout_height="35dp"-->
-<!--                android:layout_gravity="bottom|center_horizontal"-->
-<!--                android:layout_marginTop="28dp"-->
-<!--                android:background="@android:color/darker_gray" />-->
-<!--        </FrameLayout>-->
+    <!--            <View-->
+    <!--                android:layout_width="3dp"-->
+    <!--                android:layout_height="35dp"-->
+    <!--                android:layout_gravity="bottom|center_horizontal"-->
+    <!--                android:layout_marginTop="28dp"-->
+    <!--                android:background="@android:color/darker_gray" />-->
+    <!--        </FrameLayout>-->
 
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:gravity="center_vertical"-->
-<!--            android:text="مؤكد"-->
-<!--            android:textColor="@android:color/darker_gray"-->
-<!--            android:textSize="14sp" />-->
-<!--    </LinearLayout>-->
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:gravity="center_vertical"-->
+    <!--            android:text="مؤكد"-->
+    <!--            android:textColor="@android:color/darker_gray"-->
+    <!--            android:textSize="14sp" />-->
+    <!--    </LinearLayout>-->
 
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:orientation="horizontal">-->
 
-<!--        &lt;!&ndash; دائرة + خط &ndash;&gt;-->
-<!--        <FrameLayout-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginEnd="12dp">-->
+    <!--        &lt;!&ndash; دائرة + خط &ndash;&gt;-->
+    <!--        <FrameLayout-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_marginEnd="12dp">-->
 
-<!--            <FrameLayout-->
-<!--                android:layout_width="28dp"-->
-<!--                android:layout_height="28dp">-->
+    <!--            <FrameLayout-->
+    <!--                android:layout_width="28dp"-->
+    <!--                android:layout_height="28dp">-->
 
-<!--                <ImageView-->
-<!--                    android:layout_width="28dp"-->
-<!--                    android:layout_height="28dp"-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:src="@drawable/uncheck1" />-->
-<!--            </FrameLayout>-->
+    <!--                <ImageView-->
+    <!--                    android:layout_width="28dp"-->
+    <!--                    android:layout_height="28dp"-->
+    <!--                    android:layout_gravity="center"-->
+    <!--                    android:src="@drawable/uncheck1" />-->
+    <!--            </FrameLayout>-->
 
-<!--            <View-->
-<!--                android:layout_width="3dp"-->
-<!--                android:layout_height="35dp"-->
-<!--                android:layout_gravity="bottom|center_horizontal"-->
-<!--                android:layout_marginTop="28dp"-->
-<!--                android:background="@android:color/darker_gray" />-->
-<!--        </FrameLayout>-->
+    <!--            <View-->
+    <!--                android:layout_width="3dp"-->
+    <!--                android:layout_height="35dp"-->
+    <!--                android:layout_gravity="bottom|center_horizontal"-->
+    <!--                android:layout_marginTop="28dp"-->
+    <!--                android:background="@android:color/darker_gray" />-->
+    <!--        </FrameLayout>-->
 
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:gravity="center_vertical"-->
-<!--            android:text="ملغي"-->
-<!--            android:textColor="@android:color/darker_gray"-->
-<!--            android:textSize="14sp" />-->
-<!--    </LinearLayout>-->
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:gravity="center_vertical"-->
+    <!--            android:text="ملغي"-->
+    <!--            android:textColor="@android:color/darker_gray"-->
+    <!--            android:textSize="14sp" />-->
+    <!--    </LinearLayout>-->
 
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:orientation="horizontal">-->
 
-<!--        &lt;!&ndash; دائرة + خط &ndash;&gt;-->
-<!--        <FrameLayout-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginEnd="12dp">-->
+    <!--        &lt;!&ndash; دائرة + خط &ndash;&gt;-->
+    <!--        <FrameLayout-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_marginEnd="12dp">-->
 
-<!--            <FrameLayout-->
-<!--                android:layout_width="28dp"-->
-<!--                android:layout_height="28dp">-->
+    <!--            <FrameLayout-->
+    <!--                android:layout_width="28dp"-->
+    <!--                android:layout_height="28dp">-->
 
-<!--                <ImageView-->
-<!--                    android:layout_width="28dp"-->
-<!--                    android:layout_height="28dp"-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:src="@drawable/uncheck1" />-->
-<!--            </FrameLayout>-->
+    <!--                <ImageView-->
+    <!--                    android:layout_width="28dp"-->
+    <!--                    android:layout_height="28dp"-->
+    <!--                    android:layout_gravity="center"-->
+    <!--                    android:src="@drawable/uncheck1" />-->
+    <!--            </FrameLayout>-->
 
-<!--            <View-->
-<!--                android:layout_width="3dp"-->
-<!--                android:layout_height="35dp"-->
-<!--                android:layout_gravity="bottom|center_horizontal"-->
-<!--                android:layout_marginTop="28dp"-->
-<!--                android:background="@android:color/darker_gray" />-->
-<!--        </FrameLayout>-->
+    <!--            <View-->
+    <!--                android:layout_width="3dp"-->
+    <!--                android:layout_height="35dp"-->
+    <!--                android:layout_gravity="bottom|center_horizontal"-->
+    <!--                android:layout_marginTop="28dp"-->
+    <!--                android:background="@android:color/darker_gray" />-->
+    <!--        </FrameLayout>-->
 
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:gravity="center_vertical"-->
-<!--            android:text="مغلق"-->
-<!--            android:textColor="@android:color/darker_gray"-->
-<!--            android:textSize="14sp" />-->
-<!--    </LinearLayout>-->
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:gravity="center_vertical"-->
+    <!--            android:text="مغلق"-->
+    <!--            android:textColor="@android:color/darker_gray"-->
+    <!--            android:textSize="14sp" />-->
+    <!--    </LinearLayout>-->
 
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:orientation="horizontal">-->
 
-<!--        &lt;!&ndash; دائرة + خط &ndash;&gt;-->
-<!--        <FrameLayout-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginEnd="12dp">-->
+    <!--        &lt;!&ndash; دائرة + خط &ndash;&gt;-->
+    <!--        <FrameLayout-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_marginEnd="12dp">-->
 
-<!--            <FrameLayout-->
-<!--                android:layout_width="28dp"-->
-<!--                android:layout_height="28dp">-->
+    <!--            <FrameLayout-->
+    <!--                android:layout_width="28dp"-->
+    <!--                android:layout_height="28dp">-->
 
-<!--                <ImageView-->
-<!--                    android:layout_width="28dp"-->
-<!--                    android:layout_height="28dp"-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:src="@drawable/uncheck1"/>-->
-<!--            </FrameLayout>-->
-<!--        </FrameLayout>-->
+    <!--                <ImageView-->
+    <!--                    android:layout_width="28dp"-->
+    <!--                    android:layout_height="28dp"-->
+    <!--                    android:layout_gravity="center"-->
+    <!--                    android:src="@drawable/uncheck1"/>-->
+    <!--            </FrameLayout>-->
+    <!--        </FrameLayout>-->
 
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:gravity="center_vertical"-->
-<!--            android:text="منتهي"-->
-<!--            android:textColor="@android:color/darker_gray"-->
-<!--            android:textSize="14sp" />-->
-<!--    </LinearLayout>-->
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:gravity="center_vertical"-->
+    <!--            android:text="منتهي"-->
+    <!--            android:textColor="@android:color/darker_gray"-->
+    <!--            android:textSize="14sp" />-->
+    <!--    </LinearLayout>-->
 
 
 </LinearLayout>

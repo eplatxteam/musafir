@@ -3,7 +3,6 @@ package com.example.musafir;
 import android.content.Intent;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
 
 public class MyNotificationListener extends NotificationListenerService {
 

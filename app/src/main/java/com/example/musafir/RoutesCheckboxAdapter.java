@@ -57,6 +57,7 @@ public class RoutesCheckboxAdapter extends RecyclerView.Adapter<RoutesCheckboxAd
             holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> checkedStates.put(position, isChecked));
 
         } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

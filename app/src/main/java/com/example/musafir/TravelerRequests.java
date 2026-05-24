@@ -12,20 +12,19 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -35,8 +34,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageView;
@@ -44,7 +41,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.card.MaterialCardView;
@@ -56,32 +52,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
-
-import jp.wasabeef.blurry.Blurry;
 
 public class TravelerRequests extends Fragment {
 
-
-    //    @Override
-//    public void onResume() {
-//        super.onResume();
-//        if (getActivity() instanceof HomePage) {
-//            ((HomePage) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-//        }
-//    }
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        if (getActivity() instanceof HomePage) {
-//            ActionBar actionBar = ((HomePage) getActivity()).getSupportActionBar();
-//            if (actionBar != null) {
-//                actionBar.setDisplayHomeAsUpEnabled(false);
-//            }
-//        }
-//    }
 
     String BASE_URL = UserUtils.BASE_URL;
     String ImageUrl = UserUtils.ImageUrl;
@@ -231,16 +206,127 @@ public class TravelerRequests extends Fragment {
                 }
 
             });
-            getCityNameFromIp(getContext(), (cityAr, cityId) -> {
+            getCityNameFromIp(getContext(), (cityAr, cityId, country_code) -> {
                 preferences.edit().putString("default_city", cityAr).apply();
                 preferences.edit().putInt("default_city_id", cityId).apply();
+                preferences.edit().putString("country_code", country_code).apply();
             });
         });
 
+//        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+//            FragmentActivity activity = getActivity();
+//            if (activity != null) {
+//
+//                Fragment currentFragment = activity.getSupportFragmentManager()
+//                        .findFragmentById(R.id.full_screen_container);
+//
+//                if (currentFragment instanceof HomeFragment) {
+//                    Bundle args = currentFragment.getArguments();
+//                    String tripType = args != null ? args.getString("trip_type", "1") : "1";
+//                    switch (tripType) {
+//                        case "1":
+//                            updateToolbar("رحلات تشاركية", false, R.drawable.big_car, 0);
+//                            break;
+//                        case "2":
+//                            updateToolbar("نقل دولي", false, R.drawable.world_new, 0);
+//                            break;
+//                        case "3":
+//                            updateToolbar("رحلات محلية", false, R.drawable.bus_2, 0);
+//                            break;
+//                    }
+//                } else if (currentFragment instanceof BookingFragment) {
+//                    updateToolbar("رحلاتي", false, R.drawable.airplane_t, 1);
+//                } else if (currentFragment instanceof DriverTripRequest) {
+//                    updateToolbar("طلبات المسافرين", false, R.drawable.solo_traveller, 0);
+//                } else if (currentFragment instanceof AddTripFragment) {
+//                    updateToolbar("إضافة رحلة", false, R.drawable.locations, 0);
+//                } else if (currentFragment instanceof NotificationFragment) {
+//                    updateToolbar("الإشعارات", false, R.drawable.notification_new, 1);
+//                } else if (currentFragment instanceof AddTripRequests) {
+//                    updateToolbar("طلب رحلة خاصة", false, R.drawable.locations, 0);
+//                } else if (currentFragment instanceof TravelerRequests) {
+//                    updateToolbar("خدمات المسافرين", false, R.drawable.solo_traveller, 0);
+//                } else if (currentFragment instanceof BookingDetailsFragment) {
+//                    updateToolbar("تفاصيل الحجز", false, R.drawable.checklist, 0);
+//                } else if (currentFragment instanceof CustomBooking) {
+//                    updateToolbar("حجز رحلة", false, R.drawable.booking, 0);
+//                } else if (currentFragment instanceof VehicleFragment) {
+//                    updateToolbar("بيانات المركبات", false, R.drawable.local, 0);
+//                } else if (currentFragment instanceof AddVehicleFragment) {
+//                    Bundle args = currentFragment.getArguments();
+//                    String title = (args != null && args.containsKey("vehicle_id")) ? "تعديل المركبة" : "إضافة مركبة";
+//                    updateToolbar(title, false, R.drawable.local, 0);
+//                } else if (currentFragment instanceof SharingFragment) {
+//                    updateToolbar("الأعضاء المنضمون", false, R.drawable.frame, 0);
+//                } else if (currentFragment instanceof BalanceFragment) {
+//                    updateToolbar("رصيدي", false, R.drawable.wallet, 0);
+//                } else if (currentFragment instanceof TripDetailsFragment) {
+//                    updateToolbar("تفاصيل الطلب", false, R.drawable.add_trip, 0);
+//                } else if (currentFragment instanceof AllTravelerRequests) {
+//                    updateToolbar("طلبات الخدمات", false, R.drawable.solo_traveller, 0);
+//                } else if (currentFragment instanceof ProfileFragment) {
+//                    updateToolbar("الملف الشخصي", false, R.drawable.profile_new, 0);
+//                } else if (currentFragment instanceof SettingFragment) {
+//                    updateToolbar("الملف الشخصي", false, R.drawable.profile_new, 0);
+//                } else if (currentFragment instanceof TravelerRequestsDetails) {
+//                    updateToolbar("تفاصيل الخدمة", false, R.drawable.solo_traveller, 0);
+//                } else if (currentFragment instanceof AddTravelerRequests) {
+//                    Bundle args = currentFragment.getArguments();
+//                    String title = (args != null) ? args.getString("type_tr_name", "طلب خدمة") : "طلب خدمة";
+//                    int icon = (args != null) ? args.getInt("icon_tr", 0) : 0;
+//                    updateToolbar(title, false, icon, 0);
+//                } else if (currentFragment instanceof AllImagesFragment) {
+//                    updateToolbar("الإعلانات", false, R.drawable.ads, 0);
+//                } else if (currentFragment instanceof Advertisements) {
+//                    updateToolbar("تفاصيل الإعلان", false, R.drawable.ads, 0);
+//                } else if (currentFragment instanceof MoreDetails) {
+//                    updateToolbar("تفاصيل الرحلة", false, R.drawable.booking, 0);
+//                } else if (currentFragment instanceof GuideFragment) {
+//                    updateToolbar("دليل المسافر", false, R.drawable.solo_traveller, 0);
+//                } else {
+//                    String full_name = preferences.getString("full_name", "");
+//                    Toolbar toolbar = requireActivity().findViewById(R.id.main_toolbar);
+//                    String fullNames = full_name.trim();
+//                    String firstName = "";
+//                    if (!fullNames.isEmpty()) {
+//                        String[] parts = fullNames.split("\\s+");
+//                        if (parts.length > 0) {
+//                            firstName = parts[0];
+//                            if (!firstName.isEmpty()) {
+//                                firstName = firstName.substring(0, 1).toUpperCase() +
+//                                        firstName.substring(1).toLowerCase();
+//                            }
+//                        }
+//                    }
+//                    for (int i = 0; i < toolbar.getChildCount(); i++) {
+//                        View child = toolbar.getChildAt(i);
+//                        if (child.getId() == R.id.textGreeting || (child.findViewById(R.id.textGreeting) != null)) {
+//                            toolbar.removeViewAt(i);
+//                            break;
+//                        }
+//                    }
+//
+//                    View customView = getLayoutInflater().inflate(R.layout.toolbar_custom, null);
+//                    TextView textGreeting = customView.findViewById(R.id.textGreeting);
+//                    int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+//                    String greeting = (hour >= 5 && hour < 12) ? "صباح الخير" : "مساء الخير";
+//                    String fullText = greeting + " " + firstName;
+//                    textGreeting.setText(fullText);
+//                    toolbar.addView(customView);
+//                }
+//            }
+//        });
 
         return view;
     }
+    private void updateToolbar(String title, boolean showBackArrow, int iconRes, int fragmentId) {
+        HomePage activity = (HomePage) getActivity();
+        if (activity.getSupportActionBar() != null) {
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(showBackArrow);
+        }
+        activity.updateToolbar(title, showBackArrow, iconRes, fragmentId);
 
+    }
     public void updateServiceCards() {
 
         DBHelper dbHelper = new DBHelper(getContext());
@@ -277,8 +363,8 @@ public class TravelerRequests extends Fragment {
             contentLayout.setLayoutParams(new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
             ImageView imageView = new ImageView(getContext());
-            int imgWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, getResources().getDisplayMetrics());
-            int imgHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+            int imgWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, getResources().getDisplayMetrics());
+            int imgHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics());
             imageView.setLayoutParams(new LinearLayout.LayoutParams(imgWidth, imgHeight));
             int iconResId = getResources().getIdentifier(type.type_icon, "drawable", requireContext().getPackageName());
             imageView.setImageResource(iconResId != 0 ? iconResId : R.drawable.msafer_empty1);
@@ -296,54 +382,96 @@ public class TravelerRequests extends Fragment {
             contentLayout.addView(imageView);
             contentLayout.addView(textView);
             frameLayout.addView(contentLayout);
-
             if (!isActive) {
-                cardView.setCardBackgroundColor(Color.WHITE);
-                contentLayout.setAlpha(0.3f);
+//                contentLayout.setAlpha(0.4f);0
 
-                LinearLayout blurOverlay = new LinearLayout(getContext());
-                blurOverlay.setLayoutParams(new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-                blurOverlay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.gray3));
-                blurOverlay.setAlpha(0.6f);
-
-                frameLayout.addView(blurOverlay);
+                cardView.setStrokeWidth(0);
 
                 TextView tvSoon = new TextView(getContext());
-
-                GradientDrawable shape = new GradientDrawable();
-                shape.setShape(GradientDrawable.RECTANGLE);
-                shape.setColor(ContextCompat.getColorStateList(getContext(), R.color.primary));
-                shape.setCornerRadius(50f);
-
-                tvSoon.setBackground(shape);
-                int paddingVertical = 8;
-                int paddingHorizontal = 30;
-                tvSoon.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
-
                 tvSoon.setText("قريباً");
-                tvSoon.setTextSize(14);
+                tvSoon.setTextSize(8f);
                 tvSoon.setTextColor(Color.WHITE);
-                tvSoon.setTypeface(null, Typeface.BOLD);
+                Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.rptregular);
+                tvSoon.setTypeface(typeface, Typeface.NORMAL);
                 tvSoon.setGravity(Gravity.CENTER);
 
-                FrameLayout.LayoutParams soonParams = new FrameLayout.LayoutParams(
+                GradientDrawable badgeShape = new GradientDrawable();
+                badgeShape.setShape(GradientDrawable.RECTANGLE);
+                badgeShape.setColor(Color.parseColor("#9E9E9E"));
+                badgeShape.setCornerRadius(15f);
+                tvSoon.setBackground(badgeShape);
+
+                int pH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+                int pV = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
+                tvSoon.setPadding(pH, pV, pH, pV);
+
+                FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.WRAP_CONTENT,
                         FrameLayout.LayoutParams.WRAP_CONTENT
                 );
-                soonParams.gravity = Gravity.CENTER;
-                tvSoon.setLayoutParams(soonParams);
+                badgeParams.gravity = Gravity.TOP | Gravity.CENTER;
+                tvSoon.setLayoutParams(badgeParams);
 
+                tvSoon.setZ(25f);
                 frameLayout.addView(tvSoon);
+                tvSoon.bringToFront();
 
-                cardView.setClickable(false);
-                cardView.setFocusable(false);
+//                cardView.setEnabled(false);
+//                cardView.setClickable(false);
             }
+
+//            if (!isActive) {
+//                cardView.setCardBackgroundColor(Color.WHITE);
+//                contentLayout.setAlpha(0.3f);
+//
+//                LinearLayout blurOverlay = new LinearLayout(getContext());
+//                blurOverlay.setLayoutParams(new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+//                blurOverlay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.gray3));
+//                blurOverlay.setAlpha(0.6f);
+//
+//                frameLayout.addView(blurOverlay);
+//
+//                TextView tvSoon = new TextView(getContext());
+//
+//                GradientDrawable shape = new GradientDrawable();
+//                shape.setShape(GradientDrawable.RECTANGLE);
+//                shape.setColor(ContextCompat.getColorStateList(getContext(), R.color.primary));
+//                shape.setCornerRadius(50f);
+//
+//                tvSoon.setBackground(shape);
+//                int paddingVertical = 8;
+//                int paddingHorizontal = 30;
+//                tvSoon.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
+//
+//                tvSoon.setText("قريباً");
+//                tvSoon.setTextSize(14);
+//                tvSoon.setTextColor(Color.WHITE);
+//                Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.rptregular);
+//
+//                tvSoon.setTypeface(typeface, Typeface.BOLD);
+//                tvSoon.setGravity(Gravity.CENTER);
+//
+//                FrameLayout.LayoutParams soonParams = new FrameLayout.LayoutParams(
+//                        FrameLayout.LayoutParams.WRAP_CONTENT,
+//                        FrameLayout.LayoutParams.WRAP_CONTENT
+//                );
+//                soonParams.gravity = Gravity.CENTER;
+//                tvSoon.setLayoutParams(soonParams);
+//
+//                frameLayout.addView(tvSoon);
+//
+//                cardView.setClickable(false);
+//                cardView.setFocusable(false);
+//            }
 
             cardView.addView(frameLayout);
 
 
             cardView.setOnClickListener(v -> {
-                if (!isActive) return;
+                if (!isActive) {
+                    UserUtils.ToastMessages(getActivity(), UserUtils.getMessageFromLocalNew(462, dbHelper));
+                    return;
+                }
 
                 if (userId == -1) {
                     UserUtils.getMessageFromLocal(39, dbHelper, new UserUtils.MessageCallback() {
@@ -381,6 +509,19 @@ public class TravelerRequests extends Fragment {
     }
 
     private void refreshHomeData(SwipeRefreshLayout swipeRefreshLayout, SharedPreferences prefs, DBHelper dbHelper, TravelerRequests.RefreshCallback callback) {
+        if (!UserUtils.isNetworkAvailable(getContext())) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+//                        UserUtils.ToastMessages(getActivity(), message);
+                }
+
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setRefreshing(true);
         }
@@ -395,7 +536,7 @@ public class TravelerRequests extends Fragment {
 
             @Override
             public void onError(String error) {
-                handleError(dbHelper);
+
             }
         });
 
@@ -410,7 +551,6 @@ public class TravelerRequests extends Fragment {
 
             @Override
             public void onError(String error) {
-                handleError(dbHelper);
             }
         });
         UserUtils.fetchCashBankData(getContext(), dbHelper, new UserUtils.OnCashBankFetchedListener() {
@@ -420,17 +560,7 @@ public class TravelerRequests extends Fragment {
 
             @Override
             public void onError(String error) {
-                UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        UserUtils.ToastMessages(getActivity(), message);
-                    }
 
-                    @Override
-                    public void onError(String error) {
-                    }
-
-                });
             }
         });
 
@@ -442,7 +572,7 @@ public class TravelerRequests extends Fragment {
 
             @Override
             public void onError(String error) {
-                handleError(dbHelper);
+
             }
         });
 
@@ -455,6 +585,7 @@ public class TravelerRequests extends Fragment {
             public void onError(String error) {
             }
         });
+        UserUtils.fetchAndSaveContactInfo(getContext(), dbHelper);
 
         UserUtils.fetchRoutes(getContext(), new UserUtils.FetchCallback() {
             @Override
@@ -474,19 +605,7 @@ public class TravelerRequests extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
 
@@ -497,22 +616,20 @@ public class TravelerRequests extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
+        UserUtils.fetchAndSavePayTypes(getContext(), new UserUtils.GenericCallback() {
 
+            @Override
+            public void onSuccess(String message) {
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+        });
         UserUtils.fetchAndSavecities(getContext(), new UserUtils.citiesCallback() {
             @Override
             public void onSuccess(String message) {
@@ -526,23 +643,9 @@ public class TravelerRequests extends Fragment {
 
         loadImages();
 
-        // إيقاف الأنميشن بعد وقت معين
         swipeRefreshLayout.postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 2000);
     }
 
-    // دالة مساعدة لتقليل تكرار كود الخطأ
-    private void handleError(DBHelper dbHelper) {
-        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-            @Override
-            public void onSuccess(String message) {
-                UserUtils.ToastMessages(getActivity(), message);
-            }
-
-            @Override
-            public void onError(String error) {
-            }
-        });
-    }
 
     private int getPassengerId() {
         SharedPreferences prefs = SharedPrefsHelper.get(getContext());

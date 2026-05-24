@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="250dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bg_dialog"
     android:gravity="center"
     android:orientation="vertical"
@@ -28,10 +28,10 @@
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_marginTop="10dp"
-            android:src="@drawable/icons8_warning_shield_1" />
+            android:src="@drawable/info_new" />
         <!-- الرسالة -->
         <TextView
             android:id="@+id/tvMessage"
@@ -54,26 +54,6 @@
         android:orientation="horizontal"
         android:weightSum="2">
 
-        <!-- زر الموافقة -->
-        <Button
-            android:id="@+id/btnYes"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
-            android:layout_weight="1"
-            app:backgroundTint="@null"
-            android:backgroundTint="@color/primary3"
-            android:elevation="0dp"
-            android:text="حسناً"
-            android:stateListAnimator="@null"
-            android:textAllCaps="false"
-            android:padding="2dp"
-            android:textStyle="bold"
-            android:textColor="@color/primary2"
-            android:textSize="14sp" />
-
-        <!-- زر الإلغاء -->
         <Button
             android:id="@+id/btnNo"
             android:layout_width="0dp"
@@ -81,14 +61,33 @@
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
             android:layout_weight="1"
-            android:backgroundTint="@color/gray2"
+            android:backgroundTint="@color/secondary2"
             android:elevation="0dp"
             android:padding="2dp"
-            android:text="إلغاء"
             android:stateListAnimator="@null"
+            android:text="إلغاء"
             android:textAllCaps="false"
-            android:textColor="@android:color/black"
+            android:textColor="@color/white"
             android:textSize="14sp" />
-    </LinearLayout>
 
+        <Button
+            android:id="@+id/btnYes"
+            android:layout_width="0dp"
+            android:layout_height="47dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/gray2"
+            android:elevation="0dp"
+            android:padding="5dp"
+            android:stateListAnimator="@null"
+            android:text="حسناً"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+
+    </LinearLayout>
 </LinearLayout>

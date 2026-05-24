@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,7 +22,6 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -153,8 +151,6 @@ public class ChangePassword extends AppCompatActivity {
         progressDialog.show();
         SharedPreferences prefs = SharedPrefsHelper.get(this);
         SharedPreferences.Editor editor = prefs.edit();
-//        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-//        SharedPreferences.Editor editor = prefs.edit();
 
         String url = BASE_URL + "auth/ChangePassword/";
         DBHelper dbHelper = new DBHelper(this);
@@ -167,6 +163,7 @@ public class ChangePassword extends AppCompatActivity {
                 jsonParams.put("user_phone", userPhone);
             }
         } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.PATCH, url, jsonParams,
@@ -180,8 +177,16 @@ public class ChangePassword extends AppCompatActivity {
                             if ("1".equals(changePass)) {
                                 finish();
                             } else {
+                                String finalPhone;
+                                if (userPhone.startsWith("966")) {
+                                    finalPhone =  "0" + userPhone.substring(3) ;
+                                } else if (userPhone.startsWith("967")) {
+                                    finalPhone = userPhone.substring(3);
+                                } else {
+                                    finalPhone = userPhone;
+                                }
                                 Intent intent = new Intent(ChangePassword.this, MainActivity.class);
-                                intent.putExtra("user_phone", userPhone);
+                                intent.putExtra("user_phone", finalPhone);
                                 startActivity(intent);
                                 finish();
                             }

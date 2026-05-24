@@ -58,42 +58,42 @@ public class MyPagerAdapter extends FragmentStateAdapter {
                 }
                 BookingFragment bookingFragment = new BookingFragment();
                 Bundle args = new Bundle();
-//                args.putInt("tab_to_open", 0);
+                args.putInt("tab_to_open", 0);
                 bookingFragment.setArguments(args);
                 return bookingFragment;
+
+//            case 2:
+//                if (userId == -1 && position != 0) {
+//                    handleUnauthenticated();
+//                    return new PageHome();
+//                }
+//                if ("driver".equals(userType)) {
+//                    return new AddTripFragment();
+//                } else {
+//                    return new AddTripRequests();
+//                }
 
             case 2:
                 if (userId == -1 && position != 0) {
                     handleUnauthenticated();
                     return new PageHome();
                 }
-                if ("driver".equals(userType)) {
-                    return new AddTripFragment();
-                } else {
-                    return new AddTripRequests();
-                }
+                return new NotificationFragment();
 
             case 3:
                 if (userId == -1 && position != 0) {
                     handleUnauthenticated();
                     return new PageHome();
                 }
-                return new NotificationFragment();
-
-            case 4:
-                if (userId == -1 && position != 0) {
-                    handleUnauthenticated();
-                    return new PageHome();
-                }
                 return new SettingFragment();
-
             default:
-                return new PageHome();
+                if ("driver".equals(userType)) return new AddTripFragment();
+                else return new AddTripRequests();
         }
     }
 
     @Override
     public int getItemCount() {
-        return 5;
+        return 4;
     }
 }

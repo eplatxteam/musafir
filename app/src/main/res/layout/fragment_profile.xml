@@ -34,7 +34,6 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="40dp"
                 android:layoutDirection="rtl"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp">
@@ -780,22 +779,47 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/editProfileButton"
+                        style="@style/PrimaryButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="46dp"
                         android:layout_marginTop="18dp"
                         android:layout_marginBottom="18dp"
-                        android:background="@drawable/bg_button"
-                        android:elevation="0dp"
                         android:gravity="center"
-                        android:stateListAnimator="@null"
                         android:text="حفظ البيانات"
-                        android:textAllCaps="false"
-                        android:textColor="@color/primary2"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        app:backgroundTint="@null" />
+                        android:textAllCaps="false" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- خيار حذف الحساب -->
+            <LinearLayout
+                android:id="@+id/deleteAccount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/bg_cancel_booking_soft"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/delete"
+                    app:tint="#80000000" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="طلب حذف الحساب"
+                    android:textColor="#80000000"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,25 +13,22 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.airbnb.lottie.LottieAnimationView;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -44,6 +43,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import jp.wasabeef.blurry.Blurry;
+
 //import jp.wasabeef.blurry.Blurry;
 
 public class MyBookingsFragment extends Fragment {
@@ -56,7 +57,7 @@ public class MyBookingsFragment extends Fragment {
     public static LinearLayout noDataText, noInternet;
     public static boolean isLastPage = false;
     static String BASE_URL = UserUtils.BASE_URL;
-
+    public static ProgressBar paginationLoader;
     public static final List<JSONObject> bookingsList = new ArrayList<>();
     public static LottieAnimationView lottieWave;
 //    public static SwipeRefreshLayout swipeRefreshLayout;
@@ -87,32 +88,10 @@ public class MyBookingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_my_bookings, container, false);
 //        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         recyclerView = view.findViewById(R.id.recyclerViewBooking);
-//        swipeRefreshLayout.setOnRefreshListener(() -> {
-//            currentPage = 1;
-//            isLastPage = false;
-//            isLoading = false;
-//
-//            if (bookingsList != null) {
-//                bookingsList.clear();
-//                if (adapter != null) {
-//                    adapter.notifyDataSetChanged();
-//                }
-//            }
-//
-//            lottieWave.setVisibility(View.VISIBLE);
-//            lottieWave.playAnimation();
-//            noDataText.setVisibility(View.GONE);
-//
-//        });
 
-//        swipeRefreshLayout.post(() -> {
-//            swipeRefreshLayout.setRefreshing(true);
-//        });
-
-//        progressBar = view.findViewById(R.id.progressBar);
         noDataText = view.findViewById(R.id.noDataTextbooking);
         lottieWave = view.findViewById(R.id.lottieWavebooking);
-
+        paginationLoader = view.findViewById(R.id.paginationLoader);
 //        adapter = new BookingAdapter(bookingsList);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -139,6 +118,9 @@ public class MyBookingsFragment extends Fragment {
                 int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
 
                 if (!isLoading && !isLastPage && totalItemCount <= (lastVisibleItemPosition + 5)) {
+                    if (paginationLoader != null) {
+                        paginationLoader.setVisibility(View.VISIBLE);
+                    }
                     fetchBooking(currentPage + 1, getContext());
                 }
             }
@@ -163,7 +145,19 @@ public class MyBookingsFragment extends Fragment {
 
     private void sendApproveRequest(Context context, int bookingId) {
         DBHelper dbHelper = new DBHelper(getContext());
+        if (!UserUtils.isNetworkAvailable(getContext())) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(getActivity(), message);
+                }
 
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         new Thread(() -> {
             HttpURLConnection conn = null;
             try {
@@ -233,7 +227,7 @@ public class MyBookingsFragment extends Fragment {
             } catch (Exception e) {
                 ((Activity) context).runOnUiThread(() -> {
                     UserUtils.sendLog(getContext(), "sendApproveRequest", e.toString(), e.toString(), "My Bookings");
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             UserUtils.ToastMessages(getActivity(), message);
@@ -262,14 +256,34 @@ public class MyBookingsFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View dialogView = inflater.inflate(R.layout.dialog_cancel_booking, null);
         builder.setView(dialogView);
+
         EditText input = dialogView.findViewById(R.id.etReason);
         Button btnAdd = dialogView.findViewById(R.id.btnYes);
         Button btnCancel = dialogView.findViewById(R.id.btnNo);
 
         AlertDialog dialog = builder.create();
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
+        ViewGroup rootLayout = (ViewGroup) getActivity().getWindow().getDecorView().getRootView();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Blurry.with(getContext()).radius(15).sampling(2).onto(rootLayout);
+
+        });
+
+        dialog.setOnDismissListener(dialogInterface -> {
+            Blurry.delete(rootLayout);
+        });
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
         dialog.show();
+
+        if (dialog.getWindow() != null) {
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.80);
+            dialog.getWindow().setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT);
+        }
 
         UserUtils.setEditTextState(input, false);
 
@@ -279,59 +293,62 @@ public class MyBookingsFragment extends Fragment {
                 input.setError("الرجاء إدخال سبب الإلغاء");
                 UserUtils.setEditTextState(input, true);
                 return;
-            } else {
-                UserUtils.setEditTextState(input, false);
             }
-            if (getActivity() == null || getActivity().isFinishing()) return;
-
-            AlertDialog.Builder builder2 = new AlertDialog.Builder(getContext());
-            View dialogView2 = inflater.inflate(R.layout.dialog_custom_confirmationt, null);
-            builder2.setView(dialogView2);
-
-            Button btnYes = dialogView2.findViewById(R.id.btnYes);
-            Button btnNo = dialogView2.findViewById(R.id.btnNo);
-            TextView tvMessage = dialogView2.findViewById(R.id.tvMessage);
-            tvMessage.setText("هل أنت متأكد أنك تريد إلغاء الحجز؟");
-            btnYes.setTextSize(18);
-            btnNo.setTextSize(18);
-
-            exitDialog = builder2.create();
-
-//            Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
-//            exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
 
             dialog.dismiss();
 
-            btnYes.setOnClickListener(v2 -> {
-                String cancellationDate = getCurrentDateTime();
-                UserUtils.getMessageFromLocal(50, dbHelper, new UserUtils.MessageCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        UserUtils.ToastMessages(getActivity(), message);
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                    }
-                });
-                sendCancelRequest(requireContext(), bookingId, reason, cancellationDate);
-                exitDialog.dismiss();
-            });
-
-            btnNo.setOnClickListener(v2 -> exitDialog.dismiss());
-
-            if (exitDialog.getWindow() != null) {
-                exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
-            }
-
-            if (isAdded() && !getActivity().isFinishing()) {
-                exitDialog.show();
-            }
+            showConfirmationDialog(bookingId, reason, dbHelper, rootLayout);
         });
 
+        RelativeLayout btnCloseHeader = dialogView.findViewById(R.id.dialogCancelButton);
+        if (btnCloseHeader != null) {
+            btnCloseHeader.setOnClickListener(v1 -> dialog.dismiss());
+        }
         btnCancel.setOnClickListener(v -> dialog.dismiss());
     }
 
+    private void showConfirmationDialog(int bookingId, String reason, DBHelper dbHelper, ViewGroup rootLayout) {
+        AlertDialog.Builder builder2 = new AlertDialog.Builder(getContext());
+        View dialogView2 = getLayoutInflater().inflate(R.layout.dialog_custom_confirmationt, null);
+        builder2.setView(dialogView2);
+
+        Button btnYes = dialogView2.findViewById(R.id.btnYes);
+        Button btnNo = dialogView2.findViewById(R.id.btnNo);
+        TextView tvMessage = dialogView2.findViewById(R.id.tvMessage);
+        tvMessage.setText("هل أنت متأكد أنك تريد إلغاء الحجز؟");
+
+        AlertDialog exitDialog = builder2.create();
+
+        exitDialog.setOnShowListener(d -> Blurry.with(getContext()).radius(15).sampling(2).onto(rootLayout));
+        exitDialog.setOnDismissListener(d -> Blurry.delete(rootLayout));
+
+        if (exitDialog.getWindow() != null) {
+            exitDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        exitDialog.show();
+        if (exitDialog.getWindow() != null) {
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.80);
+            exitDialog.getWindow().setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT);
+        }
+        btnYes.setOnClickListener(v2 -> {
+            String cancellationDate = getCurrentDateTime();
+            UserUtils.getMessageFromLocal(50, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(getActivity(), message);
+                }
+
+                @Override
+                public void onError(String error) {
+                }
+            });
+            sendCancelRequest(requireContext(), bookingId, reason, cancellationDate);
+            exitDialog.dismiss();
+        });
+
+        btnNo.setOnClickListener(v2 -> exitDialog.dismiss());
+    }
 
     private String getCurrentDateTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
@@ -340,7 +357,18 @@ public class MyBookingsFragment extends Fragment {
 
     private void sendCancelRequest(Context context, int bookingsId, String reason, String cancellationDate) {
         DBHelper dbHelper = new DBHelper(getContext());
+        if (!UserUtils.isNetworkAvailable(getContext())) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(getActivity(), message);
+                }
 
+                @Override
+                public void onError(String error) {
+                }
+            });
+        }
         new Thread(() -> {
             HttpURLConnection conn = null;
             try {
@@ -401,8 +429,10 @@ public class MyBookingsFragment extends Fragment {
                             public void onSuccess(String message) {
                                 if (isAdded()) UserUtils.ToastMessages(getActivity(), message);
                             }
+
                             @Override
-                            public void onError(String error) {}
+                            public void onError(String error) {
+                            }
                         });
 
                         if (adapter != null) {
@@ -411,7 +441,7 @@ public class MyBookingsFragment extends Fragment {
 
                         // adapter.removeItem(bookingsId);
 
-                    }else {
+                    } else {
                         UserUtils.sendLog(getContext(), "sendCancelRequest", responseStr, s, "My Bookings");
                         UserUtils.getMessageFromLocal(52, dbHelper, new UserUtils.MessageCallback() {
                             @Override
@@ -430,7 +460,7 @@ public class MyBookingsFragment extends Fragment {
             } catch (Exception e) {
                 ((Activity) context).runOnUiThread(() -> {
                     UserUtils.sendLog(getContext(), "sendCancelRequest", e.toString(), e.toString(), "My Bookings");
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             UserUtils.ToastMessages(getActivity(), message);
@@ -520,7 +550,9 @@ public class MyBookingsFragment extends Fragment {
                             lottieWave.setVisibility(View.GONE);
                             lottieWave.cancelAnimation();
                         }
-
+                        if (paginationLoader != null) {
+                            paginationLoader.setVisibility(View.GONE);
+                        }
                         if (page == 1) {
                             adapter.clearBookings();
                         }
@@ -540,6 +572,9 @@ public class MyBookingsFragment extends Fragment {
                         if (lottieWave != null) {
                             lottieWave.setVisibility(View.GONE);
                             lottieWave.cancelAnimation();
+                        }
+                        if (paginationLoader != null) {
+                            paginationLoader.setVisibility(View.GONE);
                         }
                     });
 

@@ -2,14 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="8dp">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imageView"
         android:layout_width="350dp"
         android:layout_height="200dp"
         android:scaleType="fitXY"
-        android:background="@drawable/image_background"
-        android:clipToOutline="true"/>
+        android:padding="2dp"
+        android:background="@color/gray2"
+        app:shapeAppearanceOverlay="@style/RoundedImageView"
+        app:strokeColor="@color/gray"
+        app:strokeWidth="1dp" />
 </LinearLayout>

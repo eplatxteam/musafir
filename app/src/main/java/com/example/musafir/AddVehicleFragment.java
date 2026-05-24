@@ -66,6 +66,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import jp.wasabeef.blurry.Blurry;
 
@@ -104,8 +105,30 @@ public class AddVehicleFragment extends Fragment {
     View firstErrorView = null;
     private boolean isDataChanged = false;
 
-    @Override
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        MenuItem placeholderItem = menu.findItem(R.id.action_placeholder);
+//        if (placeholderItem != null) {
+//            placeholderItem.setVisible(true);
+//            View actionView = placeholderItem.getActionView();
+//            if (actionView != null) {
+//                actionView.setPressed(true);
+//                actionView.postDelayed(() -> actionView.setPressed(false), 100);
+//            }
+//            actionView.setOnClickListener(v -> {
+//                requireActivity().onBackPressed();
+//            });
+//        }
+//    }
+
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        MenuItem addVehicleItem = menu.findItem(R.id.action_placeholder2);
+//        if (addVehicleItem != null) {
+//            addVehicleItem.setIcon(R.drawable.baseline_add_24);
+//            addVehicleItem.setVisible(true);
+////            addVehicleItem.setTitle("إضافة مركبة");
+//        }
+
         MenuItem placeholderItem = menu.findItem(R.id.action_placeholder);
         if (placeholderItem != null) {
             placeholderItem.setVisible(true);
@@ -119,8 +142,6 @@ public class AddVehicleFragment extends Fragment {
             });
         }
     }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -285,6 +306,7 @@ public class AddVehicleFragment extends Fragment {
                 try {
                     vehicleTypeFromArgs = Integer.parseInt(args.getString("vehicle_type_ref"));
                 } catch (NumberFormatException e) {
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -335,6 +357,8 @@ public class AddVehicleFragment extends Fragment {
         submitButton.setOnClickListener(v -> {
             validateAndSendData();
         });
+
+
         return view;
     }
 
@@ -704,7 +728,7 @@ public class AddVehicleFragment extends Fragment {
         vehicleTypeMap.clear();
 
         // جلب البيانات من جدول SQLite
-        List<DBHelper.VehicleType> vehicleTypes = dbHelper.getVehicleTypes(1);
+        List<DBHelper.VehicleType> vehicleTypes = dbHelper.getVehicleTypes(1, "1");
 
         // ملء المصفوفات
         for (DBHelper.VehicleType v : vehicleTypes) {
@@ -1233,25 +1257,58 @@ public class AddVehicleFragment extends Fragment {
     }
 
     private void writeFileField(DataOutputStream out, String fieldName, Uri fileUri, String boundary) throws IOException {
-        String fileName = getFileNameFromUri(fileUri); // دالة تجلب اسم الملف من الـ Uri
-        String mimeType = getContext().getContentResolver().getType(fileUri);
+
+        String originalName = getFileNameFromUri(fileUri);
+        String uniqueID = UUID.randomUUID().toString();
+        String fileName = uniqueID + "_" + originalName;
 
         out.writeBytes("--" + boundary + "\r\n");
         out.writeBytes("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"\r\n");
-        out.writeBytes("Content-Type: " + mimeType + "\r\n");
+        out.writeBytes("Content-Type: image/jpeg\r\n");
         out.writeBytes("\r\n");
 
         InputStream inputStream = getContext().getContentResolver().openInputStream(fileUri);
-        byte[] buffer = new byte[4096];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            out.write(buffer, 0, bytesRead);
-        }
+
+        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeStream(inputStream);
+
         inputStream.close();
+
+        if (bitmap != null) {
+
+            int maxWidth = 1280;
+            int maxHeight = 1280;
+
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+
+            float ratio = Math.min(
+                    (float) maxWidth / width,
+                    (float) maxHeight / height
+            );
+
+            if (ratio < 1) {
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+
+                bitmap = android.graphics.Bitmap.createScaledBitmap(
+                        bitmap,
+                        width,
+                        height,
+                        true
+                );
+            }
+
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 75, baos);
+
+            out.write(baos.toByteArray());
+
+            baos.close();
+            bitmap.recycle();
+        }
 
         out.writeBytes("\r\n");
     }
-
 
     private void sendVehicleData() {
         if (isEditMode && vehicleId != null) {
@@ -1262,10 +1319,6 @@ public class AddVehicleFragment extends Fragment {
     }
 
     private void sendCreateRequest() {
-//        ProgressDialog progressDialog = new ProgressDialog(getContext());
-//        progressDialog.setMessage("جاري إرسال بيانات المركبة...");
-//        progressDialog.setCancelable(false);
-//        progressDialog.show();
         DBHelper dbHelper = new DBHelper(getContext());
         UserUtils.showSuccessGif(1, requireActivity(), null);
 
@@ -1410,7 +1463,9 @@ public class AddVehicleFragment extends Fragment {
 
                 getActivity().runOnUiThread(() -> {
                     UserUtils.hideSuccessGif(getActivity());
-
+                    if (!isAdded() || getActivity() == null || getActivity().isFinishing()) {
+                        return;
+                    }
                     try {
                         JSONObject jsonResponse = new JSONObject(response);
                         if (jsonResponse.has("vehicle_id")) {
@@ -1419,14 +1474,16 @@ public class AddVehicleFragment extends Fragment {
 //                                    ((HomePage) requireActivity()).selectTab(R.id.nav_reservation);
                                     VehicleFragment vehicleFragment = new VehicleFragment();
                                     isDataChanged = false;
+//                                    getActivity().getSupportFragmentManager()
+//                                            .beginTransaction()
+//                                            .replace(R.id.full_screen_container, vehicleFragment)
+//                                            .addToBackStack(null)
+//                                            .commit();
                                     getActivity().getSupportFragmentManager()
                                             .beginTransaction()
                                             .replace(R.id.full_screen_container, vehicleFragment)
                                             .addToBackStack(null)
-                                            .commit();
-//                                    if (getActivity() != null) {
-//                                        getActivity().getSupportFragmentManager().popBackStack();
-//                                    }
+                                            .commitAllowingStateLoss();
                                     UserUtils.getMessageFromLocal(18, dbHelper, new UserUtils.MessageCallback() {
                                         @Override
                                         public void onSuccess(String message) {
@@ -1439,17 +1496,6 @@ public class AddVehicleFragment extends Fragment {
                                     });
                                 }
                             }
-//                            UserUtils.getMessageFromLocal(18, dbHelper, new UserUtils.MessageCallback() {
-//                                @Override
-//                                public void onSuccess(String message) {
-//                                    UserUtils.ToastMessages(getActivity(), message);
-//                                }
-//
-//                                @Override
-//                                public void onError(String error) {
-//                                }
-//
-//                            });
 
 
                         } else {
@@ -1502,8 +1548,10 @@ public class AddVehicleFragment extends Fragment {
         super.onResume();
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         if (activity.getSupportActionBar() != null) {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false); // ❌ يخفي سهم الرجوع
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
+
+
     }
 
     private void handleServerErrors(JSONObject jsonResponse) {

@@ -3,9 +3,7 @@ package com.example.musafir;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -13,14 +11,10 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Bundle;
-import android.text.InputType;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,32 +23,20 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +45,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -84,7 +65,7 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private boolean isLoadingAdded = false;
 
     String ImageUrl = UserUtils.ImageUrl;
-    private FragmentManager fragmentManager;
+    FragmentManager fragmentManager;
     private Context context;
     private String userToken = "";
     private int tripId = 0;
@@ -96,18 +77,18 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemViewType(int position) {
-        if (position == tripList.size() && isLoadingAdded) {
+        if (isLoadingAdded && position == tripList.size()) {
             return VIEW_TYPE_LOADING;
-        } else {
-            return VIEW_TYPE_ITEM;
         }
+        return VIEW_TYPE_ITEM;
     }
 
     private OnTripActionListener listener;
 
     public interface OnTripActionListener {
         void onBookTrip(String Location, String dateTrip, int tripId, int tripId2, int availableSeats, int pricePerSeat, int pickupOrder, int dropoffOrder,
-                        String driver_id, String car_code, String car_codes, String car_codes_id, int discountPrice, int passport_required, int company_no);
+                        String driver_id, String car_code, String car_codes, String car_codes_id, int discountPrice, int passport_required, int visa_required,
+                        int company_no , String dateTimeString);
 
         void onTripDetails(int tripId);
 
@@ -163,13 +144,6 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 String car_codes = trip.optString("car_codes", "");
                 String car_codes_id = trip.optString("car_code_id", "");
 
-//                String dt_no = null;
-//                if (trip.has("dt_no") && !trip.isNull("dt_no")) {
-//                    dt_no = trip.optString("dt_no", "").trim();
-//                    if (!dt_no.isEmpty()) {
-//                        // المعالجة
-//                    }
-//                }
                 int discount_price = 0;
                 if (!trip.isNull("discount_price")) {
                     String discountPriceStr = trip.optString("discount_price", "0").replace(",", "");
@@ -182,6 +156,7 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 int pickupOrder = trip.optInt("start_point_order", 0);
                 int dropoffOrder = trip.optInt("end_point_order", 0);
                 int passport_required = trip.optInt("passport_required", 0);
+                int visa_required = trip.optInt("visa_required", 0);
                 String driver_id = trip.optString("driver_id", "");
                 String trip_status = trip.optString("trip_status", "");
 //                JSONObject vehicle = trip.getJSONObject("vehicle_info");
@@ -194,39 +169,6 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 String vehicleType = trip.optString("vehicle_type");
                 String vehicle_image = trip.optString("vehicle_image", "");
                 String vehicle_name = trip.optString("vehicle_name", "");
-
-
-//                tripHolder.vehicleImage.setOnClickListener(v -> {
-//                    String carName = vehicleType + " " + vehicleMake;
-//
-//                    String[] vehicleImages = {
-//                            vehicle.optString("vehicle_image"),
-//                            vehicle.optString("vehicle_image1"),
-//                            vehicle.optString("vehicle_image2"),
-//                            vehicle.optString("vehicle_image3"),
-//                            vehicle.optString("vehicle_image4")
-//                    };
-//
-//                    ArrayList<String> imageList = new ArrayList<>();
-//
-//                    for (String img : vehicleImages) {
-//                        // تحقق من null، فارغ، أو "null"
-//                        if (img != null && !img.isEmpty() && !img.equals("null")) {
-//                            if (!img.startsWith("http")) {
-//                                img = ImageUrl + img;
-//                            }
-//                            imageList.add(img);
-//                        }
-//                    }
-//
-//                    if (!imageList.isEmpty()) {
-//                        FullscreenImageFragment fragment = FullscreenImageFragment.newInstance(imageList, carName);
-//                        fragmentManager.beginTransaction()
-//                                .replace(android.R.id.content, fragment)
-//                                .addToBackStack(null)
-//                                .commit();
-//                    }
-//                });
 
 
                 if (vehicle_image != null && !vehicle_image.isEmpty() && !vehicle_image.equals("null")) {
@@ -266,12 +208,37 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
                 }
 
+                if (departureTime.contains("T")) {
+                    departureTime = departureTime.split("T")[1];
+                } else if (departureTime.contains(" ")) {
+                    String[] parts = departureTime.split(" ");
+                    departureTime = parts[parts.length - 1];
+                }
+
                 String dateTimeString = departureDate + " " + departureTime;
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-                Date tripDateTime = sdf.parse(dateTimeString);
+
+                Date tripDateTime;
+                try {
+                    tripDateTime = sdf.parse(dateTimeString);
+                } catch (Exception e) {
+                    try {
+                        tripDateTime = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(departureDate);
+                    } catch (Exception ex) {
+                        tripDateTime = new Date(); // الوقت الحالي كخيار أخير
+                    }
+                }
 
                 Date now = new Date();
                 long diffInMillis = tripDateTime.getTime() - now.getTime();
+
+
+//                String dateTimeString = departureDate + " " + departureTime;
+//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+//                Date tripDateTime = sdf.parse(dateTimeString);
+//
+//                Date now = new Date();
+//                long diffInMillis = tripDateTime.getTime() - now.getTime();
                 long diffDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
 
                 float ratingValue = 0f;
@@ -279,6 +246,7 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     try {
                         ratingValue = Float.parseFloat(driver_rating);
                     } catch (NumberFormatException e) {
+                        throw new RuntimeException(e);
                     }
                 }
 
@@ -424,24 +392,29 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                         if ("driver".equals(userType)) {
                             showStatusDialog(context, trip_id, availableSeats);
                         } else {
-                            if (listener != null) {
-                                if (diffInMillis <= 0) {
+                            if (availableSeats == 0 && bookingId == -1) {
+                                UserUtils.showErrorDialog((Activity) context, UserUtils.getMessageFromLocalNew(481, dbHelper), null, null,
+                                        "الرحلة ممتلئة", 2,null);
+                            } else {
+                                if (listener != null) {
+                                    if (diffInMillis <= 0) {
 
-                                    UserUtils.getMessageFromLocal(47, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-                                            UserUtils.ToastMessages((Activity) context, message);
-                                        }
+                                        UserUtils.getMessageFromLocal(47, dbHelper, new UserUtils.MessageCallback() {
+                                            @Override
+                                            public void onSuccess(String message) {
+                                                UserUtils.ToastMessages((Activity) context, message);
+                                            }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
+                                            @Override
+                                            public void onError(String error) {
+                                            }
 
-                                    });
-                                } else {
-                                    listener.onBookTrip(routeName, departureDate, trip_id, tripId2, availableSeats, finalPrice,
-                                            pickupOrder, dropoffOrder, driver_id, car_code, car_codes, car_codes_id, finalDiscount_price,
-                                            passport_required, company_no);
+                                        });
+                                    } else {
+                                        listener.onBookTrip(routeName, departureDate, trip_id, tripId2, availableSeats, finalPrice,
+                                                pickupOrder, dropoffOrder, driver_id, car_code, car_codes, car_codes_id, finalDiscount_price,
+                                                passport_required, visa_required, company_no, dateTimeString);
+                                    }
                                 }
                             }
                         }
@@ -449,18 +422,6 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 });
 
 
-//                tripHolder.details_card.setOnClickListener(v -> {
-//                    if ("driver".equals(userType)) {
-//
-//                        if (listener != null) {
-//                            listener.onDetails(trip_id);
-//                        }
-//                    } else {
-//                        if (listener != null) {
-//                            listener.onTripDetails(trip_id);
-//                        }
-//                    }
-//                });
                 tripHolder.tripLayout.setOnClickListener(v -> {
                     if ("driver".equals(userType)) {
 
@@ -553,7 +514,9 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         btnConfirm.setAllCaps(false);
         btnConfirm.setTextColor(ContextCompat.getColor(context, R.color.primary));
         btnConfirm.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        btnConfirm.setTypeface(null, Typeface.BOLD);
+        Typeface typeface = ResourcesCompat.getFont(context, R.font.rptregular);
+
+        btnConfirm.setTypeface(typeface, Typeface.BOLD);
         btnConfirm.setElevation(0);
         btnConfirm.setHeight(dpToPx(context, 40));
 
@@ -577,9 +540,6 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
             ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-//            Blurry.with(activity).radius(15).sampling(2).onto(decorView);
-//
-//            dialog.setOnDismissListener(d -> Blurry.delete(decorView));
         }
 
         if (dialog.getWindow() != null) {
@@ -604,6 +564,7 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             params.put("trip_status", statusEnglish);
             params.put("available_seats", available_seats);
         } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         DBHelper dbHelper = new DBHelper(context);
 
@@ -691,15 +652,10 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
 
-    public void clear() {
-        tripList.clear();
-        notifyDataSetChanged();
-        isLoadingAdded = false;
-    }
-
     public void addLoadingFooter() {
         if (!isLoadingAdded) {
             isLoadingAdded = true;
+            // نكتفي بتنبيه الريسايكلر بوجود عنصر إضافي في النهاية (الذي يمثل اللودر)
             notifyItemInserted(tripList.size());
         }
     }
@@ -709,6 +665,12 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             isLoadingAdded = false;
             notifyItemRemoved(tripList.size());
         }
+    }
+
+    public void clear() {
+        isLoadingAdded = false;
+        tripList.clear();
+        notifyDataSetChanged();
     }
 
     public static class LoadingViewHolder extends RecyclerView.ViewHolder {
@@ -721,9 +683,9 @@ public class TripSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     public void addTrips(List<JSONObject> newTrips) {
-        int start = tripList.size();
+        int startPosition = tripList.size();
         tripList.addAll(newTrips);
-        notifyItemRangeInserted(start, newTrips.size());
+        notifyItemRangeInserted(startPosition, newTrips.size());
     }
 
 }

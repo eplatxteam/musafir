@@ -34,7 +34,7 @@
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="مساعد مسافر"
+                android:text="المساعد الذكي"
                 android:textColor="@color/black"
                 android:textSize="17sp"/>
 

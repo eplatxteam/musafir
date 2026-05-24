@@ -11,14 +11,12 @@
     app:cardPreventCornerOverlap="false"
     app:cardUseCompatPadding="true">
 
-    <!-- الحاوية الأساسية أفقي -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layoutDirection="rtl"
         android:orientation="horizontal">
 
-        <!-- الصورة في اليمين -->
         <LinearLayout
             android:id="@+id/tripLayout"
             android:layout_width="match_parent"
@@ -26,11 +24,10 @@
             android:layout_margin="10dp"
             android:orientation="vertical">
 
-            <!-- الصورة -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:minWidth="180dp"
-                android:layout_height="240dp">
+                android:layout_height="240dp"
+                android:minWidth="180dp">
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/tripImage"
@@ -39,20 +36,6 @@
                     android:scaleType="centerCrop"
                     android:src="@drawable/empty2"
                     app:shapeAppearanceOverlay="@style/CircularImageView" />
-
-                <!--                <com.google.android.material.imageview.ShapeableImageView-->
-                <!--                    android:id="@+id/tripImage"-->
-                <!--                    android:layout_width="0dp"-->
-                <!--                    android:layout_height="0dp"-->
-                <!--                    android:scaleType="centerCrop"-->
-                <!--                    android:src="@drawable/empty2"-->
-                <!--                    app:layout_constraintDimensionRatio="H,22:9"-->
-                <!--                    app:layout_constraintEnd_toEndOf="parent"-->
-                <!--                    app:layout_constraintStart_toStartOf="parent"-->
-                <!--                    app:layout_constraintTop_toTopOf="parent"-->
-                <!--                    app:shapeAppearanceOverlay="@style/CircularImageView" />-->
-
-                <!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
 
                 <TextView
                     android:id="@+id/bookingText"
@@ -174,7 +157,6 @@
                     android:layoutDirection="rtl"
                     android:orientation="horizontal">
 
-                    <!-- الموقع -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -196,7 +178,6 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- التاريخ -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -219,8 +200,6 @@
                     </LinearLayout>
                 </LinearLayout>
 
-
-                <!-- الصف الثاني: السيارة + المقاعد -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -229,7 +208,6 @@
                     android:layoutDirection="rtl"
                     android:orientation="horizontal">
 
-                    <!-- نوع السيارة -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -251,7 +229,6 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- المقاعد -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -274,8 +251,6 @@
                     </LinearLayout>
                 </LinearLayout>
 
-
-                <!-- الصف الثالث: السعر + السعر بعد الخصم -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -284,7 +259,6 @@
                     android:layoutDirection="rtl"
                     android:orientation="horizontal">
 
-                    <!-- السعر الأصلي -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -307,7 +281,6 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- السعر بعد الخصم -->
                     <LinearLayout
                         android:id="@+id/disPrice"
                         android:layout_width="0dp"
@@ -345,12 +318,12 @@
                     android:layout_height="40dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    android:background="@drawable/bg_button"
+                    android:background="@drawable/ripple_button"
                     android:elevation="0dp"
                     android:stateListAnimator="@null"
                     android:text="احجز الآن"
                     android:textAllCaps="false"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/white"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:backgroundTint="@null" />

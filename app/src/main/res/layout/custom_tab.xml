@@ -1,25 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/tab_unselected"
     android:gravity="center"
-
     android:orientation="horizontal"
     android:padding="10dp">
 
     <ImageView
         android:id="@+id/tabIcon"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:src="@drawable/home"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/booking"
         app:tint="@color/black" />
 
     <TextView
         android:id="@+id/tabTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/rptregular"
         android:text="عنوان"
         android:textColor="@color/black"
         android:textSize="14sp" />

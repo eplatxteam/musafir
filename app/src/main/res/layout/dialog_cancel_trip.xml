@@ -4,33 +4,52 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_dialog"
-    android:gravity="center"
     android:orientation="vertical">
 
-    <!-- العنوان -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:id="@+id/dialogCancelButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="20dp"
-        android:gravity="center"
-        android:text="إلغاء الرحلة"
-        android:textColor="@color/primary"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="15dp">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="إلغاء الرحلة"
+            android:textColor="@color/primary2"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_alignParentEnd="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:src="@drawable/cancel" />
+        </LinearLayout>
+    </RelativeLayout>
 
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_marginHorizontal="20dp"
         android:layoutDirection="rtl"
         android:textAlignment="viewStart"
         app:boxBackgroundMode="none"
         app:counterEnabled="true"
-        app:hintEnabled="false"
-        app:counterMaxLength="100">
+        app:counterMaxLength="100"
+        app:hintEnabled="false">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etReason"
@@ -41,11 +60,11 @@
             android:hint="سبب الإلغاء"
             android:inputType="textMultiLine"
             android:maxLength="100"
-            android:singleLine="true"
             android:maxLines="4"
             android:minHeight="48dp"
             android:padding="12dp"
             android:scrollbars="vertical"
+            android:singleLine="true"
             android:textColor="@android:color/black" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -53,7 +72,34 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="10dp"
+        android:background="#FEF2F2"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/icons8_info_1"
+            app:tint="#B91C1C" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="تنبيه: لا يمكن التراجع عن هذه الخطوة"
+            android:textColor="#B91C1C"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="20dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -63,17 +109,16 @@
         <Button
             android:id="@+id/btnYes"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="match_parent"
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
             android:layout_weight="1"
-            android:backgroundTint="@color/primary3"
+            android:backgroundTint="@color/secondary2"
             android:elevation="0dp"
-            android:text="متابعة"
-            android:padding="2dp"
             android:stateListAnimator="@null"
+            android:text="متابعة"
             android:textAllCaps="false"
-            android:textColor="@color/primary2"
+            android:textColor="@color/white"
             android:textSize="14sp"
             app:backgroundTint="@null" />
 
@@ -81,15 +126,14 @@
         <Button
             android:id="@+id/btnNo"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="match_parent"
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
             android:layout_weight="1"
-            android:stateListAnimator="@null"
             android:backgroundTint="@color/gray2"
             android:elevation="0dp"
+            android:stateListAnimator="@null"
             android:text="إلغاء"
-            android:padding="2dp"
             android:textAllCaps="false"
             android:textColor="@android:color/black"
             android:textSize="14sp" />

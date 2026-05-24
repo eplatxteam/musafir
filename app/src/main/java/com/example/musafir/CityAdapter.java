@@ -1,5 +1,6 @@
 package com.example.musafir;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,6 +93,7 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityViewHolder
             return results;
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             filteredList.clear();

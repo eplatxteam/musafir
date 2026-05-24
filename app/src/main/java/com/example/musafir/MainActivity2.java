@@ -83,17 +83,30 @@ public class MainActivity2 extends AppCompatActivity {
         ImageView iconDriver = findViewById(R.id.iconDriver);
         TextView Driver = findViewById(R.id.driver);
         TextView Passenger = findViewById(R.id.Passenger);
+        TextView textname = findViewById(R.id.textname);
+        TextView textpass = findViewById(R.id.textpass);
+        textpass.setText(UserUtils.getMessageFromLocalNew(407, dbHelper));
+        String nameErrorMessage = UserUtils.getMessageFromLocalNew(406, dbHelper);
+
+        if (nameErrorMessage.contains("حاول مرة اخرى") ) {
+            nameErrorMessage = "يرجى كتابة اسمك الرباعي كما في الهوية (الجواز ).";
+        }
+        textname.setText(nameErrorMessage);
 
         // تعيين الافتراضي (passenger محدد)
         selectPassenger(passengerCard, driverCard, iconPassenger, iconDriver, Passenger, Driver);
-
-        passengerCard.setOnClickListener(v ->
-                selectPassenger(passengerCard, driverCard, iconPassenger, iconDriver, Passenger, Driver));
-
-        driverCard.setOnClickListener(v ->
-                selectDriver(passengerCard, driverCard, iconPassenger, iconDriver, Passenger, Driver));
-        scheduleLocationUpdate();
         usernameEditText = findViewById(R.id.fullNameEditText);
+
+        passengerCard.setOnClickListener(v -> {
+            selectPassenger(passengerCard, driverCard, iconPassenger, iconDriver, Passenger, Driver);
+            usernameEditText.setHint("اسم المسافر");
+        });
+
+        driverCard.setOnClickListener(v -> {
+            selectDriver(passengerCard, driverCard, iconPassenger, iconDriver, Passenger, Driver);
+            usernameEditText.setHint("اسم السائق");
+        });
+        scheduleLocationUpdate();
         EditText phoneEditText = findViewById(R.id.phoneEditText);
         EditText passwordEditText = findViewById(R.id.passwordEditText);
         EditText confirmPasswordEditText = findViewById(R.id.confirmpasswordEditText);
@@ -180,7 +193,7 @@ public class MainActivity2 extends AppCompatActivity {
 
         Button registerButton = findViewById(R.id.registerButton);
         registerButton.setOnClickListener(view -> {
-            clearErrors(); // مسح الأخطاء القديمة
+            clearErrors();
 
             String username = usernameEditText.getText().toString().trim();
             String phone = phoneEditText.getText().toString().trim();
@@ -188,17 +201,32 @@ public class MainActivity2 extends AppCompatActivity {
             String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
             boolean valid = true;
-
             if (username.isEmpty()) {
                 fullNameError.setVisibility(View.VISIBLE);
                 fullNameError.setText("يرجى إدخال الاسم الكامل");
                 usernameEditText.setError("يرجى إدخال الاسم الكامل");
                 UserUtils.setEditTextState(usernameEditText, true);
                 valid = false;
+            } else if (!username.trim().contains(" ")) {
+                fullNameError.setVisibility(View.VISIBLE);
+                fullNameError.setText("يرجى إدخال الاسم الأول والأخير على الأقل");
+                usernameEditText.setError("يجب إدخال اسمين أو أكثر");
+                UserUtils.setEditTextState(usernameEditText, true);
+                valid = false;
             } else {
                 fullNameError.setVisibility(View.GONE);
                 UserUtils.setEditTextState(usernameEditText, false);
             }
+//            if (username.isEmpty()) {
+//                fullNameError.setVisibility(View.VISIBLE);
+//                fullNameError.setText("يرجى إدخال الاسم الكامل");
+//                usernameEditText.setError("يرجى إدخال الاسم الكامل");
+//                UserUtils.setEditTextState(usernameEditText, true);
+//                valid = false;
+//            } else {
+//                fullNameError.setVisibility(View.GONE);
+//                UserUtils.setEditTextState(usernameEditText, false);
+//            }
 
             if (phone.isEmpty()) {
                 phoneError.setVisibility(View.VISIBLE);
@@ -263,15 +291,20 @@ public class MainActivity2 extends AppCompatActivity {
 
             }
             String finalPhone;
+            int p_otp_typ;
             if (phone.startsWith("05")) {
                 finalPhone = "966" + phone.substring(1);
+                p_otp_typ = 2;
             } else if (phone.startsWith("7")) {
-                finalPhone = phone;
+                finalPhone = "967" + phone;
+                p_otp_typ = 3;
             } else {
                 finalPhone = phone;
+                p_otp_typ = 2;
             }
             if (valid) {
-                checkPhoneExists(finalPhone, password);
+                checkPhoneExists(finalPhone, password, p_otp_typ);
+
             }
         });
     }
@@ -287,15 +320,13 @@ public class MainActivity2 extends AppCompatActivity {
                                  ImageView iconPassenger, ImageView iconDriver,
                                  TextView textPassenger, TextView textDriver) {
 
-        // ✅ الحالة المحددة (المسافر)
-        passengerCard.setCardBackgroundColor(ContextCompat.getColor(this, R.color.secondary)); // خلفية ثانوية
-        iconPassenger.setColorFilter(ContextCompat.getColor(this, android.R.color.white)); // أيقونة بيضاء
-        textPassenger.setTextColor(ContextCompat.getColor(this, android.R.color.white)); // نص أبيض
+        passengerCard.setCardBackgroundColor(ContextCompat.getColor(this, R.color.secondary2));
+        iconPassenger.setColorFilter(ContextCompat.getColor(this, R.color.primary2));
+        textPassenger.setTextColor(ContextCompat.getColor(this, android.R.color.white));
 
-        // ❌ الحالة غير المحددة (السائق)
-        driverCard.setCardBackgroundColor(Color.parseColor("#F6F6F6")); // رمادي فاتح للخلفية
-        iconDriver.setColorFilter(Color.parseColor("#666666")); // أيقونة رمادية
-        textDriver.setTextColor(Color.parseColor("#666666")); // نص رمادي
+        driverCard.setCardBackgroundColor(Color.parseColor("#F6F6F6"));
+        iconDriver.setColorFilter(Color.parseColor("#666666"));
+        textDriver.setTextColor(Color.parseColor("#666666"));
 
         driverCard.setTag("unselected");
         passengerCard.setTag("selected");
@@ -305,21 +336,33 @@ public class MainActivity2 extends AppCompatActivity {
                               ImageView iconPassenger, ImageView iconDriver,
                               TextView textPassenger, TextView textDriver) {
 
-        // ✅ الحالة المحددة (السائق)
-        driverCard.setCardBackgroundColor(ContextCompat.getColor(this, R.color.secondary)); // خلفية ثانوية
-        iconDriver.setColorFilter(ContextCompat.getColor(this, android.R.color.white)); // أيقونة بيضاء
-        textDriver.setTextColor(ContextCompat.getColor(this, android.R.color.white)); // نص أبيض
+        driverCard.setCardBackgroundColor(ContextCompat.getColor(this, R.color.secondary2));
+        iconDriver.setColorFilter(ContextCompat.getColor(this, R.color.primary2));
+        textDriver.setTextColor(ContextCompat.getColor(this, android.R.color.white));
 
-        // ❌ الحالة غير المحددة (المسافر)
-        passengerCard.setCardBackgroundColor(Color.parseColor("#F6F6F6")); // رمادي فاتح للخلفية
-        iconPassenger.setColorFilter(Color.parseColor("#666666")); // أيقونة رمادية
-        textPassenger.setTextColor(Color.parseColor("#666666")); // نص رمادي
+        passengerCard.setCardBackgroundColor(Color.parseColor("#F6F6F6"));
+        iconPassenger.setColorFilter(Color.parseColor("#666666"));
+        textPassenger.setTextColor(Color.parseColor("#666666"));
 
         passengerCard.setTag("unselected");
         driverCard.setTag("selected");
+
     }
 
-    private void checkPhoneExists(String phone, String password) {
+    private void checkPhoneExists(String phone, String password, int p_otp_typ) {
+        if (!UserUtils.isNetworkAvailable(this)) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(MainActivity2.this, message);
+                }
+
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("جاري التحقق من الرقم...");
         progressDialog.setCancelable(false);
@@ -333,6 +376,8 @@ public class MainActivity2 extends AppCompatActivity {
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
+                String finalPhone;
+
 
                 JSONObject jsonParam = new JSONObject();
                 jsonParam.put("phone", phone);
@@ -383,12 +428,12 @@ public class MainActivity2 extends AppCompatActivity {
                                 });
                             } else {
 
-                                sendOtp(phone, password);
+                                sendOtp(phone, password, p_otp_typ);
                             }
                         }
 
                     } catch (JSONException e) {
-                        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                        UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                             @Override
                             public void onSuccess(String message) {
                                 UserUtils.ToastMessages(MainActivity2.this, message);
@@ -404,7 +449,7 @@ public class MainActivity2 extends AppCompatActivity {
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     progressDialog.dismiss();
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             UserUtils.ToastMessages(MainActivity2.this, message);
@@ -420,7 +465,20 @@ public class MainActivity2 extends AppCompatActivity {
     }
 
 
-    private void sendOtp(String phone, String password) {
+    private void sendOtp(String phone, String password, int p_otp_typ) {
+        if (!UserUtils.isNetworkAvailable(this)) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(MainActivity2.this, message);
+                }
+
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         SharedPreferences otpPrefs = getSharedPreferences("OTPLimits", MODE_PRIVATE);
         long firstAttemptTime = otpPrefs.getLong("first_attempt_time", 0);
         int count = otpPrefs.getInt("otp_count", 0);
@@ -442,7 +500,6 @@ public class MainActivity2 extends AppCompatActivity {
             }
         }
 
-        // 2. تصفير العداد إذا مرت ساعة كاملة
         if (firstAttemptTime != 0 && (currentTime - firstAttemptTime) > oneHour) {
             count = 0;
             firstAttemptTime = 0;
@@ -454,7 +511,7 @@ public class MainActivity2 extends AppCompatActivity {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        int finalCount = count; // لاستخدامه داخل الـ Thread
+        int finalCount = count;
 
         new Thread(() -> {
             try {
@@ -463,7 +520,7 @@ public class MainActivity2 extends AppCompatActivity {
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 conn.setDoOutput(true);
-                String postData = "P_mobile=" + phone;
+                String postData = "P_mobile=" + phone + "&p_otp_typ=" + p_otp_typ;
 
                 OutputStream os = conn.getOutputStream();
                 os.write(postData.getBytes("UTF-8"));
@@ -494,9 +551,6 @@ public class MainActivity2 extends AppCompatActivity {
                         limitEditor.apply();
                         // ---------------------------------------
 
-//                        SharedPreferences.Editor mainEditor = getSharedPreferences("MyAppPrefs", MODE_PRIVATE).edit();
-//                        mainEditor.putString("otp_token", otpToken);
-//                        mainEditor.apply();
                         SharedPreferences prefs = SharedPrefsHelper.get(this);
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putString("otp_token", otpToken);
@@ -519,7 +573,7 @@ public class MainActivity2 extends AppCompatActivity {
                         intent.putExtra("page", "0");
                         intent.putExtra("password", password);
                         startActivity(intent);
-                        finish();
+//                        finish();
                     } else {
                         UserUtils.sendLog(this, "sendOtp", String.valueOf(responseCode), result.toString(), "Main2 Register");
                         try {
@@ -562,7 +616,7 @@ public class MainActivity2 extends AppCompatActivity {
                 runOnUiThread(() -> {
                     progressDialog.dismiss();
                     UserUtils.sendLog(this, "sendOtp", e.toString(), e.toString(), "Main2 Register");
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             UserUtils.ToastMessages(MainActivity2.this, message);

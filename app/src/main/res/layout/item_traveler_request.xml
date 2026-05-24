@@ -41,12 +41,12 @@
             <TextView
                 android:id="@+id/txtStatus"
                 android:layout_width="70dp"
-                android:textAlignment="center"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_status"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="5dp"
                 android:text="قيد المعالجة"
+                android:textAlignment="center"
                 android:textColor="@color/primary2"
                 android:textSize="10sp" />
         </LinearLayout>
@@ -63,7 +63,7 @@
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:layout_marginEnd="10dp"
-                android:src="@drawable/icons8_group_1"/>
+                android:src="@drawable/icons8_group_1" />
 
             <TextView
                 android:id="@+id/txtPersons"
@@ -76,23 +76,23 @@
             <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
+                android:layout_marginEnd="5dp"
                 android:src="@drawable/date" />
 
             <TextView
                 android:id="@+id/txtDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
                 android:textColor="@color/text"
                 android:textSize="14sp" />
 
         </LinearLayout>
-<!--        <TextView-->
-<!--            android:id="@+id/numberStatus"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:textColor="@color/text"-->
-<!--            android:textSize="14sp" />-->
+        <!--        <TextView-->
+        <!--            android:id="@+id/numberStatus"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:textColor="@color/text"-->
+        <!--            android:textSize="14sp" />-->
     </LinearLayout>
 </androidx.cardview.widget.CardView>

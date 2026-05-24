@@ -3,7 +3,6 @@ package com.example.musafir;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -13,14 +12,11 @@ import androidx.appcompat.app.ActionBar;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -95,22 +91,22 @@ public class TravelerRequestsDetails extends Fragment {
 // استلام البيانات من الـ Bundle
 
         Bundle bundle = getArguments();
-        if (bundle == null) return null;
-
+//        if (bundle == null) return null;
+        if (bundle == null) {
+            showLoading(false);
+            container_req.setVisibility(VISIBLE);
+            return view;
+        }
         String relatedObjectId = bundle.getString("related_object_id", null);
 
         if (relatedObjectId != null) {
             fetchTravelerRequestById(relatedObjectId);
         } else {
+            showLoading(false);
+            container_req.setVisibility(VISIBLE);
             bindFromBundle(bundle);
         }
 
-
-//        Bundle bundle = getArguments();
-//        if (bundle != null) {
-//
-//
-//        }
 
         return view;
     }
@@ -159,8 +155,6 @@ public class TravelerRequestsDetails extends Fragment {
                 Map<String, String> headers = new HashMap<>();
                 SharedPreferences prefs = SharedPrefsHelper.get(getContext());
 
-//                SharedPreferences prefs = requireContext()
-//                        .getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
                 String token = prefs.getString("auth_token", null);
                 headers.put("Authorization", "Bearer " + token);
                 return headers;
@@ -290,9 +284,17 @@ public class TravelerRequestsDetails extends Fragment {
             nameCompany.setText(country);
         }
 
-        int iconRes = getResources().getIdentifier(type_icon, "drawable", getContext().getPackageName());
-        if (iconRes != 0) {
-            iconReq.setImageResource(iconRes);
+        if (type_icon != null && !type_icon.isEmpty()) {
+            try {
+                int iconRes = getResources().getIdentifier(type_icon, "drawable", getContext().getPackageName());
+                if (iconRes > 0) {
+                    iconReq.setImageResource(iconRes);
+                } else {
+                    iconReq.setImageResource(R.drawable.bg_logo);
+                }
+            } catch (Exception e) {
+                iconReq.setImageResource(R.drawable.bg_logo);
+            }
         }
 
     }
@@ -343,10 +345,14 @@ public class TravelerRequestsDetails extends Fragment {
         }
 
 
+        // --- البلوك المعدل والمحمي لأسماء المسافرين ---
+        containerPassengers.removeAllViews(); // تعديل 1: تنظيف الحاوية لعدم تكرار الأسماء بالخطأ
+
         ArrayList<String> passengerNames = new ArrayList<>();
         for (int i = 1; i <= 6; i++) {
-            String name = getArguments().getString("name_passenger" + i, "");
-            if (!name.isEmpty()) {
+            // تعديل 2: القراءة من الـ bundle الممرر للدالة مباشرةً وليس getArguments()
+            String name = bundle.getString("name_passenger" + i, "");
+            if (name != null && !name.isEmpty()) {
                 passengerNames.add(name);
             }
         }
@@ -357,8 +363,9 @@ public class TravelerRequestsDetails extends Fragment {
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             ));
-            tv.setBackgroundResource(R.color.gray2);
-            tv.setTextColor(getResources().getColor(R.color.text));
+
+            tv.setBackgroundColor(Color.parseColor("#F5F5F5"));
+            tv.setTextColor(Color.parseColor("#333333"));
             tv.setTextSize(16);
             tv.setText(name);
 
@@ -379,7 +386,7 @@ public class TravelerRequestsDetails extends Fragment {
         tvTripStatus.setText(tr_status);
         setStatusStyle(tvTripStatus, tr_status);
 
-        numberSeat.setText(number_passenger + "");
+        numberSeat.setText(number_passenger);
         if (notes.isEmpty()) {
             notesContent.setVisibility(View.GONE);
         } else {
@@ -393,9 +400,18 @@ public class TravelerRequestsDetails extends Fragment {
             nameCompany.setText(country);
         }
 
-        int iconRes = getResources().getIdentifier(type_icon, "drawable", getContext().getPackageName());
-        if (iconRes != 0) {
-            iconReq.setImageResource(iconRes);
+        if (type_icon != null && !type_icon.isEmpty()) {
+            try {
+                int iconRes = getResources().getIdentifier(type_icon, "drawable", getContext().getPackageName());
+                if (iconRes > 0) {
+                    iconReq.setImageResource(iconRes);
+                } else {
+                    // أيقونة افتراضية في حال لم يجد الاسم لكي لا تظل الواجهة معلقة
+                    iconReq.setImageResource(R.drawable.bg_logo);
+                }
+            } catch (Exception e) {
+                iconReq.setImageResource(R.drawable.bg_logo);
+            }
         }
     }
 

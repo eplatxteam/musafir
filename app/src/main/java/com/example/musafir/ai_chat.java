@@ -5,21 +5,16 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -58,9 +53,6 @@ public class ai_chat extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         dbHelper = new DBHelper(this);
         messages.addAll(dbHelper.getAllMessages(userId));
-//        if (activity.getSupportActionBar() != null) {
-//            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(showBackArrow);
-//        }
         Toolbar toolbar = findViewById(R.id.main_toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
@@ -71,7 +63,7 @@ public class ai_chat extends AppCompatActivity {
             TextView toolbarTitle = findViewById(R.id.toolbar_title);
             ImageView toolbarIcon = findViewById(R.id.toolbar_icon);
 
-            if (toolbarTitle != null) toolbarTitle.setText("مساعد مسافر");
+            if (toolbarTitle != null) toolbarTitle.setText("المساعد الذكي");
             if (toolbarIcon != null)
                 toolbarIcon.setImageResource(R.drawable.robot2);
 
@@ -136,13 +128,33 @@ public class ai_chat extends AppCompatActivity {
                             addNewMessage(botReply, false);
                         } catch (Exception e) {
                             UserUtils.sendLog(this, "sendMessageToBot", String.valueOf(e.getMessage()), "user_id = " + userId, "ai_chat");
-                            addNewMessage("أعتذر منك، حدث خطأ غير متوقع. يرجى محاولة إرسال استفسارك مرة أخرى، وسأكون سعيداً بمساعدتك.", false);
+                            addNewMessage(UserUtils.getMessageFromLocalNew(317, dbHelper), false);
                         }
                     },
                     error -> {
                         showTypingIndicator(false);
-                        UserUtils.sendLog(this, "sendMessageToBot", String.valueOf(error.getMessage()), "user_id = " + userId, "ai_chat");
-                        addNewMessage("عذراً، يبدو أنني واجهت صعوبة بسيطة في فهم طلبك. هل يمكنك إعادة كتابة سؤالك بطريقة أخرى لأتمكن من مساعدتك بشكل أفضل؟", false);
+
+                        // 1. استخراج نص الخطأ الدقيق
+                        String detailedError = "Unknown Error";
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            try {
+                                detailedError = new String(error.networkResponse.data, "UTF-8");
+                            } catch (Exception e) {
+                                detailedError = "Error parsing response";
+                            }
+                        } else if (error instanceof com.android.volley.TimeoutError) {
+                            detailedError = "Timeout Error";
+                        } else if (error instanceof com.android.volley.NoConnectionError) {
+                            detailedError = "No Connection Error";
+                        } else {
+                            detailedError = error.toString();
+                        }
+
+                        // 2. إرسال اللوج بالتفاصيل الحقيقية
+                        UserUtils.sendLog(this, "sendMessageToBot", detailedError, "user_id = " + userId, "ai_chat");
+
+                        // 3. عرض رسالة للمستخدم من قاعدة البيانات المحلية
+                        addNewMessage(UserUtils.getMessageFromLocalNew(318, dbHelper), false);
                     }
             ) {
                 @Override
@@ -154,11 +166,16 @@ public class ai_chat extends AppCompatActivity {
                     return headers;
                 }
             };
+            request.setRetryPolicy(new com.android.volley.DefaultRetryPolicy(
+                    60000,
+                    0,
+                    com.android.volley.DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+// ------------------------
 
             Volley.newRequestQueue(this).add(request);
 
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             showTypingIndicator(false);
         }
     }
@@ -186,11 +203,8 @@ public class ai_chat extends AppCompatActivity {
     private void addNewMessage(String text, boolean isMe) {
         String currentTime = new java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault()).format(new java.util.Date());
 
-        // 1. الحفظ في قاعدة البيانات المحلية (SQLite)
         dbHelper.insertMessage(userId, text, isMe, currentTime);
 
-        // 2. إرسال البيانات للسيرفر (الدالة التي طلبتها)
-        // نمرر الـ userId والنص وهل هي من المستخدم (isMe) والتوقيت
         UserUtils.sendMessage(this, userId, text, isMe);
 
         Map<String, Object> msg = new HashMap<>();
@@ -206,15 +220,4 @@ public class ai_chat extends AppCompatActivity {
     private void addLocalWelcomeMessage(String text) {
         addNewMessage(text, false);
     }
-//    private void addNewMessage(String text, boolean isMe) {
-//        Map<String, Object> msg = new HashMap<>();
-//        msg.put("text", text);
-//        msg.put("isMe", isMe);
-//        String currentTime = new java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault()).format(new java.util.Date());
-//        msg.put("time", currentTime);
-//        dbHelper.insertMessage(userId, text, isMe, currentTime);
-//        messages.add(msg);
-//        adapter.notifyItemInserted(messages.size() - 1);
-//        recyclerView.scrollToPosition(messages.size() - 1);
-//    }
 }

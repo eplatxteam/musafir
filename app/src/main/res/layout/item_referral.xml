@@ -27,7 +27,7 @@
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/profile2" />
+                android:src="@drawable/profile_new" />
         </LinearLayout>
 
         <!-- العمود الثاني (صفين) -->

@@ -1,32 +1,23 @@
 package com.example.musafir;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.airbnb.lottie.LottieAnimationView;
 
@@ -36,7 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -46,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class NotificationFragment extends Fragment implements NotificationAdapter.OnNotificationClickListener {
     private RecyclerView recyclerView;
@@ -261,7 +250,7 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
                 updateToolbar("تفاصيل الخدمة", false, R.drawable.solo_traveller, 0);
             } else if ("Sharing".equalsIgnoreCase(notificationType)) {
                 fragment = new SharingFragment();
-                updateToolbar("الأعضاء المنضمون", false, R.drawable.frame_5__1_, 0);
+                updateToolbar("الأعضاء المنضمون", false, R.drawable.frame, 0);
             } else {
 //                updateToolbar("الإشعارات", false, R.drawable.notification_new, 1);
 
@@ -293,7 +282,7 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
                     icon = R.drawable.solo_traveller;
                 } else if ("Sharing".equalsIgnoreCase(notificationType)) {
                     title = "الأعضاء المنضمون";
-                    icon = R.drawable.frame_5__1_;
+                    icon = R.drawable.frame;
                 }
 
                 home.openFullScreenFragment(fragment, title, icon, 0);
@@ -318,6 +307,7 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
             return;
         }
         isLoading = true;
+
         SharedPreferences prefs = SharedPrefsHelper.get(getContext());
 //        SharedPreferences prefs = requireActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("auth_token", "");
@@ -331,7 +321,19 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
             });
         }
         DBHelper dbHelper = new DBHelper(getContext());
+        if (!UserUtils.isNetworkAvailable(getContext())) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(getActivity(), message);
+                }
 
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         new Thread(() -> {
             try {
                 String urlStr = BASE_URL + "notifications/?page=" + page + "&token=" + token;
@@ -439,7 +441,7 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
                             lottieWave.cancelAnimation();
                         }
                         UserUtils.sendLog(getContext(), "loadNotifications", e.toString(), e.toString(), "Notification Fragment");
-                        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                        UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                             @Override
                             public void onSuccess(String message) {
                                 UserUtils.ToastMessages(getActivity(), message);
@@ -469,6 +471,7 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
                 try {
                     obj.put("is_read", true);  // تحديث حالة الإشعار محليًا
                 } catch (JSONException e) {
+                    throw new RuntimeException(e);
                 }
             }
 

@@ -4,98 +4,138 @@
     android:layout_width="320dp"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    app:cardCornerRadius="20dp"
+    app:cardCornerRadius="28dp"
     app:cardElevation="8dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- الهيدر (العنوان وزر الإغلاق) -->
-        <RelativeLayout
+        <!-- زر الإغلاق (تم تعديل العرض ليكون محتوى فقط) -->
+        <FrameLayout
             android:id="@+id/dialogCancelButton"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp">
+            android:layout_gravity="end">
 
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:text="تنبيه هام"
-                android:textColor="@color/primary2"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/cancel" />
+        </FrameLayout>
 
-            <LinearLayout
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_alignParentEnd="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:gravity="center">
+        <ImageView
+            android:id="@+id/paymenticon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="-25dp"
+            android:src="@drawable/info" />
 
-                <ImageView
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:src="@drawable/cancel" />
-            </LinearLayout>
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="-5dp"
+            android:text="تعذر إتمام الدفع"
+            android:textColor="#1A1A1A"
+            android:textSize="14sp" />
 
+        <View
+            android:layout_width="40dp"
+            android:layout_height="3dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="1dp"
+            android:background="#E5A500" />
 
         <TextView
             android:id="@+id/tvMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="25dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/rptbold"
             android:gravity="center"
-            android:lineSpacingExtra="5dp"
-            android:textColor="#555555"
-            android:textSize="14sp" />
+            android:textColor="@color/black"
+            android:textSize="12dp" />
 
-        <!-- أزرار التواصل -->
+        <!-- الملاحظة (containerNote) -->
+        <LinearLayout
+            android:id="@+id/containerNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_support_note"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="6dp"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_circle_light_gold">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/support"
+                    app:tint="#FFB909" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/Note"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="10sp" />
+
+
+        </LinearLayout>
+
+        <!-- منطقة الأزرار: التعديل المهم هنا -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:gravity="center"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:orientation="horizontal">
 
-            <!-- زر واتساب: تم تغيير العرض ليدعم التوسط التلقائي -->
             <LinearLayout
                 android:id="@+id/btnWhatsapp"
                 android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_margin="6dp"
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_button2"
-                android:clickable="true"
-                android:elevation="2dp"
-                android:focusable="true"
-                android:gravity="center"
-                android:minWidth="140dp">
+                android:gravity="center">
 
                 <ImageView
+                    android:id="@+id/iconWhatsapp"
                     android:layout_width="34dp"
                     android:layout_height="34dp"
-                    android:src="@drawable/whatsapp" />
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/whatsapp"
+                    app:tint="@color/white" />
 
                 <TextView
+                    android:id="@+id/textWhatsapp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="واتساب"
                     android:textColor="@color/white"
-                    android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCall"
                 android:layout_width="0dp"
-                android:layout_height="50dp"
+                android:layout_height="48dp"
                 android:layout_margin="6dp"
                 android:layout_weight="1"
                 android:insetLeft="0dp"

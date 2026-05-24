@@ -16,7 +16,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingLeft="10dp"
-            android:paddingTop="10dp"
             android:paddingRight="10dp"
             android:scrollbars="none">
 
@@ -31,6 +30,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
+                    android:layout_marginBottom="5dp"
                     android:text="حسابي"
                     android:textColor="@color/primary"
                     android:textSize="23sp"
@@ -40,7 +40,8 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:backgroundTint="@color/white"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
@@ -48,7 +49,9 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
 
                         <!-- تحديث بيانات التطبيق -->
 
@@ -67,7 +70,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -111,7 +114,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -141,7 +144,6 @@
                         </LinearLayout>
 
 
-
                         <View
                             android:id="@+id/line_balance"
                             android:layout_width="match_parent"
@@ -157,7 +159,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -187,6 +189,51 @@
                         </LinearLayout>
 
                         <View
+                            android:id="@+id/line_guide"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginRight="10dp"
+                            android:background="@color/gray2" />
+
+                        <LinearLayout
+                            android:id="@+id/guide"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="5dp">
+
+                            <ImageView
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
+                                android:padding="7dp"
+                                android:src="@drawable/solo_traveller" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="دليل المسافر"
+                                    android:textColor="@android:color/black"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/profile_back_to_1_1" />
+                        </LinearLayout>
+
+                        <View
                             android:id="@+id/line_notification"
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
@@ -201,7 +248,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -245,7 +292,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -285,20 +332,24 @@
                     android:text="الرحلات"
                     android:textColor="@color/primary"
                     android:textSize="23sp"
-                    android:textStyle="bold" />
-                <!-- ********* كارد 2: إدارة المركبات، الرحلات، الإشعارات، الطلبات ********* -->
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
                     android:backgroundTint="@color/white"
+                    android:visibility="gone"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
 
                         <!-- بيانات المركبات -->
 
@@ -310,7 +361,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="2dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -357,7 +408,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="2dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -394,14 +445,16 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:text="التطبيق"
+                    android:layout_marginTop="5dp"
                     android:textColor="@color/primary"
                     android:textSize="23sp"
                     android:textStyle="bold" />
-                <!-- ********* كارد 3: الدعم، حول التطبيق، تسجيل خروج ********* -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="10dp"
                     android:backgroundTint="@color/white"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
@@ -409,7 +462,9 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
 
                         <!-- الدعم والمساعدة -->
                         <!--                        <LinearLayout-->
@@ -449,13 +504,56 @@
                         <!--                        </LinearLayout>-->
                         <!-- الدعم والمساعدة (العنصر الرئيسي) -->
                         <LinearLayout
+                            android:id="@+id/sharing"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="5dp">
+
+                            <ImageView
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
+                                android:src="@drawable/frame_5__1_" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="مشاركة التطبيق"
+                                    android:textColor="@android:color/black"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/profile_back_to_1_1" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginRight="10dp"
+                            android:background="@color/gray2" />
+
+                        <LinearLayout
                             android:id="@+id/supportHeader"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:background="?attr/selectableItemBackground"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -503,6 +601,71 @@
                             android:visibility="gone">
 
                             <LinearLayout
+                                android:id="@+id/contact_support"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="?attr/selectableItemBackground"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingVertical="12dp"
+                                android:paddingStart="15dp">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_marginEnd="5dp"
+                                    android:src="@drawable/whatsappn" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="خدمة العملاء"
+                                    android:textColor="@color/text_dark"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginTop="5dp"
+                                android:layout_marginRight="10dp"
+                                android:background="@color/gray2" />
+
+                            <LinearLayout
+                                android:id="@+id/phoneNumber"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="?attr/selectableItemBackground"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingVertical="12dp"
+                                android:paddingStart="15dp">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_marginEnd="5dp"
+                                    android:src="@drawable/phone_new" />
+
+                                <TextView
+                                    android:id="@+id/textNumber"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="اتصل بنا"
+                                    android:textColor="@color/text_dark"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginTop="5dp"
+                                android:layout_marginRight="10dp"
+                                android:background="@color/gray2" />
+
+                            <LinearLayout
                                 android:id="@+id/ai_chat_support"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -521,7 +684,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="مساعد مسافر"
+                                    android:text="المساعد الذكي"
                                     android:textColor="@color/text_dark"
                                     android:textSize="13sp" />
                             </LinearLayout>
@@ -533,9 +696,9 @@
                                 android:layout_marginTop="5dp"
                                 android:layout_marginRight="10dp"
                                 android:background="@color/gray2" />
-                            <!-- التواصل مع خدمة العملاء -->
+
                             <LinearLayout
-                                android:id="@+id/contact_support"
+                                android:id="@+id/btnStartTutorial"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:background="?attr/selectableItemBackground"
@@ -545,15 +708,15 @@
                                 android:paddingStart="15dp">
 
                                 <ImageView
-                                    android:layout_width="20dp"
-                                    android:layout_height="20dp"
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
                                     android:layout_marginEnd="5dp"
-                                    android:src="@drawable/phone_new" />
+                                    android:src="@drawable/icons8_info_1" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="خدمة العملاء"
+                                    android:text="خدمات التطبيق"
                                     android:textColor="@color/text_dark"
                                     android:textSize="13sp" />
                             </LinearLayout>
@@ -561,55 +724,12 @@
 
 
                         <LinearLayout
-                            android:id="@+id/refresh"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:padding="10dp">
-
-                            <ImageView
-                                android:layout_width="42dp"
-                                android:layout_height="42dp"
-                                android:src="@drawable/refresh" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="تحديث بيانات التطبيق"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
-                            </LinearLayout>
-
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/profile_back_to_1_1" />
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginRight="10dp"
-                            android:background="@color/gray2" />
-                        <!-- معلومات التطبيق -->
-                        <LinearLayout
                             android:id="@+id/about"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -647,17 +767,17 @@
                             android:background="@color/gray2" />
 
                         <LinearLayout
-                            android:id="@+id/share"
+                            android:id="@+id/refresh"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
                                 android:layout_height="42dp"
-                                android:src="@drawable/frame_5__1_" />
+                                android:src="@drawable/refresh" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -669,7 +789,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="دعوة"
+                                    android:text="تحديث بيانات التطبيق"
                                     android:textColor="@android:color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
@@ -681,90 +801,6 @@
                                 android:src="@drawable/profile_back_to_1_1" />
                         </LinearLayout>
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginRight="10dp"
-                            android:background="@color/gray2" />
-
-                        <LinearLayout
-                            android:id="@+id/sharing"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:padding="10dp">
-
-                            <ImageView
-                                android:layout_width="42dp"
-                                android:layout_height="42dp"
-                                android:src="@drawable/frame_5__1_" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="الأعضاء المنضمون"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
-                            </LinearLayout>
-
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/profile_back_to_1_1" />
-                        </LinearLayout>
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginRight="10dp"
-                            android:background="@color/gray2" />
-
-                        <LinearLayout
-                            android:id="@+id/deleteAccount"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:padding="10dp">
-
-                            <ImageView
-                                android:layout_width="42dp"
-                                android:layout_height="42dp"
-                                android:src="@drawable/delete" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="طلب حذف الحساب"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
-                            </LinearLayout>
-
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/profile_back_to_1_1" />
-                        </LinearLayout>
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
@@ -779,7 +815,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="10dp">
+                            android:padding="5dp">
 
                             <ImageView
                                 android:layout_width="42dp"
@@ -817,14 +853,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:padding="8dp"
+                    android:padding="5dp"
                     android:text="V "
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp" />
 
             </LinearLayout>
         </ScrollView>

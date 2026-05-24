@@ -1,17 +1,14 @@
 package com.example.musafir;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.musafir.R;
 
 import org.json.JSONObject;
@@ -76,16 +73,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 String notification_type = notification.optString("notification_type", "");
                 String related_object_id = notification.optString("related_object_id", "");
                 String rightIconName = notification.optString("not_icon", "");
-//                if (!rightIconName.isEmpty()) {
-//                    int iconResId = context.getResources().getIdentifier(rightIconName, "drawable", context.getPackageName());
-//                    if (iconResId != 0) {
-//                        vh.rightIcon.setImageResource(iconResId);
-//                    } else {
-//                        vh.rightIcon.setImageResource(R.drawable.notification_new);
-//                    }
-//                } else {
-//                    vh.rightIcon.setImageResource(R.drawable.ic_notifications_black_24dp);
-//                }
 
                 vh.title.setText(title);
                 vh.message.setText(content);
@@ -140,8 +127,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             title = itemView.findViewById(R.id.notificationTitle);
             message = itemView.findViewById(R.id.notificationMessage);
             date = itemView.findViewById(R.id.notificationDate);
-//            readStatusIcon = itemView.findViewById(R.id.readStatusIcon);
-//            rightIcon = itemView.findViewById(R.id.rightIcon);
         }
     }
 

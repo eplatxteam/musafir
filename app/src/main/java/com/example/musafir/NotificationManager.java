@@ -1,14 +1,6 @@
 package com.example.musafir;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
-
-import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +11,7 @@ public class NotificationManager {
     String BASE_URL = UserUtils.BASE_URL;
 
     private List<UnreadCountListener> listeners = new ArrayList<>();
-    private Context context;
+    Context context;
 
     public interface UnreadCountListener {
         void onUnreadCountChanged(int newCount);

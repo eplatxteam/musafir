@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
@@ -22,7 +21,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="البحث عن رحلة"
+            android:text="بحث متقدم"
             android:textColor="@android:color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -45,142 +44,142 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content">-->
+        <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content">-->
 
-<!--            &lt;!&ndash; من &ndash;&gt;-->
-<!--            <LinearLayout-->
-<!--                android:id="@+id/fromLayout"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:gravity="center_vertical"-->
-<!--                android:orientation="horizontal"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent">-->
+        <!--            &lt;!&ndash; من &ndash;&gt;-->
+        <!--            <LinearLayout-->
+        <!--                android:id="@+id/fromLayout"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:gravity="center_vertical"-->
+        <!--                android:orientation="horizontal"-->
+        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--                app:layout_constraintStart_toStartOf="parent"-->
+        <!--                app:layout_constraintTop_toTopOf="parent">-->
 
-<!--                <ImageView-->
-<!--                    android:layout_width="24dp"-->
-<!--                    android:layout_height="24dp"-->
-<!--                    android:src="@drawable/location2"-->
-<!--                    app:tint="@color/secondary" />-->
+        <!--                <ImageView-->
+        <!--                    android:layout_width="24dp"-->
+        <!--                    android:layout_height="24dp"-->
+        <!--                    android:src="@drawable/location2"-->
+        <!--                    app:tint="@color/secondary" />-->
 
-<!--                <LinearLayout-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="6dp"-->
-<!--                    android:gravity="start"-->
-<!--                    android:orientation="vertical">-->
+        <!--                <LinearLayout-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="wrap_content"-->
+        <!--                    android:layout_marginStart="6dp"-->
+        <!--                    android:gravity="start"-->
+        <!--                    android:orientation="vertical">-->
 
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="من"-->
-<!--                        android:textColor="@color/navIcon"-->
-<!--                        android:textSize="12sp"-->
-<!--                        android:textStyle="bold" />-->
+        <!--                    <TextView-->
+        <!--                        android:layout_width="wrap_content"-->
+        <!--                        android:layout_height="wrap_content"-->
+        <!--                        android:text="من"-->
+        <!--                        android:textColor="@color/navIcon"-->
+        <!--                        android:textSize="12sp"-->
+        <!--                        android:textStyle="bold" />-->
 
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:gravity="center_vertical"-->
-<!--                        android:orientation="horizontal"-->
-<!--                        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                        app:layout_constraintEnd_toEndOf="parent"-->
-<!--                        app:layout_constraintStart_toEndOf="@id/carIcon"-->
-<!--                        app:layout_constraintTop_toTopOf="parent">-->
+        <!--                    <LinearLayout-->
+        <!--                        android:layout_width="wrap_content"-->
+        <!--                        android:layout_height="wrap_content"-->
+        <!--                        android:gravity="center_vertical"-->
+        <!--                        android:orientation="horizontal"-->
+        <!--                        app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--                        app:layout_constraintEnd_toEndOf="parent"-->
+        <!--                        app:layout_constraintStart_toEndOf="@id/carIcon"-->
+        <!--                        app:layout_constraintTop_toTopOf="parent">-->
 
-<!--                        &lt;!&ndash; النص الرئيسي &ndash;&gt;-->
-<!--                        <TextView-->
-<!--                            android:id="@+id/textFromCity"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="حدد المدينة"-->
-<!--                            android:textColor="@color/black"-->
-<!--                            android:textSize="16sp" />-->
+        <!--                        &lt;!&ndash; النص الرئيسي &ndash;&gt;-->
+        <!--                        <TextView-->
+        <!--                            android:id="@+id/textFromCity"-->
+        <!--                            android:layout_width="wrap_content"-->
+        <!--                            android:layout_height="wrap_content"-->
+        <!--                            android:text="حدد المدينة"-->
+        <!--                            android:textColor="@color/black"-->
+        <!--                            android:textSize="16sp" />-->
 
-<!--                        &lt;!&ndash; السهم بجانب النص &ndash;&gt;-->
-<!--                        <ImageView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_marginStart="4dp"-->
-<!--                            android:src="@drawable/baseline_arrow_drop_down_24"-->
-<!--                            app:tint="@color/secondary" />-->
+        <!--                        &lt;!&ndash; السهم بجانب النص &ndash;&gt;-->
+        <!--                        <ImageView-->
+        <!--                            android:layout_width="wrap_content"-->
+        <!--                            android:layout_height="wrap_content"-->
+        <!--                            android:layout_marginStart="4dp"-->
+        <!--                            android:src="@drawable/baseline_arrow_drop_down_24"-->
+        <!--                            app:tint="@color/secondary" />-->
 
-<!--                    </LinearLayout>-->
-<!--                </LinearLayout>-->
-<!--            </LinearLayout>-->
+        <!--                    </LinearLayout>-->
+        <!--                </LinearLayout>-->
+        <!--            </LinearLayout>-->
 
-<!--            &lt;!&ndash; أيقونة السيارة &ndash;&gt;-->
-<!--            <ImageView-->
-<!--                android:id="@+id/carIcon"-->
-<!--                android:layout_width="120dp"-->
-<!--                android:layout_height="50dp"-->
-<!--                android:src="@drawable/big_car"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent" />-->
+        <!--            &lt;!&ndash; أيقونة السيارة &ndash;&gt;-->
+        <!--            <ImageView-->
+        <!--                android:id="@+id/carIcon"-->
+        <!--                android:layout_width="120dp"-->
+        <!--                android:layout_height="50dp"-->
+        <!--                android:src="@drawable/big_car"-->
+        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--                app:layout_constraintEnd_toEndOf="parent"-->
+        <!--                app:layout_constraintStart_toStartOf="parent"-->
+        <!--                app:layout_constraintTop_toTopOf="parent" />-->
 
-<!--            &lt;!&ndash; إلى &ndash;&gt;-->
-<!--            <LinearLayout-->
-<!--                android:id="@+id/toLayout"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:gravity="start"-->
-<!--                android:orientation="vertical"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintStart_toEndOf="@id/carIcon"-->
-<!--                app:layout_constraintTop_toTopOf="parent">-->
+        <!--            &lt;!&ndash; إلى &ndash;&gt;-->
+        <!--            <LinearLayout-->
+        <!--                android:id="@+id/toLayout"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:gravity="start"-->
+        <!--                android:orientation="vertical"-->
+        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--                app:layout_constraintEnd_toEndOf="parent"-->
+        <!--                app:layout_constraintStart_toEndOf="@id/carIcon"-->
+        <!--                app:layout_constraintTop_toTopOf="parent">-->
 
-<!--                <TextView-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="إلى"-->
-<!--                    android:textColor="@color/navIcon"-->
-<!--                    android:textSize="12sp"-->
-<!--                    android:textStyle="bold" />-->
+        <!--                <TextView-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="wrap_content"-->
+        <!--                    android:text="إلى"-->
+        <!--                    android:textColor="@color/navIcon"-->
+        <!--                    android:textSize="12sp"-->
+        <!--                    android:textStyle="bold" />-->
 
 
-<!--                <LinearLayout-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                    app:layout_constraintEnd_toEndOf="parent"-->
-<!--                    app:layout_constraintStart_toEndOf="@id/carIcon"-->
-<!--                    app:layout_constraintTop_toTopOf="parent">-->
+        <!--                <LinearLayout-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="wrap_content"-->
+        <!--                    android:gravity="center_vertical"-->
+        <!--                    android:orientation="horizontal"-->
+        <!--                    app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--                    app:layout_constraintEnd_toEndOf="parent"-->
+        <!--                    app:layout_constraintStart_toEndOf="@id/carIcon"-->
+        <!--                    app:layout_constraintTop_toTopOf="parent">-->
 
-<!--                    &lt;!&ndash; النص الرئيسي &ndash;&gt;-->
-<!--                    <TextView-->
-<!--                        android:id="@+id/textToCity"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="حدد المدينة"-->
-<!--                        android:textColor="@color/black"-->
-<!--                        android:textSize="16sp" />-->
+        <!--                    &lt;!&ndash; النص الرئيسي &ndash;&gt;-->
+        <!--                    <TextView-->
+        <!--                        android:id="@+id/textToCity"-->
+        <!--                        android:layout_width="wrap_content"-->
+        <!--                        android:layout_height="wrap_content"-->
+        <!--                        android:text="حدد المدينة"-->
+        <!--                        android:textColor="@color/black"-->
+        <!--                        android:textSize="16sp" />-->
 
-<!--                    &lt;!&ndash; السهم بجانب النص &ndash;&gt;-->
-<!--                    <ImageView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_marginStart="4dp"-->
-<!--                        android:src="@drawable/baseline_arrow_drop_down_24"-->
-<!--                        app:tint="@color/secondary" />-->
+        <!--                    &lt;!&ndash; السهم بجانب النص &ndash;&gt;-->
+        <!--                    <ImageView-->
+        <!--                        android:layout_width="wrap_content"-->
+        <!--                        android:layout_height="wrap_content"-->
+        <!--                        android:layout_marginStart="4dp"-->
+        <!--                        android:src="@drawable/baseline_arrow_drop_down_24"-->
+        <!--                        app:tint="@color/secondary" />-->
 
-<!--                </LinearLayout>-->
-<!--            </LinearLayout>-->
+        <!--                </LinearLayout>-->
+        <!--            </LinearLayout>-->
 
-<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+        <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
-<!--        <View-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="4dp"-->
-<!--            android:layout_marginVertical="12dp"-->
-<!--            android:background="@drawable/line_2" />-->
+        <!--        <View-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="4dp"-->
+        <!--            android:layout_marginVertical="12dp"-->
+        <!--            android:background="@drawable/line_2" />-->
 
         <!-- أيام الأسبوع -->
         <!--        <HorizontalScrollView-->
@@ -257,7 +256,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="عدد المقاعد: "
+            android:text="المقاعد المتاحة: "
             android:textColor="@color/black"
             android:textSize="18sp" />
 
@@ -298,7 +297,7 @@
             android:layout_height="34dp"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="5dp"
-            android:src="@drawable/increase"/>
+            android:src="@drawable/increase" />
         <!--        <Button-->
         <!--            android:id="@+id/btnPlus"-->
         <!--            android:layout_width="40dp"-->
@@ -362,6 +361,7 @@
         android:layout_margin="10dp"
         android:layout_marginVertical="12dp"
         android:background="@drawable/line_2" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -409,6 +409,7 @@
         android:layout_margin="10dp"
         android:layout_marginVertical="12dp"
         android:background="@drawable/line_2" />
+
     <CheckBox
         android:id="@+id/checkboxFamiliesOnly"
         android:layout_width="wrap_content"
@@ -430,19 +431,12 @@
 
         <Button
             android:id="@+id/dialogSearchButton"
+            style="@style/PrimaryButtonStyle"
             android:layout_width="0dp"
             android:layout_height="46dp"
             android:layout_weight="0.85"
-            android:background="@drawable/bg_button"
-            android:backgroundTint="@color/primary3"
-            android:elevation="0dp"
-            android:stateListAnimator="@null"
             android:text="بحث"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textColor="@color/primary2"
-            android:textSize="18sp"
-            app:backgroundTint="@null" />
+            android:textAllCaps="false" />
 
         <View
             android:layout_width="10dp"

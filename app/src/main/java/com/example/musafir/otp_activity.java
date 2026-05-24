@@ -9,18 +9,27 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,7 +51,8 @@ public class otp_activity extends AppCompatActivity {
     String password, user_type, user_name, token, page, phones;
     String BASE_URL = UserUtils.BASE_URL;
     DBHelper dbHelper = new DBHelper(this);
-    TextView btnResend, tvTimer;
+    TextView tvTimer;
+    LinearLayout btnResend, layoutResendWhatsapp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,14 +66,25 @@ public class otp_activity extends AppCompatActivity {
                 findViewById(R.id.otp5), findViewById(R.id.otp6)
         };
         EditText otp1 = findViewById(R.id.otp1);
+        EditText otp2 = findViewById(R.id.otp2);
+        EditText otp3 = findViewById(R.id.otp3);
+        EditText otp4 = findViewById(R.id.otp4);
+        EditText otp5 = findViewById(R.id.otp5);
+        EditText otp6 = findViewById(R.id.otp6);
         otp1.requestFocus();
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         Button verifyOtpButton = findViewById(R.id.verifyOtpButton);
-        btnResend = findViewById(R.id.registerText);
+        btnResend = findViewById(R.id.layoutResendSMS);
+        layoutResendWhatsapp = findViewById(R.id.layoutResendWhatsapp);
         tvTimer = findViewById(R.id.tvTimer);
         ImageView backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(v -> onBackPressed());
+        MaterialButton tvChangeNumber = findViewById(R.id.tvChangeNumber);
+        TextView tvPhoneNumber = findViewById(R.id.tvPhoneNumber);
+//        tvChangeNumber.setOnClickListener(v -> finish());
+        tvChangeNumber.setOnClickListener(v -> onBackPressed());
+        backButton.setOnClickListener(v -> finish());
+
         token = getIntent().getStringExtra("otp_token");
         phones = getIntent().getStringExtra("phone");
         String inviteCode = getIntent().getStringExtra("inviteCode");
@@ -71,7 +92,7 @@ public class otp_activity extends AppCompatActivity {
         page = getIntent().getStringExtra("page");
         user_type = getIntent().getStringExtra("user_type");
         user_name = getIntent().getStringExtra("user_name");
-
+        tvPhoneNumber.setText(phones);
         for (int i = 0; i < otpFields.length; i++) {
             final int currentIndex = i;
 
@@ -96,6 +117,24 @@ public class otp_activity extends AppCompatActivity {
                     }
                 }
             });
+            otpFields[i].setOnKeyListener((v, keyCode, event) -> {
+                if (keyCode == KeyEvent.KEYCODE_DEL && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    // إذا كان الحقل الحالي فارغاً وهناك حقل سابق متوفر
+                    if (otpFields[currentIndex].getText().length() == 0 && currentIndex > 0) {
+
+                        // 1. نقل التركيز إلى الحقل السابق مباشرة
+                        otpFields[currentIndex - 1].requestFocus();
+
+                        // 2. نقل مؤشر الكتابة (Cursor) إلى نهاية النص في الحقل السابق (حتى لا يكتب في البداية)
+                        if (otpFields[currentIndex - 1].getText().length() > 0) {
+                            otpFields[currentIndex - 1].setSelection(otpFields[currentIndex - 1].getText().length());
+                        }
+
+                        return true;
+                    }
+                }
+                return false;
+            });
         }
 
         verifyOtpButton.setOnClickListener(v -> {
@@ -106,7 +145,7 @@ public class otp_activity extends AppCompatActivity {
             String otpCode = sb.toString();
 
             if (otpCode.length() < 6) {
-                Toast.makeText(this, "يرجى إدخال الرمز كاملاً", Toast.LENGTH_SHORT).show();
+                UserUtils.ToastMessages(this, UserUtils.getMessageFromLocalNew(322, dbHelper));
                 return;
             }
 
@@ -143,7 +182,82 @@ public class otp_activity extends AppCompatActivity {
             btnResend.setEnabled(true);
         }
 
-        btnResend.setOnClickListener(v -> resendOtp(phones));
+        layoutResendWhatsapp.setOnClickListener(v -> resendOtp(phones, 2));
+        btnResend.setOnClickListener(v -> resendOtp(phones, 1));
+//        setPressAnimation(btnResend);
+//        setPressAnimation(layoutResendWhatsapp);
+//        btnResend.setOnClickListener(v -> resendOtp(phones));
+
+// الحقل الأول يقبل 6 مؤقتاً من أجل عملية اللصق (Paste)
+        otp1.setFilters(new InputFilter[]{new InputFilter.LengthFilter(6)});
+
+// بقية الحقول مقفلة تماماً على رقم واحد فقط منذ البداية
+        otp2.setFilters(new InputFilter[]{new InputFilter.LengthFilter(1)});
+        otp3.setFilters(new InputFilter[]{new InputFilter.LengthFilter(1)});
+        otp4.setFilters(new InputFilter[]{new InputFilter.LengthFilter(1)});
+        otp5.setFilters(new InputFilter[]{new InputFilter.LengthFilter(1)});
+        otp6.setFilters(new InputFilter[]{new InputFilter.LengthFilter(1)});
+        otp1.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // إذا تم لصق نص طوله 6 أرقام
+                if (s.length() == 6) {
+                    String pastedText = s.toString().trim();
+
+                    // 1. توزيع الأرقام على المصفوفة (التوزيع يتجاهل قيود maxLength لأنه برمجي)
+                    for (int i = 0; i < otpFields.length; i++) {
+                        if (i < pastedText.length()) {
+                            otpFields[i].setText(String.valueOf(pastedText.charAt(i)));
+                        }
+                    }
+
+                    // 2. قفل الحقل الأول فوراً ليكون حده الأقصى 1 فقط مثل البقية
+                    otp1.setFilters(new android.text.InputFilter[]{
+                            new android.text.InputFilter.LengthFilter(1)
+                    });
+
+                    // 3. نقل التركيز للحقل الأخير
+                    otp6.requestFocus();
+                    if (otp6.getText().length() > 0) {
+                        otp6.setSelection(otp6.getText().length());
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // حماية إضافية: إذا دخل أكثر من رقم في أي وقت، خذ الرقم الأول فقط
+                if (s.length() > 1) {
+                    String firstChar = String.valueOf(s.charAt(0));
+                    otp1.setText(firstChar);
+                    otp1.setSelection(1);
+                }
+            }
+        });
+    }
+
+    public void setPressAnimation(View view) {
+        // إضافة تأثير التموج الشفاف (Ripple)
+        TypedValue outValue = new TypedValue();
+        view.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        view.setBackgroundResource(outValue.resourceId);
+
+        view.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    v.animate().scaleX(0.2f).scaleY(0.2f).alpha(0.8f).setDuration(100).start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1.0f).scaleY(1.0f).alpha(1.0f).setDuration(100).start();
+                    break;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -156,7 +270,19 @@ public class otp_activity extends AppCompatActivity {
     }
 
     private void sendOtpVerification(String token, String code, String phone) {
+        if (!UserUtils.isNetworkAvailable(this)) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(otp_activity.this, message);
+                }
 
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("جاري التحقق من الرمز...");
         progressDialog.setCancelable(false);
@@ -173,43 +299,45 @@ public class otp_activity extends AppCompatActivity {
                         String result = jsonObject.optString("result", "FALSE");
 
 
-                            if (result.equalsIgnoreCase("TRUE")) {
-                                UserUtils.getMessageFromLocal(56, dbHelper, new UserUtils.MessageCallback() {
-                                    @Override
-                                    public void onSuccess(String message) {
-                                        UserUtils.ToastMessages(otp_activity.this, message);
-                                    }
-
-                                    @Override
-                                    public void onError(String error) {
-                                    }
-                                });
-                                Intent intent;
-                                if ("0".equals(password)) {
-                                    intent = new Intent(otp_activity.this, HomePage.class);
-                                    intent.putExtra("user_phone", phone);
-                                } else {
-                                    intent = new Intent(otp_activity.this, ChangePassword.class);
-                                    intent.putExtra("user_phone", phone);
-                                    String Tokenuser = getIntent().getStringExtra("Tokenuser");
-                                    intent.putExtra("Tokenuser", Tokenuser);
-
-                                    intent.putExtra("otp_token", token);
+                        if (result.equalsIgnoreCase("TRUE")) {
+                            UserUtils.getMessageFromLocal(56, dbHelper, new UserUtils.MessageCallback() {
+                                @Override
+                                public void onSuccess(String message) {
+                                    UserUtils.ToastMessages(otp_activity.this, message);
                                 }
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                UserUtils.getMessageFromLocal(57, dbHelper, new UserUtils.MessageCallback() {
-                                    @Override
-                                    public void onSuccess(String message) {
-                                        UserUtils.ToastMessages(otp_activity.this, message);
-                                    }
 
-                                    @Override
-                                    public void onError(String error) {
-                                    }
-                                });
+                                @Override
+                                public void onError(String error) {
+                                }
+                            });
+                            Intent intent;
+                            if ("0".equals(password)) {
+                                intent = new Intent(otp_activity.this, HomePage.class);
+                                intent.putExtra("user_phone", phone);
+                                intent.putExtra("is_just_logged_in", true);
+
+                            } else {
+                                intent = new Intent(otp_activity.this, ChangePassword.class);
+                                intent.putExtra("user_phone", phone);
+                                String Tokenuser = getIntent().getStringExtra("Tokenuser");
+                                intent.putExtra("Tokenuser", Tokenuser);
+
+                                intent.putExtra("otp_token", token);
                             }
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            UserUtils.getMessageFromLocal(57, dbHelper, new UserUtils.MessageCallback() {
+                                @Override
+                                public void onSuccess(String message) {
+                                    UserUtils.ToastMessages(otp_activity.this, message);
+                                }
+
+                                @Override
+                                public void onError(String error) {
+                                }
+                            });
+                        }
 
                     } catch (JSONException e) {
                         UserUtils.getMessageFromLocal(57, dbHelper, new UserUtils.MessageCallback() {
@@ -227,7 +355,7 @@ public class otp_activity extends AppCompatActivity {
                 },
                 error -> {
                     progressDialog.dismiss();
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             UserUtils.ToastMessages(otp_activity.this, message);
@@ -257,7 +385,19 @@ public class otp_activity extends AppCompatActivity {
 
     private void register(String fullName, String phone, String password, String user_type,
                           String register_otp_token, String otp_code, String inviteCode) {
+        if (!UserUtils.isNetworkAvailable(this)) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(otp_activity.this, message);
+                }
 
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("جاري إنشاء حساب...");
         progressDialog.setCancelable(false);
@@ -266,6 +406,7 @@ public class otp_activity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 String finalPhone;
+                String finalPhone2;
                 URL url = new URL(BASE_URL + "auth/register/");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
@@ -276,30 +417,43 @@ public class otp_activity extends AppCompatActivity {
                 SharedPreferences prefs = SharedPrefsHelper.get(this);
 
                 String defaultCity = prefs.getString("default_city", "حدد المدينة");
+                String country = prefs.getString("country_code", "");
                 int defaultCityId = prefs.getInt("default_city_id", -1);
+                String safePhone = (phone == null) ? "" : phone;
+                String safeInviteCode = (inviteCode == null) ? "" : inviteCode;
 
                 // بناء JSON
-                if (phone.startsWith("05")) {
-                    finalPhone = "966" + phone.substring(1);
-                } else if (phone.startsWith("7")) {
-                    finalPhone = phone;
+                if (safePhone.startsWith("05")) {
+                    finalPhone = "966" + safePhone.substring(1);
+                } else if (safePhone.startsWith("7")) {
+                    finalPhone = "967" + safePhone;
                 } else {
-                    finalPhone = phone;
+                    finalPhone = safePhone;
+                }
+
+                // 3. معالجة كود الدعوة (الذي تسبب في الخطأ)
+                if (safeInviteCode.startsWith("05")) {
+                    finalPhone2 = "966" + safeInviteCode.substring(1);
+                } else if (safeInviteCode.startsWith("7")) {
+                    finalPhone2 = "967" + safeInviteCode;
+                } else {
+                    finalPhone2 = safeInviteCode;
                 }
                 JSONObject jsonParam = new JSONObject();
                 jsonParam.put("full_name", fullName);
-                jsonParam.put("inviteCode", inviteCode);
+                jsonParam.put("inviteCode", finalPhone2);
                 jsonParam.put("phone_number", finalPhone);
                 jsonParam.put("password", password);
                 jsonParam.put("user_type", user_type);
                 jsonParam.put("device_serial", deviceSerial);
                 jsonParam.put("default_city", defaultCity);
+                jsonParam.put("country", country);
                 jsonParam.put("city_id", defaultCityId);
                 jsonParam.put("register_otp_token", register_otp_token);
                 jsonParam.put("otp_code", otp_code);
                 String s = "{ full_name: " + fullName +
                         " , phone_number: " + finalPhone +
-                        " , inviteCode: " + inviteCode +
+                        " , inviteCode: " + finalPhone2 +
                         " , password: " + password +
                         " , user_type: " + user_type +
                         " , city_id: " + defaultCityId +
@@ -308,6 +462,7 @@ public class otp_activity extends AppCompatActivity {
                         " , otp_code: " + otp_code +
                         " , default_city: " + defaultCity +
                         " }";
+                Log.e("=====--", s);
                 OutputStream os = conn.getOutputStream();
                 os.write(jsonParam.toString().getBytes(StandardCharsets.UTF_8));
                 os.flush();
@@ -345,6 +500,7 @@ public class otp_activity extends AppCompatActivity {
                             String notify_general = jsonObject.getString("notify_general");
                             String notify_primary = jsonObject.getString("notify_primary");
                             String default_city = jsonObject.getString("default_city");
+                            String cur_code = jsonObject.getString("cur_code");
 
                             SharedPreferences.Editor editor = prefs.edit();
 
@@ -359,6 +515,7 @@ public class otp_activity extends AppCompatActivity {
                             editor.putString("notify_primary", notify_primary);
                             editor.putString("default_city", default_city);
                             editor.putString("device_serial", deviceSerial);
+                            editor.putString("cur_code", cur_code);
                             editor.putString("user_type", user_type);
                             String firstName = fullName.trim().split("\\s+")[0];
                             firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1).toLowerCase(); // Capitalize أول حرف فقط
@@ -371,7 +528,6 @@ public class otp_activity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(String message) {
                                     UserUtils.ToastMessages(otp_activity.this, message + finalFirstName);
-
                                 }
 
                                 @Override
@@ -379,6 +535,7 @@ public class otp_activity extends AppCompatActivity {
                                 }
 
                             });
+                            UserUtils.fetchBalance(this);
 
                             UserUtils.checkAppUpdate(this);
                             UserUtils.fetchCompany(this, new UserUtils.OnCodesFetchedListener() {
@@ -388,7 +545,7 @@ public class otp_activity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                                         @Override
                                         public void onSuccess(String message) {
                                             UserUtils.ToastMessages(otp_activity.this, message);
@@ -407,20 +564,20 @@ public class otp_activity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-                                            UserUtils.ToastMessages(otp_activity.this, message);
-                                        }
-
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
 
                                 }
                             });
+                            UserUtils.fetchAndSavePayTypes(this, new UserUtils.GenericCallback() {
 
+                                @Override
+                                public void onSuccess(String message) {
+                                }
+
+                                @Override
+                                public void onError(String error) {
+
+                                }
+                            });
                             UserUtils.fetchAndSavecities(this, new UserUtils.citiesCallback() {
                                 @Override
                                 public void onSuccess(String message) {
@@ -431,38 +588,17 @@ public class otp_activity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-                                            UserUtils.ToastMessages(otp_activity.this, message);
-                                        }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-
-                                    });
                                 }
                             });
                             UserUtils.fetchAndSaveCountry(this, new UserUtils.FetchCallback() {
                                 @Override
                                 public void onSuccess(String message) {
                                     prefs.edit().putBoolean("messages_fetched", true).apply();
-//                    UserUtils.ToastMessages(getContext(), message);
                                 }
 
                                 @Override
                                 public void onError(String error) {
-//                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-//                                        @Override
-//                                        public void onSuccess(String message) {
-//                                            UserUtils.ToastMessages(this, message);
-//                                        }
-//
-//                                        @Override
-//                                        public void onError(String error) {
-//                                        }
-//                                    });
                                 }
                             });
                             UserUtils.fetchCashBankData(this, dbHelper, new UserUtils.OnCashBankFetchedListener() {
@@ -472,48 +608,31 @@ public class otp_activity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-                                            UserUtils.ToastMessages(otp_activity.this, message);
-                                        }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-
-                                    });
                                 }
                             });
+                            UserUtils.syncDayTimesFromServer(this, new UserUtils.DayTimeCallback() {
 
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError(String error) {
+
+                                }
+                            });
                             UserUtils.fetchAndSaveMessages(this, new UserUtils.FetchCallback() {
                                 @Override
                                 public void onSuccess(String message) {
                                     SharedPreferences.Editor editor = prefs.edit();
                                     editor.putBoolean("messages_fetched", true);
                                     editor.apply();
-//                                    UserUtils.ToastMessages(getActivity(), message);
-//                                    lottieWave.cancelAnimation();
-//                                    lottieWave.setProgress(0f); // مهم
-//                                    lottieWave.setVisibility(View.GONE);
                                 }
 
                                 @Override
                                 public void onError(String error) {
-//                                    lottieWave.cancelAnimation();
-//                                    lottieWave.setProgress(0f); // مهم
-//                                    lottieWave.setVisibility(View.GONE);
-
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-//                                            UserUtils.ToastMessages(getActivity(), message);
-                                        }
-
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
                                 }
 
 
@@ -526,16 +645,7 @@ public class otp_activity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-//                                            UserUtils.ToastMessages(getActivity(), message);
-                                        }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
                                 }
                             });
                             UserUtils.fetchTypeTravelerRequests(this, dbHelper, new TravelerRequests.OnTypeRequestsFetchedListener() {
@@ -546,18 +656,11 @@ public class otp_activity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-//                                            UserUtils.ToastMessages(getActivity(), message);
-                                        }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
                                 }
                             });
+                            UserUtils.fetchAndSaveContactInfo(this, dbHelper);
+
                             UserUtils.fetchRoutes(this, new UserUtils.FetchCallback() {
                                 @Override
                                 public void onSuccess(String message) {
@@ -569,14 +672,15 @@ public class otp_activity extends AppCompatActivity {
                             });
                             UserUtils.loadVehicleTypesToDB(this);
 
-                            Intent go = new Intent(otp_activity.this, HomePage.class);
-                            go.putExtra("user_phone", finalPhone);
-                            startActivity(go);
+                            Intent intent = new Intent(otp_activity.this, HomePage.class);
+                            intent.putExtra("is_just_logged_in", true);
+                            intent.putExtra("user_phone", finalPhone);
+                            startActivity(intent);
                             finish();
 
                         } else {
                             String errorReason;
-
+                            String fullResponse = result.toString();
                             if (jsonObject.has("phone_number")) {
 
                                 errorReason = "Phone already exists";
@@ -593,23 +697,20 @@ public class otp_activity extends AppCompatActivity {
                                 });
                                 progressDialog.dismiss();
 
+                            } else if (jsonObject.has("msg_txt")) {
+                                UserUtils.ToastMessages(otp_activity.this, "رمز التحقق غير صحيح أو منتهي");
+
                             } else {
-                                errorReason = "Registration failed";
+                                String msg_txt = jsonObject.has("msg_txt") ? UserUtils.getMessageFromLocalNew(45, dbHelper) : "Registration failed";
+//
+                                UserUtils.ToastMessages(otp_activity.this, msg_txt);
+//
 
-                                UserUtils.getMessageFromLocal(45, dbHelper, new UserUtils.MessageCallback() {
-                                    @Override
-                                    public void onSuccess(String message) {
-                                        UserUtils.ToastMessages(otp_activity.this, message);
-                                    }
-
-                                    @Override
-                                    public void onError(String error) {
-                                    }
-                                });
                                 progressDialog.dismiss();
 
                             }
-                            UserUtils.sendLog(this, "Register", errorReason, s, "otp_activity");
+                            UserUtils.sendLog(this, "Register", fullResponse, s, "otp_activity");
+
                             progressDialog.dismiss();
 
                         }
@@ -631,7 +732,7 @@ public class otp_activity extends AppCompatActivity {
                 });
             } catch (Exception e) {
                 UserUtils.sendLog(this, "Register", e.toString(), e.toString(), "otp_activity");
-                runOnUiThread(() -> UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                runOnUiThread(() -> UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                     @Override
                     public void onSuccess(String message) {
                         UserUtils.ToastMessages(otp_activity.this, message);
@@ -683,6 +784,8 @@ public class otp_activity extends AppCompatActivity {
 
         btnResend.setEnabled(false);
         btnResend.setAlpha(0.5f);
+        layoutResendWhatsapp.setEnabled(false);
+        layoutResendWhatsapp.setAlpha(0.5f);
         isTimerRunning = true;
 
         countDownTimer = new CountDownTimer(durationMillis, 1000) {
@@ -700,9 +803,9 @@ public class otp_activity extends AppCompatActivity {
                         : String.format("%02d:%02d", minutes, seconds);
 
                 if (isLongWait) {
-                    tvTimer.setText("تم تجاوز الحد. حاول بعد: " + timeString);
+                    tvTimer.setText(UserUtils.getMessageFromLocalNew(335, dbHelper) + " " + timeString);
                 } else {
-                    tvTimer.setText("إعادة الإرسال متاحة خلال: " + timeString);
+                    tvTimer.setText(UserUtils.getMessageFromLocalNew(336, dbHelper) + " " + timeString);
                 }
             }
 
@@ -710,13 +813,16 @@ public class otp_activity extends AppCompatActivity {
             public void onFinish() {
                 btnResend.setEnabled(true);
                 btnResend.setAlpha(1.0f);
+                layoutResendWhatsapp.setEnabled(true);
+                layoutResendWhatsapp.setAlpha(1.0f);
                 tvTimer.setVisibility(View.GONE);
                 isTimerRunning = false;
             }
         }.start();
     }
 
-    private void resendOtp(String phone) {
+
+    private void resendOtp(String phone, int p_otp_typ) {
         if (isTimerRunning) return;
 
         SharedPreferences otpPrefs = getSharedPreferences("OTPLimits", MODE_PRIVATE);
@@ -725,54 +831,70 @@ public class otp_activity extends AppCompatActivity {
         long currentTime = System.currentTimeMillis();
         long oneHour = TimeUnit.HOURS.toMillis(1);
 
-        // التحقق من تصفير العداد (فقط إذا انتهت الساعة فعلاً)
         if (firstAttemptTime != 0 && (currentTime - firstAttemptTime) > oneHour) {
             count = 0;
-            firstAttemptTime = 0; // سنعيد ضبطه عند أول إرسال جديد
+            firstAttemptTime = 0;
             otpPrefs.edit().putInt("otp_count", 0).putLong("first_attempt_time", 0).apply();
         }
 
-        // المنع إذا وصل للحد الأقصى
         if (count >= 5) {
             long timeLeftMillis = oneHour - (currentTime - firstAttemptTime);
             if (timeLeftMillis > 0) {
                 startResendTimer(timeLeftMillis, true);
-                UserUtils.ToastMessages(this, "انتظر انتهاء الساعة للمحاولة مجدداً");
-
+                UserUtils.ToastMessages(this, UserUtils.getMessageFromLocalNew(337, dbHelper));
                 return;
             }
         }
 
         ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("جاري إرسال رمز التحقق...");
+        progressDialog.setCancelable(false);
         progressDialog.show();
 
         StringRequest request = new StringRequest(Request.Method.POST, BASE_URL + "send_otp/",
                 response -> {
                     progressDialog.dismiss();
 
+                    // التحديث الهام: استخراج التوكن الجديد وتحديث المتغير العام للاكتيفيتي فوراً
+                    if (response != null && !response.isEmpty() && !response.contains("error")) {
+                        this.token = response.replace("\"", "").trim();
+                    }
+
                     int newCount = otpPrefs.getInt("otp_count", 0) + 1;
                     SharedPreferences.Editor editor = otpPrefs.edit();
-
                     if (newCount == 1) {
                         editor.putLong("first_attempt_time", System.currentTimeMillis());
                     }
-
                     editor.putInt("otp_count", newCount);
                     editor.apply();
+
                     if (newCount >= 4) {
                         startResendTimer(oneHour, true);
                     } else {
                         startResendTimer(60000, false);
                     }
                 },
-                error -> { /* handle error */ }) {
+                error -> {
+                    progressDialog.dismiss();
+                    UserUtils.sendLog(this, "resendOtp_Error", error.toString(), "", "otp_activity");
+                }) {
+
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put("P_mobile", phone);
+                params.put("p_otp_typ", String.valueOf(p_otp_typ));
                 return params;
             }
+
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/x-www-form-urlencoded");
+                return headers;
+            }
         };
+
         Volley.newRequestQueue(this).add(request);
     }
 

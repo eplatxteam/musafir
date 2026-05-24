@@ -6,20 +6,18 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
@@ -36,13 +34,13 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import android.widget.ProgressBar;
-import android.widget.Toast;
+
+import jp.wasabeef.blurry.Blurry;
 
 //import jp.wasabeef.blurry.Blurry;
 
@@ -139,7 +137,13 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 int number_of_seats = trip.getInt("number_of_seats");
                 String preferred_departure_date = trip.getString("preferred_departure_date");
                 int privates = trip.getInt("private");
+                String creation_date = trip.optString("creation_date", "");
 
+                if (creation_date != null && !creation_date.isEmpty()) {
+                    tripHolder.tvOrderTime.setText(UserUtils.getTimeAgo(creation_date));
+                } else {
+                    tripHolder.tvOrderTime.setText("منذ قليل");
+                }
                 if (privates == 0) {
                     tripHolder.tripLocation.setText("تشاركية");
                 } else {
@@ -220,8 +224,12 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private void showCancelReasonDialog(int tripId) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        DBHelper dbHelper = new DBHelper(context);
 
+        // 1. الحصول على الـ Root View لتطبيق التغبيش عليه
+        ViewGroup rootLayout = (ViewGroup) ((Activity) context).getWindow().getDecorView().getRootView();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         View dialogView = inflater.inflate(R.layout.dialog_cancel_trip, null);
         builder.setView(dialogView);
 
@@ -230,28 +238,38 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         Button btnCancel = dialogView.findViewById(R.id.btnNo);
 
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
 
-//        ViewGroup decorView = ((Activity) context).getWindow().getDecorView().findViewById(android.R.id.content);
-//        Blurry.with(context).radius(15).sampling(2).onto(decorView);
-//        dialog.setOnDismissListener(d -> Blurry.delete(decorView));
+        // جعل الخلفية شفافة للحفاظ على حواف bg_dialog الدائرية
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        // إدارة التغبيش للديالوج الأول
+        dialog.setOnShowListener(d -> Blurry.with(context).radius(15).sampling(2).onto(rootLayout));
+        dialog.setOnDismissListener(d -> Blurry.delete(rootLayout));
 
         dialog.show();
+
+        // ضبط قياسات العرض (85% من الشاشة)
+        if (dialog.getWindow() != null) {
+            int width = (int) (context.getResources().getDisplayMetrics().widthPixels * 0.80);
+            dialog.getWindow().setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT);
+        }
+
         UserUtils.setEditTextState(input, false);
 
         btnAdd.setOnClickListener(v -> {
             String reason = input.getText().toString().trim();
             if (reason.isEmpty()) {
-                DBHelper dbHelper = new DBHelper(context);
                 input.setError("الرجاء إدخال سبب الإلغاء");
                 UserUtils.setEditTextState(input, true);
                 return;
-            } else {
-                UserUtils.setEditTextState(input, false);
             }
 
+            dialog.dismiss();
+
             AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
-            View dialogView2 = LayoutInflater.from(context).inflate(R.layout.dialog_custom_confirmationt, null);
+            View dialogView2 = inflater.inflate(R.layout.dialog_custom_confirmationt, null);
             builder2.setView(dialogView2);
 
             Button btnYes = dialogView2.findViewById(R.id.btnYes);
@@ -261,17 +279,17 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             btnYes.setTextSize(18);
             btnNo.setTextSize(18);
 
-            exitDialog = builder2.create();
+            AlertDialog exitDialog = builder2.create();
 
-//            Blurry.with(context).radius(15).sampling(2).onto(decorView);
-//            exitDialog.setOnDismissListener(d2 -> Blurry.delete(decorView));
+            exitDialog.setOnShowListener(d -> Blurry.with(context).radius(15).sampling(2).onto(rootLayout));
+            exitDialog.setOnDismissListener(d -> Blurry.delete(rootLayout));
 
-            dialog.dismiss();
+            if (exitDialog.getWindow() != null) {
+                exitDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            }
 
             btnYes.setOnClickListener(v2 -> {
                 String cancellationDate = getCurrentDateTime();
-                DBHelper dbHelper = new DBHelper(context);
-
                 UserUtils.getMessageFromLocal(50, dbHelper, new UserUtils.MessageCallback() {
                     @Override
                     public void onSuccess(String message) {
@@ -288,17 +306,21 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             });
 
             btnNo.setOnClickListener(v2 -> exitDialog.dismiss());
-
-            if (exitDialog.getWindow() != null) {
-                exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
-            }
-
             exitDialog.show();
+
+            // ضبط قياسات العرض للديالوج الثاني أيضاً
+            if (exitDialog.getWindow() != null) {
+                int width = (int) (context.getResources().getDisplayMetrics().widthPixels * 0.80);
+                exitDialog.getWindow().setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT);
+            }
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
+        RelativeLayout btnCloseHeader = dialogView.findViewById(R.id.dialogCancelButton);
+        if (btnCloseHeader != null) {
+            btnCloseHeader.setOnClickListener(v1 -> dialog.dismiss());
+        }
     }
-
 
     private String getCurrentDateTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
@@ -320,14 +342,15 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     break;
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
     }
 
 
     public static class TripViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTripTitle, tvTripStatus, tvTripDate, tvTripSeats, tvTripHistory, tripLocation;
+        TextView tvTripTitle, tvTripStatus, tvTripDate, tvTripSeats, tvTripHistory, tripLocation, tvOrderTime;
         ImageView btnCancelTrip, btnDetails;
         //        LinearLayout notes, notesdriver;
         int tripId;
@@ -337,12 +360,10 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public TripViewHolder(View itemView, OnTripCancelListener listener) {
             super(itemView);
             this.cancelListener = listener;
-//            tvTripNotesDriver = itemView.findViewById(R.id.tvTripNotesDriver);
-//            notes = itemView.findViewById(R.id.notes);
-//            notesdriver = itemView.findViewById(R.id.notesdriver);
             conTrip = itemView.findViewById(R.id.conTrip);
             tvTripHistory = itemView.findViewById(R.id.tvTripHistory);
             tvTripSeats = itemView.findViewById(R.id.tvTripSeats);
+            tvOrderTime = itemView.findViewById(R.id.tvOrderTime);
             tvTripDate = itemView.findViewById(R.id.tvTripDate);
             tripLocation = itemView.findViewById(R.id.tripLocation);
             tvTripTitle = itemView.findViewById(R.id.tvTripTitle);
@@ -376,6 +397,7 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void addTrips(List<JSONObject> newTrips) {
         int start = tripList.size();
+        tripList.clear();
         tripList.addAll(newTrips);
         notifyItemRangeInserted(start, newTrips.size());
     }
@@ -393,9 +415,16 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    public void clearTrips() {
+        tripList.clear();
+        notifyDataSetChanged();
+    }
+
     public void removeLoadingFooter() {
+
         if (isLoadingAdded) {
             isLoadingAdded = false;
+
             notifyItemRemoved(tripList.size());
         }
     }
@@ -488,7 +517,7 @@ public class TripAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             } catch (Exception e) {
                 ((Activity) context).runOnUiThread(() -> {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             UserUtils.ToastMessages((Activity) context, message);

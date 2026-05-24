@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,18 +11,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class TravelerRequestsAdapter extends RecyclerView.Adapter<TravelerRequestsAdapter.ViewHolder> {
 
@@ -92,6 +86,7 @@ public class TravelerRequestsAdapter extends RecyclerView.Adapter<TravelerReques
                         ((HomePage) context).openFullScreenFragment(fragment, "تفاصيل الخدمة", R.drawable.solo_traveller, 0);
                     }
                 } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             });
 
@@ -100,8 +95,6 @@ public class TravelerRequestsAdapter extends RecyclerView.Adapter<TravelerReques
 
 
             holder.txtPersons.setText(text);
-//            int numStatus = item.optInt("number_status", 0);
-//            holder.numberStatus.setText(numStatus + "");
 
             String date = item.optString("created_at", "");
             try {
@@ -120,6 +113,7 @@ public class TravelerRequestsAdapter extends RecyclerView.Adapter<TravelerReques
             holder.imgIcon.setImageResource(getIconResId(iconName));
 
         } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

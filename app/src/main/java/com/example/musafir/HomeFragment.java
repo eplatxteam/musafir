@@ -17,13 +17,19 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -35,26 +41,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -65,7 +72,8 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.bumptech.glide.Glide;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.textfield.TextInputLayout;
 import com.scottyab.rootbeer.RootBeer;
 
 import org.jetbrains.annotations.Nullable;
@@ -95,12 +103,13 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.musafir.LocationWorker.getCityNameFromIp;
-import static com.example.musafir.R.color.primary;
+
+import javax.security.auth.callback.Callback;
 
 import jp.wasabeef.blurry.Blurry;
 
 public class HomeFragment extends Fragment {
-
+    private String nextTripsUrl = null;
     String BASE_URL = UserUtils.BASE_URL;
     String ImageUrl = UserUtils.ImageUrl;
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -132,6 +141,7 @@ public class HomeFragment extends Fragment {
     int pickupOrders;
     int dropoffOrders;
     int passport_required;
+    int visa_required;
     int company_no;
     String driver_id, carCode, carCodes, carCodesId, LocationTrip, DateTrip;
 
@@ -140,7 +150,7 @@ public class HomeFragment extends Fragment {
     private LinearLayout fromLayout, toLayout;
     LottieAnimationView lottieWave;
     //    RadioGroup countriesRadioGroup;
-    ImageView filterIcon;
+    LinearLayout filterIcon;
     TextView textFromCity, textToCity;
     private String tripType;
     SwipeRefreshLayout swipeRefreshLayout;
@@ -148,6 +158,15 @@ public class HomeFragment extends Fragment {
     private String latitude;
     private String longitude;
     int defaultCityId;
+    private int selectedCountryId = -1;
+    int v_reception_car = 0;
+    Spinner vehicleTypeSpinner, companySpinner;
+    List<String> vehicleTypeNames = new ArrayList<>();
+    Map<String, Integer> vehicleTypeMap = new HashMap<>();
+    private Integer vehicleTypeFromArgs = null;
+    List<String> companyNames = new ArrayList<>();
+    Map<String, Integer> companyMap = new HashMap<>();
+    private Integer lastCompanyId = null;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -158,8 +177,6 @@ public class HomeFragment extends Fragment {
         carIcon = view.findViewById(R.id.carIcon);
         SharedPreferences prefs = SharedPrefsHelper.get(getContext());
 
-//        String defaultCity = prefs.getString("default_city", "حدد المدينة");
-//        textFromCity.setText(defaultCity);
         defaultCityId = prefs.getInt("default_city_id", -1);
         carIcon.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
@@ -177,7 +194,10 @@ public class HomeFragment extends Fragment {
         if (getArguments() != null) {
             tripType = getArguments().getString("trip_type");
         }
+        DBHelper dbHelper = new DBHelper(getContext());
 
+        TextView textnodata = view.findViewById(R.id.textnodata);
+        textnodata.setText(UserUtils.getMessageFromLocalNew(404, dbHelper));
         noDataText = view.findViewById(R.id.noDataText);
         noInternet = view.findViewById(R.id.noInternet);
         scrollView = view.findViewById(R.id.searchContainer);
@@ -188,7 +208,6 @@ public class HomeFragment extends Fragment {
         fromLayout = view.findViewById(R.id.fromLayout);
         toLayout = view.findViewById(R.id.toLayout);
         RootBeer rootBeer = new RootBeer(getContext());
-        DBHelper dbHelper = new DBHelper(getContext());
         int passengerId = prefs.getInt("user_id", -1);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
 //        initExtraFeatures(getView(), getLayoutInflater());
@@ -239,8 +258,9 @@ public class HomeFragment extends Fragment {
             swipeRefreshLayout.setOnRefreshListener(() -> {
                 if (passengerId != -1) {
                     refreshHomeData(swipeRefreshLayout, prefs, dbHelper);
-                    getCityNameFromIp(getContext(), (cityAr, cityId) -> {
+                    getCityNameFromIp(getContext(), (cityAr, cityId, country_code) -> {
                         prefs.edit().putString("default_city", cityAr).apply();
+                        prefs.edit().putString("country_code", country_code).apply();
                         prefs.edit().putInt("default_city_id", cityId).apply();
                     });
                 } else {
@@ -252,7 +272,7 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onBookTrip(String Location, String dateTrip, int id, int trip_id2, int seats, int price, int pickupOrder, int dropoffOrder,
                                        String driverid, String car_code, String car_codes, String car_codes_id, int discountPrice,
-                                       int passport_requireds, int p_company_no) {
+                                       int passport_requireds, int visa_requireds, int p_company_no,String dateTimeString) {
                     tripId = id;
                     tripId2 = trip_id2;
                     LocationTrip = Location;
@@ -267,6 +287,7 @@ public class HomeFragment extends Fragment {
                     dropoffOrders = dropoffOrder;
                     driver_id = driverid;
                     passport_required = passport_requireds;
+                    visa_required = visa_requireds;
                     company_no = p_company_no;
 
 
@@ -295,10 +316,29 @@ public class HomeFragment extends Fragment {
                                     .replace(R.id.full_screen_container, fragment)
                                     .addToBackStack(null)
                                     .commit();
-
-
                         } else {
-                            showBookingDialog();
+                            Fragment custombookings = new CustomBooking();
+                            Bundle args = new Bundle();
+                            args.putString("car_code", carCode);
+                            args.putInt("trip_id", tripId2);
+                            args.putInt("pricePerSeat", pricePerSeat);
+                            args.putInt("pickup_orders", pickupOrders);
+                            args.putInt("dropoff_orders", dropoffOrders);
+                            args.putInt("passenger_id", passengerId);
+                            args.putString("DateTrip", dateTimeString );
+                            args.putString("carCodes", carCodes);
+                            args.putString("driver_id", driver_id);
+                            args.putString("car_codes_id", carCodesId);
+                            args.putInt("discountPricePerSeat", discountPricePerSeat);
+                            args.putInt("availableSeats", seats);
+                            args.putInt("passport_required", passport_required);
+                            args.putInt("visa_required", visa_required);
+                            args.putInt("company_no", company_no);
+                            args.putInt("v_reception_car", v_reception_car);
+                            args.putString("location_trip", LocationTrip);
+
+                            custombookings.setArguments(args);
+                            ((HomePage) getContext()).openFullScreenFragment(custombookings, "حجز رحلة", R.drawable.booking, 2);
                         }
                     } else {
                         UserUtils.getMessageFromLocal(39, dbHelper, new UserUtils.MessageCallback() {
@@ -362,7 +402,6 @@ public class HomeFragment extends Fragment {
                                     String name = booking.getString("traveler_name");
                                     int seats = booking.getInt("number_of_seats");
 
-                                    // كلمة مقعد أو مقاعد
                                     String seatWord = (seats == 1) ? "مقعد" : "مقاعد";
 
                                     travelers.append("- ").append(name)
@@ -378,10 +417,10 @@ public class HomeFragment extends Fragment {
 
                                     TextView textView = new TextView(context);
                                     textView.setText(travelers.toString());
-                                    textView.setTextSize(18);
+                                    textView.setTextSize(16);
                                     textView.setPadding(32, 32, 32, 32);
 
-                                    Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.linaround_bold);
+                                    Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.rptregular);
                                     textView.setTypeface(typeface);
 
                                     textView.setGravity(Gravity.CENTER);
@@ -389,17 +428,17 @@ public class HomeFragment extends Fragment {
 
                                     TextView titleView = new TextView(context);
                                     titleView.setText("المسافرون في الرحلة");
-                                    titleView.setTextSize(24);
+                                    titleView.setTextSize(20);
                                     titleView.setTypeface(typeface);
-                                    titleView.setTextColor(ContextCompat.getColor(context, R.color.primary));
+                                    titleView.setTextColor(ContextCompat.getColor(context, R.color.primary2));
                                     textView.setTextColor(ContextCompat.getColor(context, R.color.text));
                                     titleView.setGravity(Gravity.CENTER);
                                     titleView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                                     titleView.setPadding(16, 16, 16, 16);
 
                                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                    builder.setCustomTitle(titleView)   // العنوان المخصص
-                                            .setView(textView)          // النص
+                                    builder.setCustomTitle(titleView)
+                                            .setView(textView)
                                             .setPositiveButton("حسناً", null);
 
                                     AlertDialog dialog = builder.create();
@@ -410,14 +449,28 @@ public class HomeFragment extends Fragment {
                                     dialog.show();
 
                                     Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+//                                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) positiveButton.getLayoutParams();
+//                                    params.width = MATCH_PARENT;
+//                                    positiveButton.setLayoutParams(params);
+//                                    positiveButton.setGravity(Gravity.CENTER);
+//                                    positiveButton.setBackgroundColor(ContextCompat.getColor(context, R.color.primary2));
+//                                    positiveButton.setTextColor(ContextCompat.getColor(context, R.color.white));
+//                                    positiveButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+//                                    positiveButton.setTextSize(20);
+//                                    positiveButton.setPadding(16, 16, 16, 16);
+
+                                    positiveButton.setAllCaps(false);
+                                    positiveButton.setTypeface(typeface);
+                                    positiveButton.setTextSize(18);
                                     LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) positiveButton.getLayoutParams();
-                                    params.width = MATCH_PARENT; // الزر ياخذ العرض كامل
+                                    params.width = MATCH_PARENT;
+
+                                    positiveButton.setBackgroundColor(ContextCompat.getColor(context, R.color.primary2));
+                                    positiveButton.setTextColor(ContextCompat.getColor(context, R.color.white));
+                                    params.setMargins(40, 10, 40, 10);
                                     positiveButton.setLayoutParams(params);
+                                    positiveButton.setMinimumHeight(120);
                                     positiveButton.setGravity(Gravity.CENTER);
-                                    positiveButton.setBackgroundColor(ContextCompat.getColor(context, R.color.primary3));
-                                    positiveButton.setTextColor(ContextCompat.getColor(context, primary));
-                                    positiveButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                                    positiveButton.setTextSize(20);
                                 });
                             } else {
                                 UserUtils.sendLog(getContext(), "onDetails", String.valueOf(responseCode), String.valueOf(responseCode), "Home Fragment");
@@ -494,30 +547,61 @@ public class HomeFragment extends Fragment {
             recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
 
+//            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//                @Override
+//                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+//                    super.onScrolled(recyclerView, dx, dy);
+//                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+//                    if (layoutManager == null) return;
+//                    int totalItemCount = layoutManager.getItemCount();
+//                    int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+//                    if (firstLoadDone && !isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 2) {
+//                        recyclerView.post(() -> fetchTrips(currentPage + 1, lastFromCityId, lastToCityId, lastDate,
+//                                lastPassengers, lastFamiliesOnly ? 1 : 0, null, defaultCityId, null));
+//                    } else {
+//                    }
+//                }
+//            });
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
+
+                    // التحقق من أن المستخدم يسحب للأسفل فقط
+                    if (dy <= 0) return;
+
                     LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    if (layoutManager == null) return;
-                    int totalItemCount = layoutManager.getItemCount();
-                    int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
-                    if (firstLoadDone && !isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 2) {
-                        recyclerView.post(() -> fetchTrips(currentPage + 1, lastFromCityId, lastToCityId, lastDate,
-                                lastPassengers, lastFamiliesOnly ? 1 : 0, null, defaultCityId, null));
-                    } else {
+                    if (layoutManager != null) {
+                        int totalItemCount = layoutManager.getItemCount();
+                        int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+
+                        // إذا شارف المستخدم على الوصول لنهاية القائمة ولم يكن هناك تحميل مسبق وليست الصفحة الأخيرة
+                        if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 2) {
+
+                            // تفعيل حالة التحميل لعدم تكرار الطلب
+                            isLoading = true;
+
+                            // إظهار اللودر أسفل الريسايكلر
+                            recyclerView.post(() -> adapter.addLoadingFooter());
+
+                            // جلب الصفحة التالية
+                            int nextPage = currentPage + 1;
+                            recyclerView.post(() -> fetchTrips(nextPage, lastFromCityId, lastToCityId, lastDate,
+                                    lastPassengers, lastFamiliesOnly ? 1 : 0, null, defaultCityId, null));
+
+                        }
                     }
                 }
             });
 
-            fetchTrips(1, null, lastToCityId, lastDate, lastPassengers, lastFamiliesOnly ? 1 : 0, null, defaultCityId, null);
+//            fetchTrips(1, null, lastToCityId, lastDate, lastPassengers, lastFamiliesOnly ? 1 : 0, null, defaultCityId, null);
 
             if (tripList.size() > 0) {
                 lottieWave.setVisibility(View.GONE);
             }
         }
-        initExtraFeatures(view, inflater);
 
+        initExtraFeatures(view, inflater);
         return view;
     }
 
@@ -558,35 +642,32 @@ public class HomeFragment extends Fragment {
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
         dialog.show();
 
-        // جلب المدن
-        // 1. جلب البيانات الخام من قاعدة البيانات (هذه القائمة للمقارنة فقط)
         DBHelper db = new DBHelper(getContext());
         List<DBHelper.City> allCitiesFromDB = db.getAllCities2();
 
-// 2. إنشاء قائمة فارغة للنتائج المفلترة التي ستعرض في الديالوج
         List<DBHelper.City> allCities = new ArrayList<>();
 
-// 3. تحويل النوع لرقم
         int type = (currentTripType != null) ? Integer.parseInt(currentTripType) : 0;
-
-// 4. الفلترة
+        Integer otherCityId = isFromCity ? lastToCityId : lastFromCityId;
         for (DBHelper.City city : allCitiesFromDB) {
+            if (otherCityId != null && city.getId() == (int)otherCityId) {
+                continue;
+            }
             if (type == 3) {
                 if (city.getCountryId() == 1) {
                     allCities.add(city);
                 }
             } else if (type == 2) {
-                if (!isFromCity) {
-                    // "إلى": الدول الخارجية فقط
-                    if (city.getCountryId() != 1) {
+//                if (!isFromCity) {
+//                    if (city.getCountryId() == 1) {
                         allCities.add(city);
-                    }
-                } else {
+//                    }
+//                } else {
                     // "من": المدن المحلية فقط
-                    if (city.getCountryId() == 1) {
-                        allCities.add(city);
-                    }
-                }
+//                    if (city.getCountryId() == 1) {
+//                    allCities.add(city);
+//                    }
+//                }
             } else {
                 // النوع 1 أو أي نوع آخر: أضف كل شيء
                 allCities.add(city);
@@ -680,14 +761,34 @@ public class HomeFragment extends Fragment {
     }
 
     private void refreshHomeData(SwipeRefreshLayout swipeRefreshLayout, SharedPreferences prefs, DBHelper dbHelper) {
+        if (!UserUtils.isNetworkAvailable(getContext())) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(getActivity(), message);
+                }
 
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         Context context = getContext();
         if (context == null || !isAdded()) return;
         lastToCityId = null;
+        lastFromCityId = defaultCityId;
         lastVehicleId = null;
 //        familiesOnly = 0;
         lastPassengers = 1;
-
+        if (defaultCityId != 0) {
+            String defaultCityName = dbHelper.getCityNameById(defaultCityId);
+            if (defaultCityName != null) {
+                textFromCity.setText(defaultCityName);
+            }
+        } else {
+            textFromCity.setText("حدد المدينة");
+        }
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
         lastDate = sdf.format(calendar.getTime());
@@ -698,6 +799,8 @@ public class HomeFragment extends Fragment {
         }
 
         UserUtils.checkAppUpdate(context);
+        UserUtils.app_Pages(context);
+        UserUtils.fetchBalance(getContext());
 
         UserUtils.fetchServiceHome(context, dbHelper, new PageHome.OnServiceHomeFetchedListener() {
             @Override
@@ -707,7 +810,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onError(String error) {
                 if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             if (getActivity() != null)
@@ -729,19 +832,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
 
@@ -754,6 +845,7 @@ public class HomeFragment extends Fragment {
             public void onError(String error) {
             }
         });
+        UserUtils.fetchAndSaveContactInfo(context, dbHelper);
 
         UserUtils.loadVehicleTypesToDB(context);
 
@@ -764,17 +856,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-//                        UserUtils.ToastMessages(getActivity(), message);
-                    }
 
-                    @Override
-                    public void onError(String error) {
-                    }
-
-                });
             }
         });
 
@@ -788,19 +870,19 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
+            }
+        });
+        UserUtils.syncDayTimesFromServer(context, new UserUtils.DayTimeCallback() {
+
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onError(String error) {
+
             }
         });
 
@@ -814,19 +896,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
 
@@ -840,19 +910,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
 
@@ -863,19 +921,18 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
+            }
+        });
+        UserUtils.fetchAndSavePayTypes(context, new UserUtils.GenericCallback() {
+
+            @Override
+            public void onSuccess(String message) {
+            }
+
+            @Override
+            public void onError(String error) {
+
             }
         });
         UserUtils.fetchCompany(context, new UserUtils.OnCodesFetchedListener() {
@@ -885,19 +942,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
 
@@ -942,661 +987,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private AlertDialog exitDialog;
-
-    private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
-    }
-
-    private void addNameField(LinearLayout container, String hint, String initialText, InputFilter[] filters) {
-        Context context = getContext();
-        if (context == null) return;
-
-        LinearLayout row = new LinearLayout(context);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        // row.setBackgroundResource(R.drawable.edittext_background);
-        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        rowParams.setMargins(10, 15, 10, 0);
-        row.setLayoutParams(rowParams);
-        row.setPadding(15, 5, 15, 5);
-
-        // 1. حقل إدخال الاسم
-        EditText nameInput = new EditText(context);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f);
-        nameInput.setLayoutParams(lp);
-        nameInput.setHint(hint);
-        nameInput.setText(initialText);
-        nameInput.setBackground(null);
-        nameInput.setFilters(filters);
-        nameInput.setPadding(15, 25, 15, 25);
-        UserUtils.setEditTextState(nameInput, false);
-
-        // 2. أيقونة الحالة (سنحتاجها للتحقق، نجعلها مخفية دائماً)
-        ImageView statusIcon = new ImageView(context);
-        statusIcon.setImageResource(R.drawable.upload_success); // أيقونة صح للنجاح
-        statusIcon.setVisibility(View.GONE); // مخفية دائماً، نستخدمها فقط كعلم للتحقق
-        statusIcon.setColorFilter(Color.parseColor("#4CAF50"));
-        LinearLayout.LayoutParams iconLp = new LinearLayout.LayoutParams(50, 50);
-        statusIcon.setLayoutParams(iconLp);
-
-        ImageButton btnUpload = new ImageButton(context);
-        btnUpload.setImageResource(R.drawable.ic_upload);
-        btnUpload.setBackgroundResource(android.R.color.transparent);
-        btnUpload.setPadding(10, 10, 10, 10);
-        btnUpload.setColorFilter(ContextCompat.getColor(context, R.color.primary));
-
-        if (passport_required == 1) {
-            btnUpload.setVisibility(View.VISIBLE);
-        } else {
-            btnUpload.setVisibility(View.GONE);
-        }
-
-        btnUpload.setOnClickListener(v -> {
-            currentViewForImage = nameInput;
-            openGallery();
-        });
-
-        row.addView(nameInput);
-        row.addView(statusIcon);
-        row.addView(btnUpload);
-
-        nameInput.setTag(R.id.tag_status_icon, statusIcon);
-        nameInput.setTag(R.id.tag_upload_button, btnUpload);
-
-        container.addView(row);
-    }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-            Uri selectedImageUri = data.getData();
-            if (currentViewForImage != null && selectedImageUri != null) {
-
-                currentViewForImage.setTag(selectedImageUri);
-
-                View statusIcon = (View) currentViewForImage.getTag(R.id.tag_status_icon);
-                if (statusIcon != null) {
-                    statusIcon.setVisibility(View.INVISIBLE);
-                }
-
-                 ImageButton btnUpload = (ImageButton) currentViewForImage.getTag(R.id.tag_upload_button);
-                if (btnUpload != null) {
-                    btnUpload.setImageResource(R.drawable.upload_success);
-                    btnUpload.setColorFilter(Color.parseColor("#4CAF50"));
-                }
-
-//                UserUtils.ToastMessages(getActivity(), "تم اختيار صورة الجواز بنجاح");
-            }
-        }
-    }
-
-    @SuppressLint({"ResourceAsColor", "SetTextI18n"})
-    private void showBookingDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        DBHelper dbHelper = new DBHelper(getContext());
-
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_custom_booking, null);
-        builder.setView(dialogView);
-
-        // العناصر من XML
-        TextView passengersTextView = dialogView.findViewById(R.id.inputSeats);
-        TextView totalPriceTextView = dialogView.findViewById(R.id.totalPriceTextView);
-        EditText inputNotes = dialogView.findViewById(R.id.inputNotes);
-
-        ImageView btnMinus = dialogView.findViewById(R.id.btnMinus);
-        ImageView btnPlus = dialogView.findViewById(R.id.btnPlus);
-        Button btnAdd = dialogView.findViewById(R.id.btnYes);
-        // Button btnCancel = dialogView.findViewById(R.id.btnNo);
-        LinearLayout dialogCancelButton = dialogView.findViewById(R.id.dialogCancelButton);
-        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
-
-        TextView inputChildren = dialogView.findViewById(R.id.inputSeatschild);
-        TextView tvDate = dialogView.findViewById(R.id.tvDate);
-        TextView tvLocation = dialogView.findViewById(R.id.tvLocation);
-        TextView IdTrip = dialogView.findViewById(R.id.IdTrip2);
-        ImageView btnMinusChild = dialogView.findViewById(R.id.btnMinuschild);
-        ImageView btnPlusChild = dialogView.findViewById(R.id.btnPluschild);
-        UserUtils.setEditTextState(inputNotes, false);
-        LinearLayout paymentContainer = dialogView.findViewById(R.id.paymentMethodsContainerInBooking);
-        SharedPreferences prefs = SharedPrefsHelper.get(getContext());
-
-        LinearLayout childrenNamesContainer = dialogView.findViewById(R.id.childrenNamesContainer);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", new Locale("en"));
-        try {
-            Date date = sdf.parse(DateTrip);
-
-            SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE", new Locale("ar"));
-            String dayOfWeek = dayFormat.format(date);
-
-            tvDate.setText("(" + dayOfWeek + ") " + DateTrip);
-
-        } catch (ParseException e) {
-            tvDate.setText(DateTrip); // لو حصل خطأ، يظهر التاريخ فقط
-        }
-
-        IdTrip.setText("رقم الرحلة: " + tripId2);
-        tvLocation.setText(LocationTrip);
-        LinearLayout adultsNamesContainer = new LinearLayout(getContext());
-        adultsNamesContainer.setOrientation(LinearLayout.VERTICAL);
-        adultsNamesContainer.setLayoutParams(new LinearLayout.LayoutParams(
-                MATCH_PARENT,
-                WRAP_CONTENT
-        ));
-        childrenNamesContainer.addView(adultsNamesContainer, 0); // فوق الأطفال
-
-
-        final int[] numSeats = {1};
-        final int[] numChildren = {0};
-
-        double seatPrice = (discountPricePerSeat > 0) ? discountPricePerSeat : pricePerSeat;
-        NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
-        numberFormat.setMaximumFractionDigits(0);
-
-        totalPriceTextView.setText(numberFormat.format(seatPrice) + " " + carCodes);
-
-
-        btnMinus.setOnClickListener(v -> {
-            if (numSeats[0] > 1) {
-                numSeats[0]--;
-                passengersTextView.setText(String.valueOf(numSeats[0]));
-                double totalPrice = (numSeats[0] + numChildren[0]) * seatPrice;
-                totalPriceTextView.setText(numberFormat.format(totalPrice) + " " + carCodes);
-
-                // إزالة آخر حقل اسم للكبار
-                int count = adultsNamesContainer.getChildCount();
-                if (count > 0) adultsNamesContainer.removeViewAt(count - 1);
-            }
-        });
-        InputFilter arabicFilter = (source, start, end, dest, dstart, dend) -> {
-            for (int i = start; i < end; i++) {
-                char c = source.charAt(i);
-                if (!((c >= 0x0621 && c <= 0x064A) || c == ' ')) {
-                    return "";
-                }
-            }
-            return null;
-        };
-
-
-//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-        String full_name = prefs.getString("full_name", "");
-//        EditText firstAdultName = new EditText(getContext());
-//        firstAdultName.setHint("الاسم الكامل للراكب 1");
-        // ابحث عن كود إضافة الراكب الأول واستبدله بـ:
-        addNameField(adultsNamesContainer, "الاسم الكامل للراكب 1", full_name, new InputFilter[]{arabicFilter, new InputFilter.LengthFilter(30)});
-//        UserUtils.setEditTextState(firstAdultName, false);
-
-//        firstAdultName.setBackgroundResource(R.drawable.edittext_background);
-//        firstAdultName.setFilters(new InputFilter[]{arabicFilter});
-//        firstAdultName.setFilters(new InputFilter[]{
-//                arabicFilter,
-//                new InputFilter.LengthFilter(30)
-//        });
-//
-//        firstAdultName.setText(full_name);
-//        firstAdultName.setPadding(30, 30, 30, 30);
-//        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
-//                MATCH_PARENT,
-//                WRAP_CONTENT
-//        );
-//        params2.setMargins(10, 15, 10, 0);
-//        firstAdultName.setLayoutParams(params2);
-//        adultsNamesContainer.addView(firstAdultName);
-        btnPlus.setOnClickListener(v -> {
-            if (numSeats[0] + numChildren[0] < availableSeats) {
-                numSeats[0]++;
-                passengersTextView.setText(String.valueOf(numSeats[0]));
-                double totalPrice = (numSeats[0] + numChildren[0]) * seatPrice;
-                totalPriceTextView.setText( numberFormat.format(totalPrice) + " " + carCodes);
-
-//                EditText adultName = new EditText(getContext());
-//                adultName.setHint("الاسم الكامل للراكب " + numSeats[0]);
-                addNameField(adultsNamesContainer, "الاسم الكامل للراكب " + numSeats[0], "", new InputFilter[]{arabicFilter, new InputFilter.LengthFilter(30)});
-//                adultName.setBackgroundResource(R.drawable.edittext_background);
-//                adultName.setFilters(new InputFilter[]{arabicFilter});
-//                adultName.setFilters(new InputFilter[]{
-//                        arabicFilter,
-//                        new InputFilter.LengthFilter(30)
-//                });
-//                UserUtils.setEditTextState(adultName, false);
-
-//                adultName.setPadding(30, 30, 30, 30);
-//                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-//                        MATCH_PARENT,
-//                        WRAP_CONTENT
-//                );
-//                params.setMargins(10, 15, 10, 0);
-//                adultName.setLayoutParams(params);
-//                adultsNamesContainer.addView(adultName);
-
-            } else {
-                UserUtils.getMessageFromLocal(34, dbHelper, new UserUtils.MessageCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        UserUtils.ToastMessages(getActivity(), message);
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                    }
-
-                });
-            }
-        });
-
-        btnPlusChild.setOnClickListener(v -> {
-            if (numSeats[0] + numChildren[0] < availableSeats) {
-                numChildren[0]++;
-                inputChildren.setText(String.valueOf(numChildren[0]));
-                double totalPrice = (numSeats[0] + numChildren[0]) * seatPrice;
-                totalPriceTextView.setText(numberFormat.format(totalPrice) + " " + carCodes);
-//                EditText childName = new EditText(getContext());
-                addNameField(childrenNamesContainer, "الاسم الكامل للطفل " + numChildren[0], "", new InputFilter[]{arabicFilter, new InputFilter.LengthFilter(30)});
-//                childName.setBackgroundResource(R.drawable.edittext_background);
-//                childName.setPadding(30, 30, 30, 30);
-//                childName.setFilters(new InputFilter[]{arabicFilter});
-//                childName.setFilters(new InputFilter[]{
-//                        arabicFilter,
-//                        new InputFilter.LengthFilter(30)
-//                });
-//                UserUtils.setEditTextState(childName, false);
-//
-//                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-//                        MATCH_PARENT,
-//                        WRAP_CONTENT
-//                );
-//                params.setMargins(10, 15, 10, 0);
-//                childName.setLayoutParams(params);
-
-//                childrenNamesContainer.addView(childName);
-            } else {
-                UserUtils.getMessageFromLocal(34, dbHelper, new UserUtils.MessageCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        UserUtils.ToastMessages(getActivity(), message);
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                    }
-
-                });
-            }
-        });
-
-        btnMinusChild.setOnClickListener(v -> {
-            if (numChildren[0] > 0) {
-                numChildren[0]--;
-                inputChildren.setText(String.valueOf(numChildren[0]));
-                double totalPrice = (numSeats[0] + numChildren[0]) * seatPrice;
-                totalPriceTextView.setText(numberFormat.format(totalPrice) + " " + carCodes);
-                int count = childrenNamesContainer.getChildCount();
-                if (count > 0) {
-                    childrenNamesContainer.removeViewAt(count - 1);
-                }
-            }
-        });
-
-        exitDialog = builder.create();
-        ViewGroup decorView = requireActivity().getWindow().getDecorView().findViewById(android.R.id.content);
-        Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
-        exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
-
-        exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
-        exitDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        exitDialog.show();
-
-        dialogCancelButton.setOnClickListener(v -> {
-            exitDialog.dismiss();
-        });
-        btnCancel.setOnClickListener(v -> {
-            exitDialog.dismiss();
-        });
-        btnAdd.setOnClickListener(new UserUtils.SingleClickListener() {
-            @Override
-            public void onSingleClick(View v) {
-                boolean missingPassportImage = false; // متغير جديد للتحقق من الصور
-                int passengerId = prefs.getInt("user_id", -1);
-                String notes = inputNotes.getText().toString().trim();
-
-                StringBuilder adultNamesBuilder = new StringBuilder();
-                boolean missingAdultName = false;
-
-                StringBuilder childNamesBuilder = new StringBuilder();
-                boolean missingChildName = false;
-
-                // 1. معالجة أسماء وصور البالغين
-                for (int i = 0; i < adultsNamesContainer.getChildCount(); i++) {
-                    View view = adultsNamesContainer.getChildAt(i);
-                    if (view instanceof LinearLayout) {
-                        LinearLayout row = (LinearLayout) view;
-                        if (row.getChildCount() > 0 && row.getChildAt(0) instanceof EditText) {
-                            EditText nameField = (EditText) row.getChildAt(0);
-                            String name = nameField.getText().toString().trim();
-
-                            // التحقق من الاسم
-                            if (name.isEmpty()) {
-                                missingAdultName = true;
-                                nameField.setError("يرجى إدخال الاسم الكامل");
-                                UserUtils.setEditTextState(nameField, true);
-                            } else {
-                                adultNamesBuilder.append(name);
-                                UserUtils.setEditTextState(nameField, false);
-                                if (i < adultsNamesContainer.getChildCount() - 1) {
-                                    adultNamesBuilder.append(", ");
-                                }
-                            }
-
-                            // --- التعديل: التحقق من صورة الجواز ---
-                            if (passport_required == 1) {
-                                if (nameField.getTag() == null || !(nameField.getTag() instanceof Uri)) {
-                                    missingPassportImage = true;
-                                    // تغيير لون زر الرفع للأحمر لتنبيه المستخدم
-                                    ImageButton btnUpload = (ImageButton) nameField.getTag(R.id.tag_upload_button);
-                                    if (btnUpload != null) {
-                                        btnUpload.setColorFilter(Color.RED);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 2. معالجة أسماء وصور الأطفال
-                for (int i = 0; i < childrenNamesContainer.getChildCount(); i++) {
-                    View view = childrenNamesContainer.getChildAt(i);
-                    if (view instanceof LinearLayout) {
-                        LinearLayout row = (LinearLayout) view;
-                        if (row.getChildCount() > 0 && row.getChildAt(0) instanceof EditText) {
-                            EditText nameField = (EditText) row.getChildAt(0);
-                            String name = nameField.getText().toString().trim();
-
-                            if (name.isEmpty()) {
-                                missingChildName = true;
-                                nameField.setError("يرجى إدخال الاسم الكامل");
-                                UserUtils.setEditTextState(nameField, true);
-                            } else {
-                                childNamesBuilder.append(name);
-                                UserUtils.setEditTextState(nameField, false);
-                                childNamesBuilder.append(", ");
-                            }
-
-                            // --- التعديل: التحقق من صورة جواز الطفل ---
-                            if (passport_required == 1) {
-                                if (nameField.getTag() == null || !(nameField.getTag() instanceof Uri)) {
-                                    missingPassportImage = true;
-                                    ImageButton btnUpload = (ImageButton) nameField.getTag(R.id.tag_upload_button);
-                                    if (btnUpload != null) {
-                                        btnUpload.setColorFilter(Color.RED);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (missingAdultName || missingChildName) {
-                    UserUtils.getMessageFromLocal(164, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
-
-                        @Override
-                        public void onError(String error) {
-                        }
-
-                    });
-                    return;
-                }
-
-                if (missingPassportImage) {
-                    UserUtils.getMessageFromLocal(261, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
-
-                        @Override
-                        public void onError(String error) {
-                        }
-
-                    });
-                    UserUtils.ToastMessages(getActivity(), "يرجى رفع صور جوازات السفر لجميع الركاب");
-                    return;
-                }
-
-                // إذا وصل الكود هنا، يعني كل البيانات مكتملة
-                String childNames = childNamesBuilder.toString();
-                if (childNames.endsWith(", ")) {
-                    childNames = childNames.substring(0, childNames.length() - 2);
-                }
-
-                String adultNames = adultNamesBuilder.toString().replaceAll(", $", "");
-                int totalSeats = numSeats[0] + numChildren[0];
-                double totalPrice = totalSeats * seatPrice;
-
-                sendBookingRequest(
-                        carCode, tripId2, totalSeats, pickupOrders, dropoffOrders,
-                        passengerId, totalPrice, notes, driver_id,
-                        carCodesId, adultNames, childNames,
-                        0, "waiting", 0, company_no,
-                        adultsNamesContainer, childrenNamesContainer
-                );
-
-                exitDialog.dismiss();
-            }
-        });
-
-    }
-
-    private String getFileNameFromUri(Uri uri) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            Cursor cursor = getContext().getContentResolver().query(uri, null, null, null, null);
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
-            }
-        }
-
-        if (result == null) {
-            result = uri.getLastPathSegment();
-            if (result != null && result.contains("/")) {
-                result = result.substring(result.lastIndexOf("/") + 1);
-            }
-        }
-
-        return result;
-    }
-
-    private void writeFileField(DataOutputStream out, String fieldName, Uri fileUri, String boundary) throws IOException {
-        String originalName = getFileNameFromUri(fileUri); // الاسم الأصلي
-        String uniqueID = UUID.randomUUID().toString();   // جزء فريد
-        String fileName = uniqueID + "_" + originalName;   // الاسم النهائي الفريد
-        String mimeType = getContext().getContentResolver().getType(fileUri);
-
-        out.writeBytes("--" + boundary + "\r\n");
-        out.writeBytes("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"\r\n");
-        out.writeBytes("Content-Type: " + mimeType + "\r\n");
-        out.writeBytes("\r\n");
-        InputStream inputStream = getContext().getContentResolver().openInputStream(fileUri);
-        byte[] buffer = new byte[4096];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            out.write(buffer, 0, bytesRead);
-        }
-        inputStream.close();
-
-        out.writeBytes("\r\n");
-    }
-
-    private void sendBookingRequest(String car_code, int tripId, int numSeats, int pickupOrder,
-                                    int dropoffOrder, int passengerId,
-                                    double totalPrice, String notes, String driver_id, String car_codes,
-                                    String adult_names_str, String child_names_str, int pay_type, String payment_status,
-                                    int request_id, int company_no,
-                                    LinearLayout adultsContainer, LinearLayout childrenContainer) { // أضفنا الحاويات هنا
-
-        DBHelper dbHelper = new DBHelper(getContext());
-        UserUtils.showSuccessGif(3, requireActivity(), null);
-
-        new Thread(() -> {
-            try {
-                String deviceId = UserUtils.getDeviceID(getContext());
-                String deviceInfo = UserUtils.getDeviceInfo();
-
-                URL url = new URL(BASE_URL + "bookings/?device_id=" + deviceId + "&device_info=" + deviceInfo);
-                String boundary = "*****" + System.currentTimeMillis() + "*****";
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setDoOutput(true);
-
-                SharedPreferences prefs = SharedPrefsHelper.get(getContext());
-                String token = prefs.getString("auth_token", null);
-                if (token != null) {
-                    conn.setRequestProperty("Authorization", "Bearer " + token);
-                }
-
-                DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
-
-                // 1. إرسال الحقول النصية
-                writeFormField(dos, "trip", String.valueOf(tripId), boundary);
-                writeFormField(dos, "number_of_seats", String.valueOf(numSeats), boundary);
-                writeFormField(dos, "pickup_point_order", String.valueOf(pickupOrder), boundary);
-                writeFormField(dos, "dropoff_point_order", String.valueOf(dropoffOrder), boundary);
-                writeFormField(dos, "passenger", String.valueOf(passengerId), boundary);
-                writeFormField(dos, "adult_names", adult_names_str, boundary);
-                writeFormField(dos, "child_names", child_names_str, boundary);
-                writeFormField(dos, "total_price", String.valueOf(totalPrice), boundary);
-                writeFormField(dos, "passenger_notes", notes, boundary);
-                writeFormField(dos, "driver_id", driver_id, boundary);
-                writeFormField(dos, "car_code", car_code, boundary);
-                writeFormField(dos, "car_codes", car_codes, boundary);
-                writeFormField(dos, "pay_type", String.valueOf(pay_type), boundary);
-                writeFormField(dos, "payment_status", payment_status, boundary);
-                writeFormField(dos, "request_id", String.valueOf(request_id), boundary);
-                writeFormField(dos, "company_no", String.valueOf(company_no), boundary);
-
-                // 2. رفع صور جوازات البالغين
-                // داخل دالة sendBookingRequest - الجزء الخاص برفع الصور (الخطوة 3 و 4)
-
-// 3. رفع صور جوازات البالغين
-                if (adultsContainer != null) {
-                    for (int i = 0; i < adultsContainer.getChildCount(); i++) {
-                        View row = adultsContainer.getChildAt(i);
-
-                        // التحقق أن العنصر الحالي هو LinearLayout (الصف)
-                        if (row instanceof LinearLayout) {
-                            LinearLayout rowLayout = (LinearLayout) row;
-
-                            // التحقق أن الصف يحتوي على عناصر وأن أول عنصر هو EditText
-                            if (rowLayout.getChildCount() > 0 && rowLayout.getChildAt(0) instanceof EditText) {
-                                EditText nameField = (EditText) rowLayout.getChildAt(0);
-                                Uri imageUri = (Uri) nameField.getTag();
-
-                                if (imageUri != null) {
-                                    writeFileField(dos, "passport_image" + (i + 1), imageUri, boundary);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (childrenContainer != null) {
-                    for (int i = 0; i < childrenContainer.getChildCount(); i++) {
-                        View row = childrenContainer.getChildAt(i);
-
-                        if (row instanceof LinearLayout) {
-                            LinearLayout rowLayout = (LinearLayout) row;
-
-                            if (rowLayout.getChildCount() > 0 && rowLayout.getChildAt(0) instanceof EditText) {
-                                EditText nameField = (EditText) rowLayout.getChildAt(0);
-                                Uri imageUri = (Uri) nameField.getTag();
-
-                                if (imageUri != null) {
-                                    writeFileField(dos, "passport_image" + (i + 1), imageUri, boundary);
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-                dos.writeBytes("--" + boundary + "--\r\n");
-                dos.flush();
-                dos.close();
-
-                // 4. معالجة الرد
-                int status = conn.getResponseCode();
-                InputStream inputStream = (status >= 200 && status < 300) ? conn.getInputStream() : conn.getErrorStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) response.append(line);
-                reader.close();
-
-                getActivity().runOnUiThread(() -> {
-                    UserUtils.hideSuccessGif(getActivity());
-                    if (status >= 200 && status < 300) {
-                        try {
-                            JSONObject respJson = new JSONObject(response.toString());
-                            int bookingIdFromServer = respJson.getInt("booking_id");
-                            dbHelper.addBooking(tripId, bookingIdFromServer, passengerId);
-
-                            UserUtils.getMessageFromLocal(48, dbHelper, new UserUtils.MessageCallback() {
-                                @Override
-                                public void onSuccess(String message) {
-                                    UserUtils.ToastMessages(getActivity(), message);
-                                }
-
-                                @Override
-                                public void onError(String error) {
-                                }
-                            });
-                            Fragment detailsFragment = new BookingDetailsFragment();
-                            Bundle args = new Bundle();
-                            args.putString("related_object_id", String.valueOf(bookingIdFromServer));
-                            detailsFragment.setArguments(args);
-
-                            requireActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.full_screen_container, detailsFragment)
-                                    .addToBackStack(null).commit();
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        UserUtils.sendLog(getContext(), "sendBookingRequest", response.toString(), "Error Status: " + status, "Home Fragment");
-                    }
-                });
-                conn.disconnect();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                getActivity().runOnUiThread(() -> UserUtils.hideSuccessGif(getActivity()));
-            }
-        }).start();
-    }
-
-    private void writeFormField(DataOutputStream request, String fieldName, String fieldValue, String boundary) throws IOException {
-        request.writeBytes("--" + boundary + "\r\n");
-        request.writeBytes("Content-Disposition: form-data; name=\"" + fieldName + "\"\r\n");
-        request.writeBytes("Content-Type: text/plain; charset=UTF-8\r\n\r\n");
-        request.write(fieldValue.getBytes(StandardCharsets.UTF_8));
-        request.writeBytes("\r\n");
-    }
-
     private void initExtraFeatures(View rootView, LayoutInflater inflater) {
 
         SharedPreferences prefs = SharedPrefsHelper.get(getContext());
@@ -1618,16 +1008,11 @@ public class HomeFragment extends Fragment {
             adapter.clear();
             recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
-            fetchTrips(currentPage, lastFromCityId, lastToCityId, null,
+            fetchTrips(currentPage, null, lastToCityId, null,
                     lastPassengers, lastFamiliesOnly ? 1 : 0, null, null, null);
 
         });
-        filterIcon.setOnClickListener(new UserUtils.SingleClickListener() {
-            @Override
-            public void onSingleClick(View v) {
-                showCustomSearchDialog();
-            }
-        });
+
 
         LinearLayout weekContainer = rootView.findViewById(R.id.week_container);
 
@@ -1637,17 +1022,26 @@ public class HomeFragment extends Fragment {
         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
         HorizontalScrollView daysScroll = rootView.findViewById(R.id.days_scroll_view);
 
-        daysScroll.post(() ->
-
-        {
+        daysScroll.post(() -> {
             daysScroll.fullScroll(View.FOCUS_RIGHT);
+        });
+        daysScroll.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_MOVE:
+                    swipeRefreshLayout.setEnabled(false);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    swipeRefreshLayout.setEnabled(true);
+                    break;
+            }
+            return false;
         });
         int today = calendar.get(Calendar.DAY_OF_MONTH);
         LinearLayout[] dayViews = new LinearLayout[14];
 //        LayoutInflater inflater;
-        for (
-                int i = 0;
-                i < 14; i++) {
+        weekContainer.removeAllViews();
+        for (int i = 0; i < 14; i++) {
             View dayView = inflater.inflate(R.layout.week_days, weekContainer, false);
             dayViews[i] = (LinearLayout) dayView;
 
@@ -1680,25 +1074,67 @@ public class HomeFragment extends Fragment {
                         getResources().getColor(R.color.secondary)
                 ));
             }
+//            dayView.setOnClickListener(v -> {
+//                boolean alreadySelected = v.isSelected();
+//
+//                String dateToSend = alreadySelected ? null : (String) v.getTag();
+//
+//                for (int j = 0; j < 14; j++) {
+//                    dayViews[j].setSelected(false);
+//                    ((TextView) dayViews[j].findViewById(R.id.day_name)).setTextColor(getResources().getColor(R.color.secondary));
+//                    ((TextView) dayViews[j].findViewById(R.id.day_number)).setTextColor(getResources().getColor(R.color.secondary));
+//                    dayViews[j].findViewById(R.id.day_dot).setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+//                }
+//
+//                if (!alreadySelected) {
+//                    v.setSelected(true);
+//                    tvDayName.setTextColor(getResources().getColor(R.color.secondary));
+//                    tvDayNumber.setTextColor(getResources().getColor(R.color.secondary));
+//                    dayDot.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+//                }
+////                if (!alreadySelected) {
+////                    v.setSelected(true);
+////                    tvDayName.setTextColor(getResources().getColor(R.color.primary)); // لون مختلف للمختار
+////                    tvDayNumber.setTextColor(getResources().getColor(R.color.primary));
+////                    dayDot.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.primary)));
+////                    dayDot.setVisibility(View.VISIBLE); // إظهار النقطة للمختار فقط مثلاً
+////                }
+//                currentPage = 1;
+//                isLastPage = false;
+//                tripList.clear();
+//                adapter.notifyDataSetChanged();
+//
+//                fetchTrips(currentPage, lastFromCityId, lastToCityId, dateToSend,
+//                        lastPassengers, lastFamiliesOnly ? 1 : 0, null, null, null);
+//            });
             dayView.setOnClickListener(v -> {
                 boolean alreadySelected = v.isSelected();
-
                 String dateToSend = alreadySelected ? null : (String) v.getTag();
+                lastDate = dateToSend;
 
-                for (int j = 0; j < 14; j++) {
-                    dayViews[j].setSelected(false);
-                    ((TextView) dayViews[j].findViewById(R.id.day_name)).setTextColor(getResources().getColor(R.color.secondary));
-                    ((TextView) dayViews[j].findViewById(R.id.day_number)).setTextColor(getResources().getColor(R.color.secondary));
-                    dayViews[j].findViewById(R.id.day_dot).setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+                // 1. إعادة تعيين ألوان وحالة جميع الأيام إلى الوضع غير المختار
+                for (int j = 0; j < weekContainer.getChildCount(); j++) {
+                    View child = weekContainer.getChildAt(j);
+                    child.setSelected(false);
+
+                    TextView name = child.findViewById(R.id.day_name);
+                    TextView number = child.findViewById(R.id.day_number);
+                    View dot = child.findViewById(R.id.day_dot);
+
+                    name.setTextColor(getResources().getColor(R.color.secondary));
+                    number.setTextColor(getResources().getColor(R.color.secondary));
+                    dot.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
                 }
 
+                // 2. إذا لم يكن العنصر مختاراً مسبقاً، قم بتحديده الآن
                 if (!alreadySelected) {
                     v.setSelected(true);
-                    tvDayName.setTextColor(getResources().getColor(R.color.secondary));
-                    tvDayNumber.setTextColor(getResources().getColor(R.color.secondary));
-                    dayDot.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+                    tvDayName.setTextColor(getResources().getColor(R.color.black)); // لون المختار
+                    tvDayNumber.setTextColor(getResources().getColor(R.color.black));
+                    dayDot.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.black)));
                 }
 
+                // 3. تحديث البيانات والطلب من السيرفر
                 currentPage = 1;
                 isLastPage = false;
                 tripList.clear();
@@ -1732,70 +1168,20 @@ public class HomeFragment extends Fragment {
         }
 
 
-//        recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-//            @Override
-//            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-//
-//                switch (e.getAction()) {
-//                    case MotionEvent.ACTION_DOWN:
-//                    case MotionEvent.ACTION_MOVE:
-//                        swipeRefreshLayout.setEnabled(false); // إيقاف السحب أثناء تحريك الصور
-//                        break;
-//
-//                    case MotionEvent.ACTION_UP:
-//                    case MotionEvent.ACTION_CANCEL:
-//                        swipeRefreshLayout.postDelayed(() ->
-//                                swipeRefreshLayout.setEnabled(true), 150
-//                        );
-//                        break;
-//                }
-//
-//                return false;
-//            }
-//
-//            @Override
-//            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-//            }
-//
-//            @Override
-//            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-//            }
-//        });
-        UserUtils.fetchAndSavecities(
+        UserUtils.fetchAndSavecities(getContext(), new UserUtils.citiesCallback() {
+            @Override
+            public void onSuccess(String message) {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean("messages_fetched", true);
+                editor.apply();
+            }
 
-                getContext(), new UserUtils.citiesCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putBoolean("messages_fetched", true);
-                        editor.apply();
-                    }
+            @Override
+            public void onError(String error) {
 
-                    @Override
-                    public void onError(String error) {
-                        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                            @Override
-                            public void onSuccess(String message) {
-                                UserUtils.ToastMessages(getActivity(), message);
-                            }
+            }
+        });
 
-                            @Override
-                            public void onError(String error) {
-                            }
-
-                        });
-                    }
-                });
-
-        //        refreshHomeData(swipeRefreshLayout, prefs, dbHelper);
-//        swipeRefreshLayout.setOnRefreshListener(() -> {
-//            refreshHomeData(swipeRefreshLayout, prefs, dbHelper);
-//            getCityNameFromIp(getContext(), (cityAr, cityId) -> {
-//                prefs.edit().putString("default_city", cityAr).apply();
-//                prefs.edit().putInt("default_city_id", cityId).apply();
-//            });
-//            swipeRefreshLayout.setEnabled(false);
-//        });
         String defaultCity = prefs.getString("default_city", "حدد المدينة");
 //
         textFromCity.setText(defaultCity);
@@ -1815,7 +1201,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        UserUtils.getPublicIp((ipJson, city_id) ->
+        UserUtils.getPublicIp((ipJson, city_id, country_code) ->
 
         {
             if (ipJson != null) {
@@ -1828,73 +1214,80 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+
+        filterIcon.setOnClickListener(new UserUtils.SingleClickListener() {
+            @Override
+            public void onSingleClick(View v) {
+                showCustomSearchDialog();
+            }
+        });
     }
 
-    private void fetchTrips(int page, @Nullable Integer fromCityId,
+    private void fetchTrips(int page,
+                            @Nullable Integer fromCityId,
                             @Nullable Integer toCityId,
-                            @Nullable String date, @Nullable Integer passengers,
-                            @Nullable Integer familiesOnly, @Nullable Integer vehicle_type,
+                            @Nullable String date,
+                            @Nullable Integer passengers,
+                            @Nullable Integer familiesOnly,
+                            @Nullable Integer vehicle_type,
                             @Nullable Integer defaultCityId,
                             @Nullable Integer lastCompanyId) {
 
-        if (!isAdded() || getActivity() == null || isLoading || isLastPage) return;
+        if (!isAdded() || getActivity() == null) return;
+
         if (page == 1) {
+            if (isLoading) return;
+            isLoading = true;
+            currentPage = 1;
+            isLastPage = false;
             tripList.clear();
-            adapter.notifyDataSetChanged();
+
+            requireActivity().runOnUiThread(() -> {
+                adapter.clear();
+                noDataText.setVisibility(View.GONE);
+                noInternet.setVisibility(View.GONE);
+                lottieWave.setVisibility(View.VISIBLE);
+                lottieWave.playAnimation();
+                recyclerView.setVisibility(View.VISIBLE);
+            });
         }
-        DBHelper dbHelper = new DBHelper(getContext());
-        isLoading = true;
 
         if (!UserUtils.isNetworkAvailable(requireContext())) {
             requireActivity().runOnUiThread(() -> {
-                if (lottieWave.isAnimating()) lottieWave.cancelAnimation();
-                lottieWave.setVisibility(View.GONE);
-                noInternet.setVisibility(View.VISIBLE);
-                noDataText.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.GONE);
+                if (page == 1) {
+                    if (lottieWave.isAnimating()) lottieWave.cancelAnimation();
+                    lottieWave.setVisibility(View.GONE);
+                    noInternet.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                } else {
+                    adapter.removeLoadingFooter();
+                    UserUtils.ToastMessages(getActivity(), "لا يوجد اتصال بالإنترنت للمزيد من الرحلات");
+                }
+                swipeRefreshLayout.setRefreshing(false);
             });
             isLoading = false;
             return;
         }
 
-        requireActivity().runOnUiThread(() -> {
-            noDataText.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-            lottieWave.setVisibility(View.VISIBLE);
-            lottieWave.playAnimation();
-            noInternet.setVisibility(View.GONE);
-        });
-
         new Thread(() -> {
+            HttpURLConnection conn = null;
             try {
-//                    if (ipJson == null) {
-//                        isLoading = false;
-//                        if (isAdded() && getActivity() != null) {
-//                            requireActivity().runOnUiThread(() -> {
-//                                noInternet.setVisibility(View.VISIBLE);
-//                                recyclerView.setVisibility(View.GONE);
-//                            });
-//                        }
-//                        return;
-//                    }
+                SharedPreferences sharedPreferences = SharedPrefsHelper.get(getContext());
+                String userType = sharedPreferences.getString("user_type", "");
+                int driverId = sharedPreferences.getInt("user_id", -1);
 
-                try {
-//                        JSONObject ipObject = new JSONObject(ipJson);
-//                        String latitude = ipObject.optString("latitude", null);
-//                        String longitude = ipObject.optString("longitude", null);
-                    SharedPreferences sharedPreferences = SharedPrefsHelper.get(getContext());
+                StringBuilder urlBuilder;
 
-//                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-                    String userType = sharedPreferences.getString("user_type", "");
-                    int driverId = sharedPreferences.getInt("user_id", -1);
-                    String defaultCity = sharedPreferences.getString("default_city", "حدد المدينة");
-
-                    StringBuilder urlBuilder;
+                if (page > 1 && nextTripsUrl != null && !nextTripsUrl.equals("null")) {
+                    urlBuilder = new StringBuilder(nextTripsUrl);
+                } else {
                     if ("driver".equals(userType)) {
-                        urlBuilder = new StringBuilder(BASE_URL + "trip-list/?driver=" + driverId);
+                        urlBuilder = new StringBuilder(BASE_URL + "trip-list/?driver_id=" + driverId);
                     } else {
                         urlBuilder = new StringBuilder(BASE_URL + "trip-list/?page=" + page + "&limit=5");
                     }
+
+                    urlBuilder.append("&trip_type=").append(tripType);
 
                     if (defaultCityId != null)
                         urlBuilder.append("&start_city_order=").append(defaultCityId);
@@ -1904,9 +1297,9 @@ public class HomeFragment extends Fragment {
                         urlBuilder.append("&start_city=").append(fromCityId);
                     if (toCityId != null && toCityId > 0)
                         urlBuilder.append("&end_city=").append(toCityId);
-                    if (date != null)
+                    if (date != null && !date.isEmpty())
                         urlBuilder.append("&start_date=").append(date);
-                    if (passengers != null && passengers != 1)
+                    if (passengers != null && passengers > 1)
                         urlBuilder.append("&seats=").append(passengers);
                     if (familiesOnly != null && familiesOnly != 0)
                         urlBuilder.append("&family=").append(familiesOnly);
@@ -1914,129 +1307,111 @@ public class HomeFragment extends Fragment {
                         urlBuilder.append("&vehicle_type_id=").append(vehicle_type);
                     if (lastCompanyId != null)
                         urlBuilder.append("&company_no=").append(lastCompanyId);
-                    URL url = new URL(urlBuilder.toString());
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(10000);
-                    conn.setReadTimeout(10000);
-                    conn.setRequestMethod("GET");
-                    conn.setRequestProperty("Accept", "application/json");
-                    int responseCode = conn.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                        StringBuilder responseBuilder = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) responseBuilder.append(line);
-                        reader.close();
+                }
+                URL url = new URL(urlBuilder.toString());
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(15000);
+                conn.setReadTimeout(15000);
+                conn.setRequestProperty("Accept", "application/json");
+                int responseCode = conn.getResponseCode();
 
-                        JSONObject jsonObject = new JSONObject(responseBuilder.toString());
-                        JSONArray resultsArray = jsonObject.getJSONArray("results");
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder responseBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        responseBuilder.append(line);
+                    }
+                    reader.close();
 
-                        List<JSONObject> trips = new ArrayList<>();
+                    JSONObject jsonObject = new JSONObject(responseBuilder.toString());
+                    JSONArray resultsArray = jsonObject.optJSONArray("results");
+                    List<JSONObject> newTrips = new ArrayList<>();
+
+                    if (resultsArray != null) {
                         for (int i = 0; i < resultsArray.length(); i++) {
-                            trips.add(resultsArray.getJSONObject(i));
-                        }
+                            JSONObject trip = resultsArray.getJSONObject(i);
 
-                        if (!"driver".equals(userType)) { // فقط للركاب
-                            List<JSONObject> activeTrips = new ArrayList<>();
-                            for (JSONObject trip : trips) {
+                            // فلترة inactive للركاب
+                            if (!"driver".equals(userType)) {
                                 int inactive = trip.optInt("inactive", 1);
-                                if (inactive != 0) {
-                                    activeTrips.add(trip);
-                                }
+                                if (inactive == 0) continue;
                             }
-                            trips = activeTrips;
+                            newTrips.add(trip);
                         }
-                        boolean lastPage = jsonObject.isNull("next");
-
-                        List<JSONObject> finalTrips = trips;
-                        requireActivity().runOnUiThread(() -> {
-                            lottieWave.cancelAnimation();
-                            lottieWave.setVisibility(View.GONE);
-
-                            swipeRefreshLayout.setRefreshing(false);
-                            swipeRefreshLayout.setEnabled(true);
-
-                            if (finalTrips.isEmpty()) {
-                                adapter.clear();
-                                recyclerView.setVisibility(View.GONE);
-                                noDataText.setVisibility(View.VISIBLE);
-                            } else {
-                                List<JSONObject> filteredTrips = new ArrayList<>();
-                                int requestedType = Integer.parseInt(tripType);
-
-                                for (JSONObject trip : finalTrips) {
-                                    try {
-                                        if (tripType == null || tripType.isEmpty()) {
-                                            filteredTrips.add(trip);
-                                            continue;
-                                        }
-
-                                        int currentTripType = trip.optInt("trip_type", 0);
-                                        if (currentTripType == requestedType) {
-                                            filteredTrips.add(trip);
-                                        }
-
-                                    } catch (Exception e) {
-                                    }
-                                }
-
-
-                                if (filteredTrips.isEmpty()) {
-                                    recyclerView.setVisibility(View.GONE);
-                                    noDataText.setVisibility(View.VISIBLE);
-                                    noInternet.setVisibility(View.GONE);
-                                    swipeRefreshLayout.setEnabled(true);
-                                } else {
-                                    noDataText.setVisibility(View.GONE);
-                                    noInternet.setVisibility(View.GONE);
-                                    recyclerView.setVisibility(View.VISIBLE);
-                                    initExtraFeatures(getView(), getLayoutInflater());
-                                    adapter.addTrips(filteredTrips);
-                                    currentPage = page;
-                                    isLastPage = lastPage;
-                                }
-                            }
-                            isLoading = false;
-                        });
-
+                    }
+                    nextTripsUrl = jsonObject.optString("next", null);
+                    if (jsonObject.isNull("next") || nextTripsUrl == null || nextTripsUrl.equals("null")) {
+                        isLastPage = true;
                     } else {
-                        requireActivity().runOnUiThread(() -> {
+                        isLastPage = false;
+                    }
+                    boolean reachedLastPage = jsonObject.isNull("next");
+
+                    requireActivity().runOnUiThread(() -> {
+                        if (page > 1) {
+                            adapter.removeLoadingFooter();
+                        } else {
                             lottieWave.cancelAnimation();
                             lottieWave.setVisibility(View.GONE);
+                        }
+
+                        swipeRefreshLayout.setRefreshing(false);
+                        if (newTrips.isEmpty() && page == 1) {
                             recyclerView.setVisibility(View.GONE);
                             noDataText.setVisibility(View.VISIBLE);
-                            swipeRefreshLayout.setEnabled(true);
-                            noInternet.setVisibility(View.GONE);
-                            isLoading = false;
-                        });
+                        } else {
+                            recyclerView.setVisibility(View.VISIBLE);
+                            noDataText.setVisibility(View.GONE);
+                            adapter.addTrips(newTrips);
+                            currentPage = page;
+                            isLastPage = reachedLastPage;
+                        }
+                        isLoading = false;
+                    });
+                } else {
+                    requireActivity().runOnUiThread(() -> {
+                        if (page > 1) adapter.removeLoadingFooter();
+                        else {
+                            recyclerView.setVisibility(View.GONE);
+                            noDataText.setVisibility(View.VISIBLE);
+                        }
+                        swipeRefreshLayout.setRefreshing(false);
+                        isLoading = false;
+                    });
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Activity activity = getActivity();
+
+                if (activity == null || !isAdded()) {
+                    return;
+                }
+
+                activity.runOnUiThread(() -> {
+                    if (!isAdded() || getView() == null) return;
+
+                    if (page > 1) {
+                        adapter.removeLoadingFooter();
+                    } else {
+                        lottieWave.cancelAnimation();
+                        lottieWave.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.GONE);
+                        noInternet.setVisibility(View.VISIBLE);
                     }
 
-                    conn.disconnect();
-                } catch (Exception e) {
-                    handleError(e);
-                }
-            } catch (Exception e) {
-                handleError(e);
+                    swipeRefreshLayout.setRefreshing(false);
+                    isLoading = false;
+                });
+            } finally {
+                if (conn != null) conn.disconnect();
             }
         }).start();
     }
 
 
-    private void handleError(Exception e) {
-        if (isAdded() && getActivity() != null) {
-            requireActivity().runOnUiThread(() -> {
-                lottieWave.cancelAnimation();
-                lottieWave.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.GONE);
-                noDataText.setVisibility(View.VISIBLE);
-                noInternet.setVisibility(View.GONE);
-                isLoading = false;
-            });
-        }
-    }
-
-
-    private int selectedCountryId = -1;
 
     private void fetchCities() {
         DBHelper dbHelper = new DBHelper(getContext());
@@ -2069,8 +1444,6 @@ public class HomeFragment extends Fragment {
 
                 int finalSelectedCountryId = selectedCountryId;
                 requireActivity().runOnUiThread(() -> {
-//                    populateCountryRadioButtons(countries, finalSelectedCountryId, countriesRadioGroup);
-//                    populateCityRadioButtons();
                     currentPage = 1;
                     isLastPage = false;
                     tripList.clear();
@@ -2083,29 +1456,21 @@ public class HomeFragment extends Fragment {
                 });
 
             } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }).start();
     }
 
-
-    Spinner vehicleTypeSpinner, companySpinner;
-    List<String> vehicleTypeNames = new ArrayList<>();
-    Map<String, Integer> vehicleTypeMap = new HashMap<>();
-    private Integer vehicleTypeFromArgs = null;
-    List<String> companyNames = new ArrayList<>();
-    Map<String, Integer> companyMap = new HashMap<>();
-    private Integer lastCompanyId = null;
-
-    private void loadCompanies() {
+    private void loadCompanies(String triptype) {
         DBHelper dbHelper = new DBHelper(getContext());
 
         companyNames.clear();
         companyMap.clear();
 
-        companyNames.add("");
+        companyNames.add("اختر الشركة");
         companyMap.put("", -1);
 
-        List<Map<String, Object>> companies = dbHelper.getAllCompanies();
+        List<Map<String, Object>> companies = dbHelper.getAllCompanies(triptype);
 
         for (Map<String, Object> c : companies) {
             String name = (String) c.get("company_name");
@@ -2115,8 +1480,33 @@ public class HomeFragment extends Fragment {
         }
 
         if (isAdded()) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                    android.R.layout.simple_spinner_item, companyNames);
+            // تخصيص الـ Adapter لتغيير لون النص
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(requireContext(),
+                    android.R.layout.simple_spinner_item, companyNames) {
+
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View v = super.getView(position, convertView, parent);
+                    if (position == 0) {
+                        ((TextView) v).setTextColor(Color.GRAY);
+                    } else {
+                        ((TextView) v).setTextColor(Color.BLACK); // أو اللون الافتراضي لديك
+                    }
+                    return v;
+                }
+
+                @Override
+                public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                    View v = super.getDropDownView(position, convertView, parent);
+                    if (position == 0) {
+                        ((TextView) v).setTextColor(Color.GRAY);
+                    } else {
+                        ((TextView) v).setTextColor(Color.BLACK);
+                    }
+                    return v;
+                }
+            };
+
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             companySpinner.setAdapter(adapter);
 
@@ -2139,22 +1529,43 @@ public class HomeFragment extends Fragment {
         vehicleTypeNames.clear();
         vehicleTypeMap.clear();
 
-        // إضافة عنصر فارغ افتراضي
-        vehicleTypeNames.add("");
+        vehicleTypeNames.add("اختر المركبة");
         vehicleTypeMap.put("", -1);
 
-        // جلب البيانات من جدول SQLite
-        List<DBHelper.VehicleType> vehicleTypes = dbHelper.getVehicleTypes(1);
+        List<DBHelper.VehicleType> vehicleTypes = dbHelper.getVehicleTypes(1, tripType);
 
         for (DBHelper.VehicleType v : vehicleTypes) {
             vehicleTypeNames.add(v.getName());
             vehicleTypeMap.put(v.getName(), v.getId());
         }
 
-        // ضبط Spinner إذا كانت Fragment مضافة
         if (isAdded()) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                    android.R.layout.simple_spinner_item, vehicleTypeNames);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(requireContext(),
+                    android.R.layout.simple_spinner_item, vehicleTypeNames) {
+
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View v = super.getView(position, convertView, parent);
+                    if (position == 0) {
+                        ((TextView) v).setTextColor(Color.GRAY);
+                    } else {
+                        ((TextView) v).setTextColor(Color.BLACK);
+                    }
+                    return v;
+                }
+
+                @Override
+                public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                    View v = super.getDropDownView(position, convertView, parent);
+                    if (position == 0) {
+                        ((TextView) v).setTextColor(Color.GRAY);
+                    } else {
+                        ((TextView) v).setTextColor(Color.BLACK);
+                    }
+                    return v;
+                }
+            };
+
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             vehicleTypeSpinner.setAdapter(adapter);
 
@@ -2190,41 +1601,42 @@ public class HomeFragment extends Fragment {
         CheckBox checkboxFamiliesOnly = dialogView.findViewById(R.id.checkboxFamiliesOnly);
         vehicleTypeSpinner = dialogView.findViewById(R.id.vehicleTypeSpinner);
         companySpinner = dialogView.findViewById(R.id.companySpinner);
-        loadCompanies();
+        TextView selectedDateText = dialogView.findViewById(R.id.selectedDateText);
+        if("1".equals(tripType)){
+            checkboxFamiliesOnly.setVisibility(View.VISIBLE);
+        }else {
+            checkboxFamiliesOnly.setVisibility(View.GONE);
+        }
+
+        Dialog dialog = new Dialog(requireContext(), R.style.TransparentBottomDialog);
+        dialog.setContentView(dialogView);
+
+        if (dialog.getWindow() != null) {
+            Window window = dialog.getWindow();
+            window.setGravity(Gravity.BOTTOM);
+            window.setLayout(MATCH_PARENT, WRAP_CONTENT); // لتسهيل الحجم مؤقتاً وضمان عدم الخطأ بحسبة البكسل
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+        dialog.show();
+
+        loadCompanies(tripType);
         loadVehicleTypes();
-        if (lastVehicleId != null) {
+
+        if (lastVehicleId != null && vehicleTypeMap != null) {
             vehicleTypeSpinner.post(() -> {
                 for (int i = 0; i < vehicleTypeSpinner.getCount(); i++) {
-                    String name = vehicleTypeSpinner.getItemAtPosition(i).toString();
-                    if (vehicleTypeMap.get(name) != null && vehicleTypeMap.get(name).equals(lastVehicleId)) {
-                        vehicleTypeSpinner.setSelection(i);
-                        break;
+                    Object item = vehicleTypeSpinner.getItemAtPosition(i);
+                    if (item != null) {
+                        String name = item.toString();
+                        Integer currentId = vehicleTypeMap.get(name);
+                        if (currentId != null && currentId.equals(lastVehicleId)) {
+                            vehicleTypeSpinner.setSelection(i);
+                            break;
+                        }
                     }
                 }
             });
         }
-//        TextView textFromCity = dialogView.findViewById(R.id.textFromCity);
-//        TextView textToCity = dialogView.findViewById(R.id.textToCity);
-//        SharedPreferences prefs = SharedPrefsHelper.get(getContext());
-
-//        SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", getActivity().MODE_PRIVATE);
-//        textFromCity.setOnClickListener(v2 -> showCityDialog(true, textFromCity, tripType));
-//        textToCity.setOnClickListener(v2 -> showCityDialog(false, textToCity, tripType));
-//        carIcons.setOnClickListener(v -> {
-//            String fromCity = textFromCity.getText().toString().trim();
-//            String toCity = textToCity.getText().toString().trim();
-//
-//            if (fromCity.equals("حدد المدينة") || toCity.equals("حدد المدينة")) {
-//                return;
-//            }
-//
-//            // عكس القيم بينهما
-//            textFromCity.setText(toCity);
-//            textToCity.setText(fromCity);
-//        });
-
-//        String defaultCity = prefs.getString("default_city", "حدد المدينة");
-//        textFromCity.setText(defaultCity);
         checkboxFamiliesOnly.setChecked(lastFamiliesOnly);
         final int[] passengers = {lastPassengers > 0 ? lastPassengers : 1};
         passengersTextView.setText(String.valueOf(passengers[0]));
@@ -2243,8 +1655,8 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        Dialog dialog = new Dialog(requireContext(), R.style.TransparentBottomDialog);
-        dialog.setContentView(dialogView);
+//        Dialog dialog = new Dialog(requireContext(), R.style.TransparentBottomDialog);
+//        dialog.setContentView(dialogView);
 
         if (dialog.getWindow() != null) {
             Window window = dialog.getWindow();
@@ -2259,113 +1671,11 @@ public class HomeFragment extends Fragment {
             window.getAttributes().windowAnimations = R.style.DialogSlideUpAnimation;
         }
 
-        // --- الأيام ---
-//        LinearLayout weekContainer = dialogView.findViewById(R.id.week_container);
-//        Calendar calendar2 = Calendar.getInstance(new Locale("ar"));
-//        SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE", new Locale("ar"));
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("d", new Locale("ar"));
-//        SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-//        int today = calendar2.get(Calendar.DAY_OF_MONTH);
-//        LinearLayout[] dayViews = new LinearLayout[14];
 
-//        for (int i = 0; i < 14; i++) {
-//            View dayView = getLayoutInflater().inflate(R.layout.week_days, weekContainer, false);
-//            dayViews[i] = (LinearLayout) dayView;
-//
-//            TextView tvDayName = dayView.findViewById(R.id.day_name);
-//            TextView tvDayNumber = dayView.findViewById(R.id.day_number);
-//            View dayDot = dayView.findViewById(R.id.day_dot);
-//
-//            Calendar tempCal = (Calendar) calendar.clone();
-//            String dayName = dayFormat.format(tempCal.getTime());
-//            String dayNumber = dateFormat.format(tempCal.getTime());
-//            String fullDate = fullDateFormat.format(tempCal.getTime());
-//            dayView.setTag(fullDate);
-//
-//            tvDayName.setText(dayName);
-//            tvDayNumber.setText(dayNumber);
-//
-//            if (Integer.parseInt(dayNumber) == today) {
-//                dayView.setSelected(true);
-//                tvDayName.setTextColor(getResources().getColor(R.color.white));
-//                tvDayNumber.setTextColor(getResources().getColor(R.color.white));
-//                dayDot.setBackgroundTintList(ColorStateList.valueOf(
-//                        getResources().getColor(R.color.white)
-//                ));
-//            } else {
-//                tvDayName.setTextColor(getResources().getColor(R.color.secondary));
-//                tvDayNumber.setTextColor(getResources().getColor(R.color.secondary));
-//                dayDot.setBackgroundTintList(ColorStateList.valueOf(
-//                        getResources().getColor(R.color.secondary)
-//                ));
-//            }
-//
-//            // حدث الضغط على اليوم
-//            dayView.setOnClickListener(v -> {
-//                for (int j = 0; j < 14; j++) {
-//                    dayViews[j].setSelected(false);
-//                    ((TextView) dayViews[j].findViewById(R.id.day_name))
-//                            .setTextColor(getResources().getColor(R.color.secondary));
-//                    ((TextView) dayViews[j].findViewById(R.id.day_number))
-//                            .setTextColor(getResources().getColor(R.color.secondary));
-//                    dayViews[j].findViewById(R.id.day_dot)
-//                            .setBackgroundTintList(ColorStateList.valueOf(
-//                                    getResources().getColor(R.color.secondary)
-//                            ));
-//                }
-//
-//                dayView.setSelected(true);
-//                tvDayName.setTextColor(getResources().getColor(R.color.white));
-//                tvDayNumber.setTextColor(getResources().getColor(R.color.white));
-//                dayDot.setBackgroundTintList(ColorStateList.valueOf(
-//                        getResources().getColor(R.color.white)
-//                ));
-//
-////                tvDayName.setTextColor(getResources().getColor(R.color.white));
-////                tvDayNumber.setTextColor(getResources().getColor(R.color.white));
-////                dayDot.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-//                Object selectedItem = vehicleTypeSpinner.getSelectedItem();
-//                String selectedName = (selectedItem != null && !selectedItem.toString().isEmpty()) ? selectedItem.toString() : null;
-//                Integer selectedVehicleId = null;
-//                if (selectedName != null && vehicleTypeMap.containsKey(selectedName)) {
-//                    selectedVehicleId = vehicleTypeMap.get(selectedName);
-//                }
-//                String selectedDate = (String) v.getTag();
-//                currentPage = 1;
-//                isLastPage = false;
-//                tripList.clear();
-//                adapter.clear();
-//                recyclerView.setAdapter(adapter);
-//                recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
-//                fetchTrips(currentPage, lastFromCityId, lastToCityId, selectedDate, passengers[0], checkboxFamiliesOnly.isChecked() ? 1 : 0, selectedVehicleId, null);
-//            });
-//
-//            calendar.add(Calendar.DAY_OF_MONTH, 1);
-//            weekContainer.addView(dayView);
-//        }
         final String[] finalSelectedDate = {(lastDate != null && !lastDate.isEmpty()) ? lastDate : new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(new Date())};
-        TextView selectedDateText = dialogView.findViewById(R.id.selectedDateText);
-//        selectedDateText.setText(finalSelectedDate[0]);
-
 //        TextView selectedDateText = dialogView.findViewById(R.id.selectedDateText);
-//        final String[] finalSelectedDate = {new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(new Date())}; // افتراضياً تاريخ اليوم
-
-//        selectedDateText.setText(finalSelectedDate[0]);
-// --- استعادة الأسماء المخزنة سابقاً ---
-//        if (lastFromCityName != null && !lastFromCityName.isEmpty()) {
-//            textFromCity.setText(lastFromCityName);
-//        } else {
-//            // إذا لم يوجد بحث سابق، نضع المدينة الافتراضية من الشيرد بريفرنس
-//            textFromCity.setText(prefs.getString("default_city", "حدد المدينة"));
-//        }
-//
-//        if (lastToCityName != null && !lastToCityName.isEmpty()) {
-//            textToCity.setText(lastToCityName);
-//        }
         dateSelectorLayout.setOnClickListener(v -> {
             Calendar cal = Calendar.getInstance();
-
-            // محاولة تحليل التاريخ النصي إلى كائن Calendar
             try {
                 SimpleDateFormat sdfParser = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
                 Date d = sdfParser.parse(finalSelectedDate[0]);
@@ -2390,20 +1700,7 @@ public class HomeFragment extends Fragment {
             datePicker.getDatePicker().setMinDate(System.currentTimeMillis());
             datePicker.show();
         });
-// داخل showCustomSearchDialog
-
-// --- 1. التاريخ ---
-// نتحقق إذا كان هناك تاريخ بحث سابق (lastDate)، وإلا نستخدم تاريخ اليوم
-
-
-// --- 2. المدن ---
-// نضع النصوص المخزنة سابقاً في حقول المدن (يجب أن تكون قد خزنت الأسماء في متغيرات مثل lastFromCityName)
-//        if (lastFromCityName != null) textFromCity.setText(lastFromCityName);
-//        if (lastToCityName != null) textToCity.setText(lastToCityName);
-
-// --- 3. بقية الفلاتر ---
         checkboxFamiliesOnly.setChecked(lastFamiliesOnly);
-// عدد الركاب (أنت قمت بها بالفعل في كودك)
         passengers[0] = lastPassengers > 0 ? lastPassengers : 1;
         passengersTextView.setText(String.valueOf(passengers[0]));
         ViewGroup decorView = (ViewGroup) requireActivity().getWindow().getDecorView();
@@ -2428,7 +1725,6 @@ public class HomeFragment extends Fragment {
             dialog.dismiss();
         });
         dialog.setOnDismissListener(d -> Blurry.delete(decorView));
-        // --- الإغلاق ---
         dialogCancelButton.setOnClickListener(v -> dialog.dismiss());
         dialogSearchButton.setOnClickListener(v -> {
             lastDate = finalSelectedDate[0];
@@ -2436,10 +1732,8 @@ public class HomeFragment extends Fragment {
             lastFamiliesOnly = checkboxFamiliesOnly.isChecked();
             int passengersCount = passengers[0];
 
-            // --- خيار العوائل ---
             int familiesOnly = checkboxFamiliesOnly.isChecked() ? 1 : 0;
 
-            // --- نوع المركبة ---
             Object selectedItem = vehicleTypeSpinner.getSelectedItem();
             String selectedName = (selectedItem != null && !selectedItem.toString().isEmpty()) ? selectedItem.toString() : null;
             Integer selectedVehicleId = null;
@@ -2448,8 +1742,6 @@ public class HomeFragment extends Fragment {
             } else {
                 lastVehicleId = null;
             }
-//            lastFromCityName = textFromCity.getText().toString();
-//            lastToCityName = textToCity.getText().toString();
             String date = finalSelectedDate[0];
             currentPage = 1;
             isLastPage = false;
@@ -2465,14 +1757,9 @@ public class HomeFragment extends Fragment {
             dialog.dismiss();
         });
 
-//        dialogSearchButton.setOnClickListener(v -> {
-//
-//            dialog.dismiss();
-//            fetchTrips(currentPage, lastFromCityId, lastToCityId, null, passengers[0], checkboxFamiliesOnly.isChecked() ? 1 : 0, null);
-//        });
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
 
-        dialog.show();
+//        dialog.show();
     }
 
 
@@ -2494,7 +1781,7 @@ public class HomeFragment extends Fragment {
                 }
 //                updateUIFields();
             } else {
-                fetchTrips(1, lastFromCityId, lastToCityId, lastDate,
+                fetchTrips(1, null, lastToCityId, lastDate,
                         lastPassengers, lastFamiliesOnly ? 1 : 0, null, defaultCityId, null);
             }
 
@@ -2505,11 +1792,4 @@ public class HomeFragment extends Fragment {
         }
     }
 
-//    private void updateUIFields() {
-//        if (lastDate != null && !lastDate.isEmpty()) {
-//            editTextDate.setText(lastDate);
-//        }
-//        // تأكد من وضع اسم المدينة المختارة في الـ fromCity EditText
-//        // يمكنك جلب الاسم من DBHelper بناءً على lastFromCityId
-//    }
 }

@@ -1,167 +1,435 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg3"
+    android:background="@android:color/white"
+    android:fillViewport="true"
     android:layoutDirection="rtl">
 
-    <ImageView
-        android:id="@+id/backButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:src="@drawable/icons8_back_to_1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:src="@drawable/icons8_back_to_1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/headerIllustration"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/otp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!--        <TextView-->
+        <!--            android:id="@+id/tvTitle"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="24dp"-->
+        <!--            android:fontFamily="@font/rptregular"-->
+        <!--            android:text="تحقق من الحساب"-->
+        <!--            android:textColor="@color/secondary"-->
+        <!--            android:textSize="26sp"-->
+        <!--            android:textStyle="bold"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/headerIllustration" />-->
+        <LinearLayout
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/headerIllustration">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/rptregular"
+                android:text="تحقق "
+                android:textColor="@color/secondary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/rptregular"
+                android:text="من الحساب"
+                android:textColor="@color/primary2"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
+            android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
-            android:text="تحقق من الحساب"
-            android:textColor="@color/primary"
-            android:textSize="26sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/rptregular"
             android:text="أدخل الرمز المرسل إلى رقمك"
-            android:textColor="@color/black"
+            android:textColor="@color/text_light_gray"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
+        <!-- Phone Number Display -->
+        <LinearLayout
+            android:id="@+id/phoneDisplayContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/edittext_background"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="6dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/phone_new"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:id="@+id/tvPhoneNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+967 775054156"
+                android:textColor="@color/secondary"
+                android:textDirection="ltr"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/tvChangeNumber"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/rptregular"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:text="تغيير الرقم؟"
+            android:textColor="@color/primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/phoneDisplayContainer"
+            app:rippleColor="@color/primary3" />
+
+        <LinearLayout
+            android:id="@+id/otpContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="55dp"
+            android:gravity="center"
+            android:layoutDirection="ltr"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/phoneDisplayContainer">
+
+            <EditText
+                android:id="@+id/otp1"
+                style="@style/OtpEditTextStyle"
+                android:background="@drawable/edittext_background"
+                android:imeOptions="actionNext"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/otp2"
+                style="@style/OtpEditTextStyle"
+                android:background="@drawable/edittext_background"
+                android:imeOptions="actionNext"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/otp3"
+                style="@style/OtpEditTextStyle"
+                android:background="@drawable/edittext_background"
+                android:imeOptions="actionNext"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/otp4"
+                style="@style/OtpEditTextStyle"
+                android:background="@drawable/edittext_background"
+                android:imeOptions="actionNext"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/otp5"
+                style="@style/OtpEditTextStyle"
+                android:background="@drawable/edittext_background"
+                android:imeOptions="actionNext"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/otp6"
+                style="@style/OtpEditTextStyle"
+                android:background="@drawable/edittext_background"
+                android:imeOptions="actionDone"
+                android:singleLine="true"
+                android:maxLength="1"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvNoCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="لم يصلك الرمز؟"
+            android:textColor="@color/text_light_gray"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/otpContainer" />
+
+        <!-- Resend Row -->
+        <LinearLayout
+            android:id="@+id/resendOptionsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvNoCode">
+
+            <LinearLayout
+                android:id="@+id/layoutResendSMS"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:padding="8dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/sms"
+                    app:tint="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvResendSms"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/rptregular"
+                    android:text="إعادة إرسال عبر SMS"
+                    android:textColor="@color/secondary"
+                    android:textSize="14sp" />
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="20dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="#DDDDDD" />
+
+            <LinearLayout
+                android:id="@+id/layoutResendWhatsapp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:padding="8dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/whatsapp"
+                    app:tint="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvResendWhatsapp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/rptregular"
+                    android:text="واتساب"
+                    android:textColor="@color/secondary"
+                    android:textSize="14sp" />
+
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/rptregular"
+            android:text="إعادة الإرسال خلال: 00:58"
+            android:textColor="@color/primary"
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/resendOptionsContainer" />
+
+        <!--        <com.google.android.material.button.MaterialButton-->
+        <!--            android:id="@+id/verifyOtpButton"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="56dp"-->
+        <!--            android:layout_marginHorizontal="24dp"-->
+        <!--            android:layout_marginTop="20dp"-->
+        <!--            android:fontFamily="@font/rptregular"-->
+        <!--            android:text="تحقق"-->
+        <!--            android:textAllCaps="false"-->
+        <!--            android:textColor="@color/white"-->
+        <!--            android:textSize="18sp"-->
+        <!--            android:textStyle="bold"-->
+        <!--            app:backgroundTint="@drawable/ripple_button"-->
+        <!--            app:cornerRadius="14dp"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/tvTimer" />-->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/verifyOtpButton"
+            style="@style/PrimaryButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="تحقق"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTimer" />
+        <!-- Footer Features -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            app:layout_constraintTop_toBottomOf="@id/verifyOtpButton"
+            app:layout_constraintVertical_bias="1.0">
 
             <LinearLayout
-                android:id="@+id/otpContainer"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="50dp"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:layoutDirection="ltr"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <EditText
-                    android:id="@+id/otp1"
-                    android:layout_width="50dp"
-                    android:layout_height="60dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/edittext_background"
-                    android:inputType="number"
-                    android:maxLength="1"
-                    android:textAlignment="center" />
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/protect"
+                    app:tint="@color/primary2" />
 
-                <EditText
-                    android:id="@+id/otp2"
-                    android:layout_width="50dp"
-                    android:layout_height="60dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/edittext_background"
-                    android:inputType="number"
-                    android:maxLength="1"
-                    android:textAlignment="center" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/rptregular"
+                    android:text="حماية وأمان"
+                    android:textAlignment="center"
+                    android:textColor="@color/text_light_gray"
+                    android:textSize="10sp" />
 
-                <EditText
-                    android:id="@+id/otp3"
-                    android:layout_width="50dp"
-                    android:layout_height="60dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/edittext_background"
-                    android:inputType="number"
-                    android:maxLength="1"
-                    android:textAlignment="center" />
-
-                <EditText
-                    android:id="@+id/otp4"
-                    android:layout_width="50dp"
-                    android:layout_height="60dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/edittext_background"
-                    android:inputType="number"
-                    android:maxLength="1"
-                    android:textAlignment="center" />
-
-                <EditText
-                    android:id="@+id/otp5"
-                    android:layout_width="50dp"
-                    android:layout_height="60dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/edittext_background"
-                    android:inputType="number"
-                    android:maxLength="1"
-                    android:textAlignment="center" />
-
-                <EditText
-                    android:id="@+id/otp6"
-                    android:layout_width="50dp"
-                    android:layout_height="60dp"
-                    android:background="@drawable/edittext_background"
-                    android:imeOptions="actionDone"
-                    android:inputType="number"
-                    android:maxLength="1"
-                    android:textAlignment="center" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="بياناتك محمية بالكامل"
+                    android:textColor="@color/text_light_gray"
+                    android:textSize="8sp" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/registerText"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:text="@string/resend_underlined"
-                android:textColor="@color/primary"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/tvTimer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/text"
-                android:textSize="16sp"
-                android:visibility="gone" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/verifyOtpButton"
-                android:layout_width="match_parent"
-                android:layout_height="46dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/bg_button"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:stateListAnimator="@null"
-                android:text="تحقق"
-                android:textAllCaps="false"
-                android:textColor="@color/primary2"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:backgroundTint="@null" />
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/resendCodeText"
-                android:layout_width="wrap_content"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/support2"
+                    app:tint="@color/primary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/rptregular"
+                    android:text="دعم سريع"
+                    android:textAlignment="center"
+                    android:textColor="@color/text_light_gray"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="نحن هنا لمساعدتك"
+                    android:textColor="@color/text_light_gray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="إعادة إرسال الرمز"
-                android:textColor="@color/primary"
-                android:textSize="14sp"
-                android:visibility="gone" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/verified_badge" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/rptregular"
+                    android:text="موثوق ومعتمد"
+                    android:textAlignment="center"
+                    android:textColor="@color/text_light_gray"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="تجربة آمنة وموثوقة"
+                    android:textColor="@color/text_light_gray"
+                    android:textSize="8sp" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

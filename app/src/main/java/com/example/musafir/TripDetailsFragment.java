@@ -3,9 +3,7 @@ package com.example.musafir;
 import static android.view.View.GONE;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -13,9 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
@@ -29,11 +25,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -44,17 +37,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,19 +67,9 @@ public class TripDetailsFragment extends Fragment {
         }
     }
 
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//
-//        Toolbar toolbar = requireActivity().findViewById(R.id.main_toolbar);
-//
-//        // استرجاع الحالة الأصلية
-//        toolbar.setNavigationIcon(oldNavigationIcon);
-//        toolbar.setTitle(oldTitle);
-//        toolbar.setNavigationOnClickListener(null); // إزالة حدث الرجوع
-//    }
-
-    TextView reception_car, tvPrice, requestIds, tvTripTitle, tvTripStatus, tvTripDate, vehicle_type_name, tvTripSeats, tvTripNotes, tvTripHistory, tripLocation, tvTripNotesDriver, cancellationReason;
+    TextView reception_car, tvPrice, requestIds, tvTripTitle, tvTripStatus, tvTripDate, vehicle_type_name,
+            tvTripSeats, tvTripNotes, tvTripHistory, tripLocation, tvTripNotesDriver, cancellationReason,
+            tvOrderTime;
     LinearLayout notes, notesdriver, cancellationReasonCon, requestContainer, reception_car_con;
     //    ProgressBar progressBar;
     ScrollView detailsCard;
@@ -128,6 +104,7 @@ public class TripDetailsFragment extends Fragment {
         tvTripNotesDriver = itemView.findViewById(R.id.tvTripNotesDriver);
         reception_car = itemView.findViewById(R.id.reception_car);
         notes = itemView.findViewById(R.id.notes);
+        tvOrderTime = itemView.findViewById(R.id.tvOrderTime);
         reception_car_con = itemView.findViewById(R.id.reception_car_con);
         cardRequest = itemView.findViewById(R.id.cardRequest);
         requestContainer = itemView.findViewById(R.id.requestContainer);
@@ -208,10 +185,16 @@ public class TripDetailsFragment extends Fragment {
                             String price = trip.optString("price", "");
                             String vehicletypename = trip.optString("vehicle_type_name", "");
                             String address = trip.optString("address", "");
-                            int v_reception_car = trip.getInt("reception_car"); // المرحلة الحالية
-                            int number_status = trip.getInt("number_status"); // المرحلة الحالية
+                            int v_reception_car = trip.getInt("reception_car");
+                            int number_status = trip.getInt("number_status");
+                            String creation_date = trip.optString("creation_date", "");
 
-                            requestContainer.removeAllViews(); // تنظيف الحاوية قبل الإضافة
+                            if (creation_date != null && !creation_date.isEmpty()) {
+                                tvOrderTime.setText(UserUtils.getTimeAgo(creation_date));
+                            } else {
+                                tvOrderTime.setText("منذ قليل");
+                            }
+                            requestContainer.removeAllViews();
 
                             String[] stagesNames;
                             if (number_status == 0) {

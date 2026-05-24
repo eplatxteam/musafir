@@ -1,13 +1,10 @@
 package com.example.musafir;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,15 +18,14 @@ import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleViewHolder> {
 
     private final List<JSONObject> vehicles;
     private final Context context;
-    private final String baseUrl;
-    String ImageUrl = UserUtils.ImageUrl;
+    final String baseUrl;
+//    String ImageUrl = UserUtils.ImageUrl;
 
     public VehicleAdapter(Context context, List<JSONObject> vehicles, String baseUrl) {
         this.context = context;
@@ -60,8 +56,6 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             String displayName = vehicle_type + " " + make;
             holder.driverName.setText(displayName);
             holder.yearText.setText(year);
-//            holder.carPlate.setText(licensePlate);
-//            holder.colorText.setText(color);
             holder.seatText.setText(totalSeats);
 
             int vehicleId = vehicle.has("vehicle_id") ? vehicle.getInt("vehicle_id") : vehicle.getInt("id");
@@ -110,6 +104,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
                 bundle.putString("vehicle_image2", vehicle.isNull("vehicle_image2") ? null : vehicle.getString("vehicle_image2"));
                 bundle.putString("vehicle_image3", vehicle.isNull("vehicle_image3") ? null : vehicle.getString("vehicle_image3"));
                 bundle.putString("vehicle_image4", vehicle.isNull("vehicle_image4") ? null : vehicle.getString("vehicle_image4"));
+
                 AddVehicleFragment fragment = new AddVehicleFragment();
                 fragment.setArguments(bundle);
 
@@ -138,8 +133,6 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
         public VehicleViewHolder(@NonNull View itemView) {
             super(itemView);
             seatText = itemView.findViewById(R.id.seatText);
-//            colorText = itemView.findViewById(R.id.colorText);
-//            carPlate = itemView.findViewById(R.id.carPlate);
             vehicleImage = itemView.findViewById(R.id.vehicleImage);
             driverName = itemView.findViewById(R.id.driver_name);
             yearText = itemView.findViewById(R.id.yearText);

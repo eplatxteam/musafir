@@ -65,7 +65,27 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:padding="4dp"
+                    android:src="@drawable/clock" />
+
+                <TextView
+                    android:id="@+id/tvOrderTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="#000"
+                    android:textSize="14sp" />
+            </LinearLayout>
             <LinearLayout
                 android:id="@+id/containerCompany"
                 android:layout_width="match_parent"
@@ -221,7 +241,8 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_marginStart="8dp"
-                    android:src="@drawable/cancel2" />
+                    android:src="@drawable/cancel2"
+                    android:visibility="gone" />
 
                 <!-- الزر الثاني (أيقونة فقط) -->
                 <ImageView

@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -28,11 +27,7 @@ import androidx.fragment.app.Fragment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.Editable;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextWatcher;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,18 +39,22 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.google.android.material.card.MaterialCardView;
 
-import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -68,7 +67,12 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import jp.wasabeef.blurry.Blurry;
 
 //import jp.wasabeef.blurry.Blurry;
 
@@ -111,27 +115,27 @@ public class ProfileFragment extends Fragment {
     private boolean isLoadingData = false;
     TextView textMan, textWoman;
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        MenuItem placeholderItem = menu.findItem(R.id.action_placeholder);
-        if (placeholderItem != null) {
-            placeholderItem.setVisible(true);
-            View actionView = placeholderItem.getActionView();
-            if (actionView != null) {
-                actionView.setPressed(true);
-                actionView.postDelayed(() -> actionView.setPressed(false), 100);
-            }
-            actionView.setOnClickListener(v -> {
-                requireActivity().onBackPressed();
-            });
-        }
-    }
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        MenuItem placeholderItem = menu.findItem(R.id.action_placeholder);
+//        if (placeholderItem != null) {
+//            placeholderItem.setVisible(true);
+//            View actionView = placeholderItem.getActionView();
+//            if (actionView != null) {
+//                actionView.setPressed(true);
+//                actionView.postDelayed(() -> actionView.setPressed(false), 100);
+//            }
+//            actionView.setOnClickListener(v -> {
+//                requireActivity().onBackPressed();
+//            });
+//        }
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_profile, container, false);
-        setHasOptionsMenu(true);
+//        setHasOptionsMenu(true);
         progressLicenseImage = view.findViewById(R.id.progressLicenseImage);
         progressnationalImage = view.findViewById(R.id.progressNationalImage);
         frame_img2 = view.findViewById(R.id.frame_img2);
@@ -230,19 +234,6 @@ public class ProfileFragment extends Fragment {
             isDataChanged = true;
         });
 
-//        nationalIdImageView.setOnClickListener(v -> {
-//            selectImageFromGallery(PICK_NATIONAL_ID_IMAGE);
-//            isDataChanged = true;
-//        });
-//        licenseImageView.setOnClickListener(v -> {
-//            selectImageFromGallery(PICK_LICENSE_IMAGE);
-//            isDataChanged = true;
-//        });
-//        passportImage.setOnClickListener(v -> {
-//            selectImageFromGallery(PASSPORT_IMAGE);
-//            isDataChanged = true;
-//        });
-
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(),
                 new OnBackPressedCallback(true) {
                     @Override
@@ -275,8 +266,148 @@ public class ProfileFragment extends Fragment {
         // بعد انتهاء تحميل البيانات، إيقاف علم التحميل
         isLoadingData = false;
         isDataChanged = false; // لا يعتبر أي شيء تم تغييره بعد التحميل
+        LinearLayout deleteAccount = view.findViewById(R.id.deleteAccount);
 
+        deleteAccount.setOnClickListener(v -> {
+            showDeleteConfirmationDialog(getContext());
+        });
         return view;
+    }
+
+    private AlertDialog exitDialog2;
+
+    private void showDeleteConfirmationDialog(Context context) {
+        if (getActivity() == null || getActivity().isFinishing()) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_delete_account, null);
+        builder.setView(dialogView);
+
+        Button btnYes = dialogView.findViewById(R.id.btnYes);
+        Button btnNo = dialogView.findViewById(R.id.btnNo);
+        RadioGroup rgReason = dialogView.findViewById(R.id.rgDeleteReason);
+        EditText etNotes = dialogView.findViewById(R.id.etDeleteNotes);
+
+        ViewGroup decorView = getActivity().getWindow().getDecorView().findViewById(android.R.id.content);
+
+        btnYes.setOnClickListener(v -> {
+            int selectedId = rgReason.getCheckedRadioButtonId();
+            if (selectedId == -1) {
+                UserUtils.ToastMessages(getActivity(), "يرجى اختيار سبب الحذف أولاً");
+                return;
+            }
+
+            RadioButton rb = dialogView.findViewById(selectedId);
+            String reason = rb.getText().toString();
+            String notes = etNotes.getText().toString();
+
+            deleteUser(reason, notes);
+        });
+
+        btnNo.setOnClickListener(v -> {
+            if (exitDialog2 != null && exitDialog2.isShowing()) {
+                exitDialog2.dismiss();
+            }
+        });
+
+        exitDialog2 = builder.create();
+
+        Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
+        exitDialog2.setOnDismissListener(d -> Blurry.delete(decorView));
+
+        if (exitDialog2.getWindow() != null) {
+            exitDialog2.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
+        }
+        exitDialog2.show();
+    }
+
+    private void deleteUser(String reason, String notes) {
+        SharedPreferences prefs = SharedPrefsHelper.get(getContext());
+        String token = prefs.getString("auth_token", "");
+        int userId = prefs.getInt("user_id", -1);
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.ENGLISH);
+        String currentDate = sdf.format(new java.util.Date());
+        DBHelper dbHelper = new DBHelper(getContext());
+        if (token.isEmpty() || userId == -1) return;
+
+        showLoading();
+        String deviceId = UserUtils.getDeviceID(getContext());
+        String deviceInfo = UserUtils.getDeviceInfo();
+        String url = BASE_URL + "auth/profile/?device_id=" + deviceId + "&device_info=" + deviceInfo;
+
+        JSONObject postData = new JSONObject();
+        try {
+            postData.put("reason_deletion", reason);
+            postData.put("token", token);
+            postData.put("note_deletion", notes);
+            postData.put("date_request", currentDate);
+            postData.put("device_info", deviceInfo);
+            postData.put("account_deletion", 1);
+        } catch (JSONException e) {
+//            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.PATCH,
+                url,
+                postData,
+                response -> {
+                    hideLoading();
+                    if (exitDialog != null && exitDialog.isShowing()) exitDialog.dismiss();
+
+                    prefs.edit().clear().apply();
+
+                    if (getActivity() != null) {
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        getActivity().finish();
+                        UserUtils.getMessageFromLocal(241, dbHelper, new UserUtils.MessageCallback() {
+                            @Override
+                            public void onSuccess(String message) {
+                                UserUtils.ToastMessages(getActivity(), message);
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                            }
+
+                        });
+                    }
+                },
+                error -> {
+                    hideLoading();
+                    UserUtils.ToastMessages(getActivity(), UserUtils.getMessageFromLocalNew(338, dbHelper));
+                    UserUtils.sendLog(getContext(), "deleteUser", error.toString(), "user_id = " + userId, "SettingFragment");
+
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                headers.put("Accept", "application/json");
+                return headers;
+            }
+        };
+
+        Volley.newRequestQueue(getContext()).add(request);
+    }
+
+    private ProgressDialog progressDialog;
+
+    private void showLoading() {
+        progressDialog = new ProgressDialog(getContext());
+        progressDialog.setMessage("جاري حذف الحساب...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+    }
+
+    private void hideLoading() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 
 
@@ -457,21 +588,41 @@ public class ProfileFragment extends Fragment {
             valid = false;
             if (firstErrorView == null) firstErrorView = phoneError;
 
-        } else if (phoneNumber.length() != 9) {
-            phoneError.setVisibility(View.VISIBLE);
-            phoneError.setText("يجب أن يتكون رقم الهاتف من 9 أرقام");
-            phoneNumber.setError("يجب أن يتكون رقم الهاتف من 9 أرقام");
-            UserUtils.setEditTextState(phoneNumber, true);
-            valid = false;
-            if (firstErrorView == null) firstErrorView = phoneError;
-
-        } else if (!phoneNumber.getText().toString().trim().matches("7[013789]\\d{7}")) {
+        }
+//        else if (phoneNumber.length() != 9) {
+//            phoneError.setVisibility(View.VISIBLE);
+//            phoneError.setText("يجب أن يتكون رقم الهاتف من 9 أرقام");
+//            phoneNumber.setError("يجب أن يتكون رقم الهاتف من 9 أرقام");
+//            UserUtils.setEditTextState(phoneNumber, true);
+//            valid = false;
+//            if (firstErrorView == null) firstErrorView = phoneError;
+//
+//        }
+        else if (!phoneNumber.getText().toString().trim().matches("7[013789]\\d{7}")) {
             phoneError.setVisibility(View.VISIBLE);
             phoneError.setText("يرجى إدخال رقم صحيح يبدأ بـ 7");
             phoneNumber.setError("يرجى إدخال رقم صحيح يبدأ بـ 7");
             UserUtils.setEditTextState(phoneNumber, true);
             valid = false;
             if (firstErrorView == null) firstErrorView = phoneError;
+        } else if (!(phoneNumber.getText().toString().startsWith("7") || phoneNumber.getText().toString().startsWith("05"))) {
+            phoneError.setVisibility(View.VISIBLE);
+            phoneError.setText("يجب أن يبدأ الرقم بـ 7 أو 05 ");
+            phoneNumber.setError("رقم غير صحيح");
+            UserUtils.setEditTextState(phoneNumber, true);
+            valid = false;
+        } else if (phoneNumber.getText().toString().startsWith("05") && phoneNumber.length() != 10) {
+            phoneError.setVisibility(View.VISIBLE);
+            phoneError.setText("رقم غير صحيح. يجب أن يتكون من 10 أرقام ويبدأ بـ 05");
+            phoneNumber.setError("يرجى إدخال رقم صحيح");
+            UserUtils.setEditTextState(phoneNumber, true);
+            valid = false;
+        } else if (phoneNumber.getText().toString().startsWith("7") && !phoneNumber.getText().toString().matches("7[013789]\\d{7}")) {
+            phoneError.setVisibility(View.VISIBLE);
+            phoneError.setText("رقم غير صحيح. يجب أن يبدأ بـ 7 ويتكون من 9 أرقام");
+            phoneNumber.setError("رقم غير صحيح");
+            UserUtils.setEditTextState(phoneNumber, true);
+            valid = false;
         } else {
             phoneError.setVisibility(View.GONE);
             UserUtils.setEditTextState(phoneNumber, false);
@@ -522,8 +673,6 @@ public class ProfileFragment extends Fragment {
 
         // إعداد الضبابية
         ViewGroup decorView = requireActivity().getWindow().getDecorView().findViewById(android.R.id.content);
-//        Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
-//        exitDialog.setOnDismissListener(d -> Blurry.delete(decorView));
 
         if (exitDialog.getWindow() != null) {
             exitDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
@@ -600,7 +749,6 @@ public class ProfileFragment extends Fragment {
     }
 
 
-
     private void checkImagePermission(int requestCode) {
         Intent intent;
 
@@ -657,17 +805,6 @@ public class ProfileFragment extends Fragment {
         DBHelper dbHelper = new DBHelper(getContext());
 
         if (token.isEmpty()) {
-//            UserUtils.getMessageFromLocal(41, dbHelper, new UserUtils.MessageCallback() {
-//                @Override
-//                public void onSuccess(String message) {
-//                    UserUtils.ToastMessages(getActivity(), message);
-//                }
-//
-//                @Override
-//                public void onError(String error) {
-//                }
-//
-//            });
             return;
         }
 
@@ -704,11 +841,18 @@ public class ProfileFragment extends Fragment {
                     conn.setRequestProperty("Authorization", "Bearer " + token);
                 }
                 DataOutputStream request = new DataOutputStream(conn.getOutputStream());
+                String finalPhone;
 
-                // إرسال الحقول النصية
+                if (phoneNumber.startsWith("05")) {
+                    finalPhone = "966" + phoneNumber.substring(1);
+                } else if (phoneNumber.startsWith("7")) {
+                    finalPhone = "967" + phoneNumber;
+                } else {
+                    finalPhone = phoneNumber;
+                }
                 if (!fullName.isEmpty()) writeFormField(request, "full_name", fullName, boundary);
-                if (!phoneNumber.isEmpty())
-                    writeFormField(request, "phone_number", phoneNumber, boundary);
+                if (!finalPhone.isEmpty())
+                    writeFormField(request, "phone_number", finalPhone, boundary);
                 if (!nationalId.isEmpty())
                     writeFormField(request, "national_id", nationalId, boundary);
                 if (!dateOfBirth.isEmpty())
@@ -800,21 +944,6 @@ public class ProfileFragment extends Fragment {
                                     }
                                 }
                             }
-
-                            // int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
-                            // String greeting = (hour >= 5 && hour < 12) ? "صباح الخير" : "مساء الخير";
-
-                            // String fullText = greeting + " " + firstName;
-
-                            // SpannableString spannable = new SpannableString(fullText);
-                            // int start = greeting.length();
-                            // int end = fullText.length();
-
-                            // spannable.setSpan(new RelativeSizeSpan(1.2f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            // spannable.setSpan(new StyleSpan(Typeface.BOLD), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                            // toolbar.setTitle(spannable);
-                            // toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
 
                             isDataChanged = false;
                             oldFullName = fullName;
@@ -913,24 +1042,59 @@ public class ProfileFragment extends Fragment {
     }
 
     private void writeFileField(DataOutputStream out, String fieldName, Uri fileUri, String boundary) throws IOException {
-        String fileName = getFileNameFromUri(fileUri); // دالة تجلب اسم الملف من الـ Uri
-        String mimeType = getContext().getContentResolver().getType(fileUri);
+
+        String originalName = getFileNameFromUri(fileUri);
+        String uniqueID = UUID.randomUUID().toString();
+        String fileName = uniqueID + "_" + originalName;
 
         out.writeBytes("--" + boundary + "\r\n");
         out.writeBytes("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"\r\n");
-        out.writeBytes("Content-Type: " + mimeType + "\r\n");
+        out.writeBytes("Content-Type: image/jpeg\r\n");
         out.writeBytes("\r\n");
 
         InputStream inputStream = getContext().getContentResolver().openInputStream(fileUri);
-        byte[] buffer = new byte[4096];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            out.write(buffer, 0, bytesRead);
-        }
+
+        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeStream(inputStream);
+
         inputStream.close();
+
+        if (bitmap != null) {
+
+            int maxWidth = 1280;
+            int maxHeight = 1280;
+
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+
+            float ratio = Math.min(
+                    (float) maxWidth / width,
+                    (float) maxHeight / height
+            );
+
+            if (ratio < 1) {
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+
+                bitmap = android.graphics.Bitmap.createScaledBitmap(
+                        bitmap,
+                        width,
+                        height,
+                        true
+                );
+            }
+
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 75, baos);
+
+            out.write(baos.toByteArray());
+
+            baos.close();
+            bitmap.recycle();
+        }
 
         out.writeBytes("\r\n");
     }
+
 
     private void showDatePickerDialog(EditText targetEditText) {
         final Calendar calendar = Calendar.getInstance();
@@ -982,19 +1146,20 @@ public class ProfileFragment extends Fragment {
 //        SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", getActivity().MODE_PRIVATE);
         String token = prefs.getString("auth_token", "");
         DBHelper dbHelper = new DBHelper(getContext());
+        if (!UserUtils.isNetworkAvailable(getContext())) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(getActivity(), message);
+                }
 
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         if (token.isEmpty()) {
-//            UserUtils.getMessageFromLocal(41, dbHelper, new UserUtils.MessageCallback() {
-//                @Override
-//                public void onSuccess(String message) {
-//                    UserUtils.ToastMessages(getActivity(), message);
-//                }
-//
-//                @Override
-//                public void onError(String error) {
-//                }
-//
-//            });
             return;
         }
 
@@ -1002,7 +1167,8 @@ public class ProfileFragment extends Fragment {
             try {
                 String deviceId = UserUtils.getDeviceID(getContext());
                 String deviceInfo = UserUtils.getDeviceInfo();
-                URL url = new URL(BASE_URL + "auth/profile/?device_id=" + deviceId + "&device_info=" + deviceInfo);                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                URL url = new URL(BASE_URL + "auth/profile/?device_id=" + deviceId + "&device_info=" + deviceInfo);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
@@ -1083,7 +1249,7 @@ public class ProfileFragment extends Fragment {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         UserUtils.sendLog(getContext(), "loadProfileData", e.toString(), e.toString(), "Profile Fragment");
-                        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                        UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                             @Override
                             public void onSuccess(String message) {
                                 UserUtils.ToastMessages(getActivity(), message);
@@ -1099,10 +1265,23 @@ public class ProfileFragment extends Fragment {
             }
         }).start();
     }
-
     private void setProfileField(int viewId, String label, String value) {
         EditText editText = view.findViewById(viewId);
         editText.setHint(label);
-        editText.setText(value);
+
+        if (value != null) {
+            String cleanValue = value.trim();
+            if (cleanValue.startsWith("966") || cleanValue.startsWith("967")) {
+                cleanValue = cleanValue.substring(3);
+            }
+            editText.setText(cleanValue);
+        } else {
+            editText.setText("");
+        }
     }
+//    private void setProfileField(int viewId, String label, String value) {
+//        EditText editText = view.findViewById(viewId);
+//        editText.setHint(label);
+//        editText.setText(value);
+//    }
 }

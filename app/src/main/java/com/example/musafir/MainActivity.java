@@ -17,8 +17,6 @@ import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,15 +24,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.content.Intent;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -42,6 +37,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.google.android.material.button.MaterialButton;
 import com.scottyab.rootbeer.RootBeer;
 
 public class MainActivity extends AppCompatActivity {
@@ -79,10 +75,25 @@ public class MainActivity extends AppCompatActivity {
         UserUtils.app_Page(this, 10);
         passwordError = findViewById(R.id.passwordError);
         phoneError = findViewById(R.id.phoneError);
-        TextView whatsappIcon = findViewById(R.id.whatsappIconMain);
+        MaterialButton whatsappIcon = findViewById(R.id.btn_whatsapp_driver);
+        MaterialButton btn_call = findViewById(R.id.btn_call);
+        SharedPreferences prefs = SharedPrefsHelper.get(this);
+
+        btn_call.setOnClickListener(v -> {
+            String countryCode = prefs.getString("country_code", "967785050270");
+
+            int messageId = "YE".equals(countryCode) ? 349 : 362;
+            String phone = UserUtils.getMessageFromLocalNew(messageId, dbHelper);
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:" + phone));
+            startActivity(intent);
+        });
         whatsappIcon.setOnClickListener(v -> {
-            String phoneNumber = "967785050270";
-            String url = "https://wa.me/" + phoneNumber;
+            String countryCode = prefs.getString("country_code", "967785050270");
+
+            int messageId = "YE".equals(countryCode) ? 349 : 362;
+            String phone = UserUtils.getMessageFromLocalNew(messageId, dbHelper);
+            String url = "https://wa.me/" + phone;
 
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
@@ -91,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 v.getContext().startActivity(intent);
             } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
 
@@ -256,6 +268,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void login() {
+        if (!UserUtils.isNetworkAvailable(this)) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(MainActivity.this, message);
+                }
+
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         String phone = phoneEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
@@ -275,13 +300,22 @@ public class MainActivity extends AppCompatActivity {
                 String deviceSerials = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
                 SharedPreferences prefs = SharedPrefsHelper.get(this);
                 String defaultCity = prefs.getString("default_city", "حدد المدينة");
+                String country = prefs.getString("country_code", "");
                 int defaultCityId = prefs.getInt("default_city_id", -1);
-
+                String finalPhone;
+                if (phone.startsWith("05")) {
+                    finalPhone = "966" + phone.substring(1);
+                } else if (phone.startsWith("7")) {
+                    finalPhone = "967" + phone;
+                } else {
+                    finalPhone = phone;
+                }
                 JSONObject jsonParam = new JSONObject();
                 jsonParam.put("password", password);
-                jsonParam.put("username", phone);
+                jsonParam.put("username", finalPhone);
                 jsonParam.put("device_serial", deviceSerials);
                 jsonParam.put("default_city", defaultCity);
+                jsonParam.put("country", country);
                 jsonParam.put("city_id", defaultCityId);
 
                 OutputStream os = conn.getOutputStream();
@@ -289,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
                 os.flush();
                 os.close();
                 String s = "{ password: " + password +
-                        " , username: " + phone +
+                        " , username: " + finalPhone +
                         " , device_serial: " + deviceSerials +
                         " , default_city: " + defaultCity +
                         " , city_id: " + defaultCityId +
@@ -321,6 +355,7 @@ public class MainActivity extends AppCompatActivity {
                             String ip = jsonObject.getString("ip");
                             String notify_general = jsonObject.getString("notify_general");
                             String notify_primary = jsonObject.getString("notify_primary");
+                            String cur_code = jsonObject.getString("cur_code");
 
                             if (is_active.equals("false")) {
                                 UserUtils.getMessageFromLocal(22, dbHelper, new UserUtils.MessageCallback() {
@@ -340,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
 
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putString("auth_token", token);
-                            editor.putString("user_phone", phone);
+                            editor.putString("user_phone", finalPhone);
                             editor.putInt("user_id", userId);
                             editor.putString("ip", ip);
                             editor.putString("is_verified", is_verified);
@@ -351,6 +386,7 @@ public class MainActivity extends AppCompatActivity {
                             editor.putString("device_serial", deviceSerial);
                             editor.putString("password", password);
                             editor.putString("default_city", defaultCity);
+                            editor.putString("cur_code", cur_code);
                             String firstName = full_name.trim().split("\\s+")[0];
                             firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1).toLowerCase(); // Capitalize أول حرف فقط
 
@@ -379,19 +415,10 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-                                            UserUtils.ToastMessages(MainActivity.this, message);
-                                        }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
                                 }
                             });
-
+                            UserUtils.fetchBalance(this);
                             UserUtils.fetchCodeDetails(this, 5, null, new UserUtils.OnCodesFetchedListener() {
                                 @Override
                                 public void onFetched(JSONArray response) {
@@ -399,20 +426,20 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-                                            UserUtils.ToastMessages(MainActivity.this, message);
-                                        }
-
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
 
                                 }
                             });
+                            UserUtils.fetchAndSavePayTypes(this, new UserUtils.GenericCallback() {
 
+                                @Override
+                                public void onSuccess(String message) {
+                                }
+
+                                @Override
+                                public void onError(String error) {
+
+                                }
+                            });
                             UserUtils.fetchAndSavecities(this, new UserUtils.citiesCallback() {
                                 @Override
                                 public void onSuccess(String message) {
@@ -423,17 +450,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-                                            UserUtils.ToastMessages(MainActivity.this, message);
-                                        }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-
-                                    });
                                 }
                             });
                             UserUtils.fetchCashBankData(this, dbHelper, new UserUtils.OnCashBankFetchedListener() {
@@ -443,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                                         @Override
                                         public void onSuccess(String message) {
                                             UserUtils.ToastMessages(MainActivity.this, message);
@@ -456,7 +473,18 @@ public class MainActivity extends AppCompatActivity {
                                     });
                                 }
                             });
+                            UserUtils.syncDayTimesFromServer(this, new UserUtils.DayTimeCallback() {
 
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError(String error) {
+
+                                }
+                            });
                             UserUtils.fetchAndSaveCountry(this, new UserUtils.FetchCallback() {
                                 @Override
                                 public void onSuccess(String message) {
@@ -466,16 +494,6 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-//                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-//                                        @Override
-//                                        public void onSuccess(String message) {
-//                                            UserUtils.ToastMessages(this, message);
-//                                        }
-//
-//                                        @Override
-//                                        public void onError(String error) {
-//                                        }
-//                                    });
                                 }
                             });
                             UserUtils.fetchAndSaveMessages(this, new UserUtils.FetchCallback() {
@@ -484,28 +502,11 @@ public class MainActivity extends AppCompatActivity {
                                     SharedPreferences.Editor editor = prefs.edit();
                                     editor.putBoolean("messages_fetched", true);
                                     editor.apply();
-//                                    UserUtils.ToastMessages(getActivity(), message);
-//                                    lottieWave.cancelAnimation();
-//                                    lottieWave.setProgress(0f); // مهم
-//                                    lottieWave.setVisibility(View.GONE);
                                 }
 
                                 @Override
                                 public void onError(String error) {
-//                                    lottieWave.cancelAnimation();
-//                                    lottieWave.setProgress(0f); // مهم
-//                                    lottieWave.setVisibility(View.GONE);
 
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-//                                            UserUtils.ToastMessages(getActivity(), message);
-                                        }
-
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
                                 }
 
 
@@ -518,16 +519,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-//                                            UserUtils.ToastMessages(getActivity(), message);
-                                        }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
                                 }
                             });
                             UserUtils.fetchTypeTravelerRequests(this, dbHelper, new TravelerRequests.OnTypeRequestsFetchedListener() {
@@ -538,18 +530,11 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String error) {
-                                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                                        @Override
-                                        public void onSuccess(String message) {
-//                                            UserUtils.ToastMessages(getActivity(), message);
-                                        }
 
-                                        @Override
-                                        public void onError(String error) {
-                                        }
-                                    });
                                 }
                             });
+                            UserUtils.fetchAndSaveContactInfo(this, dbHelper);
+
                             UserUtils.fetchRoutes(this, new UserUtils.FetchCallback() {
                                 @Override
                                 public void onSuccess(String message) {
@@ -561,7 +546,9 @@ public class MainActivity extends AppCompatActivity {
                             });
                             UserUtils.loadVehicleTypesToDB(this);
 
+
                             Intent intent = new Intent(MainActivity.this, HomePage.class);
+                            intent.putExtra("is_just_logged_in", true);
                             startActivity(intent);
                             finish();
                         } else {
@@ -590,7 +577,6 @@ public class MainActivity extends AppCompatActivity {
                                 UserUtils.getMessageFromLocal(42, dbHelper, new UserUtils.MessageCallback() {
                                     @Override
                                     public void onSuccess(String message) {
-                                        UserUtils.ToastMessages(MainActivity.this, message);
                                     }
 
                                     @Override
@@ -612,7 +598,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } catch (JSONException e) {
                         UserUtils.sendLog(this, "login", s, s, "Main Login");
-                        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                        UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                             @Override
                             public void onSuccess(String message) {
                                 UserUtils.ToastMessages(MainActivity.this, message);
@@ -630,7 +616,7 @@ public class MainActivity extends AppCompatActivity {
                 UserUtils.sendLog(this, "login", e.toString(), e.toString(), "Main Login");
                 runOnUiThread(() -> {
                     progressDialog.dismiss();
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             UserUtils.ToastMessages(MainActivity.this, message);

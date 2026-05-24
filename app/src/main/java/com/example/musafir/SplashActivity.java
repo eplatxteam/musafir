@@ -40,6 +40,8 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+//        Firebase.initialize(this);
+
 //        try {
 //            PackageInfo info = getPackageManager().getPackageInfo(
 //                    "com.EplatX.musafir",
@@ -74,9 +76,6 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 })
                 .into(lottieWave);
-//        Glide.with(this)
-//                .load(R.drawable.msaferlogo)
-//                .into(lottieWave);
         if (!BuildConfig.DEBUG &&
                 (android.os.Debug.isDebuggerConnected() || isEmulator())) {
 
@@ -94,7 +93,7 @@ public class SplashActivity extends AppCompatActivity {
                 System.exit(1);
             }
         });
-        new Handler().postDelayed(this::goNext, 5100);
+        new Handler().postDelayed(this::goNext, 5500);
     }
 
     public static boolean isEmulator() {
@@ -116,26 +115,6 @@ public class SplashActivity extends AppCompatActivity {
                 || Build.PRODUCT.contains("simulator");
     }
 
-    //    public static boolean checkForRootBinaries() {
-//        String[] rootBinariesPaths = {
-//                "/system/app/Superuser.apk",
-//                "/sbin/su",
-//                "/system/bin/su",
-//                "/system/xbin/su",
-//                "/data/local/xbin/su",
-//                "/data/local/bin/su",
-//                "/system/sd/xbin/su",
-//                "/system/bin/failsafe/su",
-//                "/data/local/su",
-//                "/su/bin/su"
-//        };
-//        for (String path : rootBinariesPaths) {
-//            if (new File(path).exists()) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
     private void checkInstallReferrer() {
         InstallReferrerClient referrerClient = InstallReferrerClient.newBuilder(this).build();
         referrerClient.startConnection(new InstallReferrerStateListener() {
@@ -157,6 +136,7 @@ public class SplashActivity extends AppCompatActivity {
                         }
                         referrerClient.endConnection();
                     } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -179,32 +159,44 @@ public class SplashActivity extends AppCompatActivity {
         );
     }
 
-    private void goNext() {
-        // المسار 1: الرابط المباشر (Deep Link)
+private void goNext() {
         Uri data = getIntent().getData();
         String inviteCode = null;
 
+        // 1. استخراج الكود من الرابط العميق
         if (data != null) {
             inviteCode = data.getQueryParameter("invite");
         }
 
-        // المسار 2: الـ Referrer (من المتجر)
         if (inviteCode == null || inviteCode.isEmpty()) {
             inviteCode = inviteCodeFromReferrer;
         }
 
-        // إذا وُجد الكود في أي من المسارين
-        if (inviteCode != null && !inviteCode.isEmpty()) {
+        SharedPreferences userPrefs = SharedPrefsHelper.get(this);
+        int userId = userPrefs.getInt("user_id", 0);
+
+        SharedPreferences onboardingPrefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        boolean onboardingShown = onboardingPrefs.getBoolean("onboardingShown", false);
+
+        // الشرط: إذا وجد كود دعوة والمستخدم جديد
+        if (inviteCode != null && !inviteCode.isEmpty() && userId == 0) {
             saveInviteCode(inviteCode);
 
-            Intent i = new Intent(SplashActivity.this, MainActivity2.class);
-            i.putExtra("invite", inviteCode);
-            startActivity(i);
+            // إذا لم يشاهد الـ onboarding بعد، نرسله إليها أولاً
+            if (!onboardingShown) {
+                Intent i = new Intent(SplashActivity.this, onboarding.class);
+                i.putExtra("invite", inviteCode); // نمرر الكود لكي تستخدمه صفحة الـ onboarding لاحقاً
+                startActivity(i);
+            } else {
+                // إذا شاهد الـ onboarding سابقاً ولكن لم يسجل، نرسله للتسجيل مباشرة
+                Intent i = new Intent(SplashActivity.this, MainActivity2.class);
+                i.putExtra("invite", inviteCode);
+                startActivity(i);
+            }
             finish();
             return;
         }
 
-        // إذا لم يوجد كود، نكمل المسار الطبيعي
         proceedToApp();
     }
 
@@ -214,7 +206,7 @@ public class SplashActivity extends AppCompatActivity {
 
         Intent intent;
         if (!onboardingShown) {
-            intent = new Intent(SplashActivity.this, Onboarding1.class);
+            intent = new Intent(SplashActivity.this, onboarding.class);
         } else {
             intent = new Intent(SplashActivity.this, HomePage.class);
         }

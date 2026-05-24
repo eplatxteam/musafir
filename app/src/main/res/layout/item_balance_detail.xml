@@ -20,82 +20,138 @@
             android:gravity="top"
             android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/ivIcon"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="@drawable/badge_background_bal"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_plus"
-                    app:tint="@color/white" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:weightSum="3">
 
-                    <TextView
-                        android:id="@+id/tvDocType"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="نوع العملية"
-                        android:textColor="@color/secondary"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
+                    <!-- القسم الأول (يسار): مساحة النصوص والنوع -->
+                    <LinearLayout
+                        android:layout_width="85dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="start|center_vertical"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/tvDate"
-                        android:layout_width="wrap_content"
+                        <ImageView
+                            android:id="@+id/ivIcon"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/badge_background_bal"
+                            android:padding="5dp"
+                            android:src="@drawable/ic_plus"
+                            app:tint="@color/holo_green_dark" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:gravity="center"
+
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <ImageView
+                                    android:id="@+id/circleIcon"
+                                    android:layout_width="8dp"
+                                    android:layout_height="8dp"
+                                    android:layout_marginEnd="4dp"
+                                    android:src="@drawable/bg_button"
+                                    app:tint="@color/holo_green_dark" />
+
+                                <TextView
+                                    android:id="@+id/tvDocType"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="رسوم التذكرة"
+                                    android:textColor="@color/secondary"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="10dp"
+                                    android:layout_height="10dp"
+                                    android:layout_marginEnd="2dp"
+                                    android:src="@drawable/date"
+                                    app:tint="@color/text" />
+
+                                <TextView
+                                    android:id="@+id/tvDate"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="2026-05-06"
+                                    android:paddingStart="4dp"
+                                    android:textColor="@color/text_light_gray"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="10dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.7"
+                        android:gravity="center|start"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/ivIconbal"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:background="@drawable/badge_bal_dow"
+                            android:padding="3dp"
+                            android:src="@drawable/ei_arrow_dow" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="2026-01-01"
-                        android:textColor="@color/text_light_gray"
-                        android:textSize="12sp" />
+                        android:layout_weight="1.3"
+                        android:gravity="end|center_vertical"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+50.000.00"
+                            android:textColor="@color/holo_green_dark"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvCurCode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ريال يمني"
+                            android:textSize="11sp" />
+
+                        <ImageView
+                            android:id="@+id/ivArrow"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:src="@drawable/baseline_keyboard_arrow_down_24"
+                            app:tint="@color/text_light_gray" />
+                    </LinearLayout>
 
                 </LinearLayout>
-
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvAmount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="+100"
-                    android:textColor="@color/holo_green_dark"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvCurCode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ريال يمني"
-                    android:textSize="12sp" />
-
-                <!-- تم نقل السهم إلى هنا ليكون تحت العملة -->
-                <ImageView
-                    android:id="@+id/ivArrow"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="4dp"
-                    android:src="@drawable/baseline_keyboard_arrow_down_24"
-                    app:tint="@color/text_light_gray" />
-            </LinearLayout>
-            =
+            </RelativeLayout>
         </LinearLayout>
 
         <LinearLayout

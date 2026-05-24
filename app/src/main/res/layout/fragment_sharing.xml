@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray">
@@ -11,7 +10,42 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <!-- بطاقة الإشعارات -->
+
+        <Button
+            android:id="@+id/share"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
+            style="@style/PrimaryButtonStyle"
+            android:stateListAnimator="@null"
+            android:text="مشاركة التطبيق"
+            app:icon="@drawable/share"
+            app:iconGravity="textStart"
+            app:iconSize="35dp"/>
+
+        <LinearLayout
+            android:id="@+id/details_share"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textShare"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="#888888"
+                android:textSize="12sp" />
+        </LinearLayout>
+
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardshare"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
@@ -42,19 +76,14 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <!--        <ImageView-->
-        <!--            android:layout_width="100dp"-->
-        <!--            android:layout_height="100dp"-->
-        <!--            android:layout_gravity="center"-->
-        <!--            android:src="@drawable/remove" />-->
-
         <TextView
+            android:id="@+id/textPerson"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="لا يوجد أعضاء منضمون"
+            android:text="سيظهر الأعضاء الذين استجابوا لدعوتك هنا"
             android:textColor="#888888"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout

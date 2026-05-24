@@ -3,12 +3,16 @@ package com.example.musafir;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -18,38 +22,56 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.RatingBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
-import com.airbnb.lottie.parser.IntegerParser;
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.card.MaterialCardView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.Parser;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -58,13 +80,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
 
 import jp.wasabeef.blurry.Blurry;
 
@@ -72,15 +99,63 @@ public class UserUtils {
 
     public static String app_version = com.example.musafir.BuildConfig.VERSION_NAME;
 
-    public static String BASE_URL = "https://msafer.eplatx.com/" + app_version + "/api/";
+    public static String BASE_URL = "https://api.msafer.app/" + app_version + "/api/";
 
-    public static String ImageUrl = "https://msafer.eplatx.com";
+    public static String ImageUrl = "https://api.msafer.app";
 
     public static String getDeviceID(Context context) {
         if (context == null) return "unknown_id";
         String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         return androidId != null ? androidId : "null_id";
     }
+
+    public static String getTimeAgo(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return "";
+
+        try {
+            SimpleDateFormat sdf;
+
+            if (dateStr.contains("T")) {
+                sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
+            } else {
+                sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+            }
+
+            Date date = sdf.parse(dateStr);
+            long time = date.getTime();
+            long now = System.currentTimeMillis();
+
+            long diff = now - time;
+            if (diff < 0) return "منذ قليل";
+
+            long seconds = diff / 1000;
+            long minutes = seconds / 60;
+            long hours = minutes / 60;
+            long days = hours / 24;
+
+            if (seconds < 60) {
+                return "الآن";
+            } else if (minutes < 60) {
+                return "منذ " + minutes + " دقيقة";
+            } else if (hours < 24) {
+                return "منذ " + hours + " ساعة";
+            } else if (days < 30) { // تم التعديل هنا ليدعم حتى شهر
+                if (days == 1) return "أمس";
+                if (days == 2) return "منذ يومين";
+                if (days < 11) return "منذ " + days + " أيام";
+                return "منذ " + days + " يوماً";
+            } else {
+                // إذا مر أكثر من شهر، يمكن إظهار عدد الشهور أو التاريخ
+                long months = days / 30;
+                if (months == 1) return "منذ شهر";
+                if (months == 2) return "منذ شهرين";
+                return "منذ " + months + " أشهر";
+            }
+        } catch (Exception e) {
+            return dateStr;
+        }
+    }
+
 
     public static String getDeviceInfo() {
         try {
@@ -123,13 +198,16 @@ public class UserUtils {
                             JSONObject obj = response.getJSONObject(i);
                             int cNo = obj.getInt("code_no");
                             int show_in_app = obj.getInt("show_in_app");
+                            int code_ordr = obj.getInt("code_ordr");
                             String name = obj.getString("code_l_nm");
                             String icon = obj.optString("code_icon", "");
+                            String sys_code = obj.optString("sys_code", "");
 
-                            dbHelper.saveCodeDetails(typeNo, cNo, name, icon, show_in_app);
+                            dbHelper.saveCodeDetails(typeNo, cNo, name, icon, show_in_app, code_ordr, sys_code);
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
 
                     listener.onFetched(response);
@@ -160,10 +238,9 @@ public class UserUtils {
                 response -> {
                     try {
                         dbHelper.saveCompaniesFromJson(response);
-
                         listener.onFetched(response);
                     } catch (Exception e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                         listener.onError(e.getMessage());
                     }
                 },
@@ -191,19 +268,24 @@ public class UserUtils {
             String url = BASE_URL + "vehicle-types/";
             RequestQueue queue = Volley.newRequestQueue(context);
 
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+            // تم التغيير إلى JsonArrayRequest لأن الرد مصفوفة مباشرة
+            JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
                     response -> {
                         try {
-                            JSONArray results = response.getJSONArray("results");
-
+                            // تفريغ الجدول القديم قبل البدء بحفظ البيانات الجديدة
                             dbHelper.clearVehicleTypes();
 
-                            for (int i = 0; i < results.length(); i++) {
-                                JSONObject item = results.getJSONObject(i);
+                            // هنا الـ response هو نفسه الـ JSONArray مباشرة
+                            for (int i = 0; i < response.length(); i++) {
+                                JSONObject item = response.getJSONObject(i);
                                 int id = item.getInt("id_vehicle_type");
                                 int inactive = item.getInt("inactive");
+                                int has_local = item.getInt("has_local");
+                                int has_global = item.getInt("has_global");
+                                int has_shared = item.getInt("has_shared");
                                 String name = item.getString("vehicles_type");
-                                dbHelper.insertVehicleType(id, name, inactive);
+
+                                dbHelper.insertVehicleType(id, name, inactive, has_local, has_global, has_shared);
                             }
 
                         } catch (JSONException e) {
@@ -221,6 +303,7 @@ public class UserUtils {
                     return headers;
                 }
             };
+
             request.setRetryPolicy(new DefaultRetryPolicy(
                     30000,
                     DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -231,6 +314,34 @@ public class UserUtils {
             sendLog(context, "loadVehicleTypesToDB", e.toString(), e.toString(), "UserUtils");
         }
     }
+
+    public static void fetchAndSaveContactInfo(Context context, DBHelper dbHelper) {
+        String url = BASE_URL + "ContactInfo/";
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        dbHelper.saveContactInfo(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        sendLog(context, "fetchAndSaveContactInfo", error.toString(), "فشل جلب بيانات التواصل", "ContactInfoAPI");
+                    }
+                }
+        );
+
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        Volley.newRequestQueue(context).add(request);
+    }
+
 
     public static void fetchTravelerRequests(Context context, DBHelper dbHelper, int passengerId,
                                              final TravelerRequests.fetchTravelerRequestsListener listener) {
@@ -251,24 +362,13 @@ public class UserUtils {
                                     boolean hasNew = false;
                                     int lastId = dbHelper.getLastTrId(); // آخر tr_id مخزن
 
-//                                    for (int i = 0; i < response.length(); i++) {
-//                                        JSONObject item = response.getJSONObject(i);
-//                                        int tr_id = item.getInt("tr_id");
-//
-//                                        if (tr_id > lastId) {
-//                                            hasNew = true;
-//                                            dbHelper.insertOrUpdate(item); // حفظ أو تحديث
-//                                        }
-//                                    }
                                     for (int i = 0; i < response.length(); i++) {
                                         JSONObject item = response.getJSONObject(i);
                                         dbHelper.insertOrUpdate(item); // تحديث أو إدخال دائمًا
                                     }
 
-                                    // جلب آخر 5 طلبات من DB
                                     List<JSONObject> list = dbHelper.getLatestRequests();
 
-                                    // إعادة البيانات عبر listener
                                     listener.onFetched(list);
 
                                 } catch (JSONException e) {
@@ -324,7 +424,7 @@ public class UserUtils {
                 // حفظ البيانات داخل SQLite فقط
                 DBHelper db = new DBHelper(context);
                 db.saveRoutes(results);
-                callback.onSuccess("تم تحديث البيانات بنجاح");
+                callback.onSuccess(getMessageFromLocalNew(61, db));
             } catch (Exception e) {
                 callback.onError(e.getMessage());
                 sendLog(context, "fetchRoutes", e.toString(), e.toString(), "add trip");
@@ -386,6 +486,7 @@ public class UserUtils {
     }
 
     public static void fetchServiceHome(Context context, final DBHelper dbHelper, final PageHome.OnServiceHomeFetchedListener listener) {
+
         String url = BASE_URL + "ServiceHome/";
 
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -460,6 +561,7 @@ public class UserUtils {
                                 }
                             }
                         } catch (Exception e) {
+                            throw new RuntimeException(e);
                         }
                     },
                     error -> {
@@ -504,10 +606,11 @@ public class UserUtils {
         TextView tvMessage = view.findViewById(R.id.tvMessage);
         Button btnYes = view.findViewById(R.id.btnYes);
         Button btnNo = view.findViewById(R.id.btnNo);
+        DBHelper dbHelper = new DBHelper(context);
 
         tvMessage.setText(mandatory ?
-                "انتهت صلاحية هذا الإصدار من التطبيق.\n قم بالتحديث للمتابعة." :
-                "يتوفر تحديث جديد للتطبيق، هل تريد التحديث الآن؟");
+                getMessageFromLocalNew(339, dbHelper) :
+                getMessageFromLocalNew(340, dbHelper));
 
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(!mandatory);
@@ -518,6 +621,7 @@ public class UserUtils {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkApp));
                 context.startActivity(intent);
             } catch (Exception e) {
+                throw new RuntimeException(e);
             }
             if (!mandatory) dialog.dismiss();
         });
@@ -584,21 +688,71 @@ public class UserUtils {
                     }
 
                     if (callback != null) {
-                        // إرسال الـ JSON كامل كسلسلة نصية
-                        callback.onIpReceived(result.toString(), null);
+                        callback.onIpReceived(result.toString(), null, "");
 
                     }
                 } else {
-                    if (callback != null) callback.onIpReceived(null, null);
+                    if (callback != null) callback.onIpReceived(null, null, "");
                 }
             } catch (Exception e) {
-                if (callback != null) callback.onIpReceived(null, null);
+                if (callback != null) callback.onIpReceived(null, null, "");
             } finally {
                 if (reader != null) try {
                     reader.close();
                 } catch (IOException ignored) {
                 }
                 if (connection != null) connection.disconnect();
+            }
+        }).start();
+    }
+
+    public interface DayTimeCallback {
+        void onSuccess();
+
+        void onError(String error);
+    }
+
+    public static void syncDayTimesFromServer(Context context, DayTimeCallback callback) {
+        new Thread(() -> {
+            try {
+                DBHelper dbHelper = new DBHelper(context);
+
+                URL url = new URL(BASE_URL + "day-time");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+                SharedPreferences prefs = SharedPrefsHelper.get(context);
+                String token = prefs.getString("auth_token", null);
+                if (token != null) {
+                    conn.setRequestProperty("Authorization", "Bearer " + token);
+                }
+
+                int responseCode = conn.getResponseCode();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        (responseCode == 200) ? conn.getInputStream() : conn.getErrorStream()));
+
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+                reader.close();
+                conn.disconnect();
+
+                if (responseCode == 200) {
+                    JSONArray serverArray = new JSONArray(result.toString());
+
+                    dbHelper.saveDayTimes(serverArray);
+
+                    if (callback != null) callback.onSuccess();
+                } else {
+                    if (callback != null) callback.onError("Response Code: " + responseCode);
+                }
+
+            } catch (Exception e) {
+                sendLog(context, "syncDayTimesFromServer", e.toString(), e.toString(), "UserUtils");
+                if (callback != null) callback.onError(e.getMessage());
             }
         }).start();
     }
@@ -644,7 +798,7 @@ public class UserUtils {
 
 
     public interface PublicIpCallback {
-        void onIpReceived(String cityName, Integer cityId);
+        void onIpReceived(String cityName, Integer cityId, String country);
     }
 
 
@@ -802,171 +956,6 @@ public class UserUtils {
         void onOptionSelected(int payType, String paymentStatus, boolean success, int request_id);
     }
 
-    public static void showGenericOptionsBottomSheet(Context context, int typeNo, double price, int trip_id,
-                                                     int showFirstItem, int booking_id, GenericOptionsCallback callback) {
-        if (!(context instanceof Activity)) return;
-        Activity activity = (Activity) context;
-        DBHelper dbHelper = new DBHelper(context);
-        List<Map<String, Object>> localData = dbHelper.getCodeDetailsByType(typeNo);
-
-        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.TransparentBottomDialog);
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_cash_bank, null);
-        dialog.setContentView(view);
-
-        TextView dialogTitle = view.findViewById(R.id.dialogTitle);
-        LinearLayout container = view.findViewById(R.id.paymentMethodsContainer);
-        view.findViewById(R.id.step2_Inputs).setVisibility(View.GONE);
-
-        dialogTitle.setText("وسيلة الدفع");
-
-        ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-        Blurry.with(context).radius(15).sampling(2).onto(decorView);
-        dialog.setOnDismissListener(d -> Blurry.delete(decorView));
-
-        try {
-            for (int i = 0; i < localData.size(); i++) {
-                Map<String, Object> item = localData.get(i);
-                int codeNo = (int) item.get("code_no");
-                String name = (String) item.get("code_l_nm");
-                String iconName = (String) item.get("code_icon");
-
-                if (showFirstItem == 0 && i == 0) continue;
-                if (showFirstItem == 2 && i == 0) continue;
-
-                View itemView = LayoutInflater.from(context).inflate(R.layout.item_cash_bank, container, false);
-                TextView txtName = itemView.findViewById(R.id.txtName);
-                ImageView imgIcon = itemView.findViewById(R.id.imgIcon);
-
-                txtName.setText(name);
-
-                int resId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
-                if (resId != 0) {
-                    imgIcon.setImageResource(resId);
-                } else if (!iconName.isEmpty()) {
-                    String finalIconUrl = iconName.startsWith("http") ? iconName : ImageUrl + iconName;
-                    Glide.with(context).load(finalIconUrl).placeholder(R.drawable.wallet_setting).into(imgIcon);
-                } else {
-                    imgIcon.setImageResource(R.drawable.wallet_setting);
-                }
-
-                itemView.setOnClickListener(v -> {
-                    if (codeNo == 2) {
-
-                        if (typeNo == 5) {
-
-                            dialog.dismiss();
-                            showCashBankBottomSheet(context, trip_id, price, booking_id, 0, (walletId, success, requestId) -> {
-                                if (callback != null) {
-                                    callback.onOptionSelected(2, "on_verfy", success, requestId);
-                                }
-                            });
-                        }
-                    }
-//                            else if (codeNo == 1) {
-//                                if (showFirstItem == 2) {
-//                                    return;
-//                                }
-//
-//                                dialog.dismiss();
-//                                if (callback != null)
-//                                    callback.onOptionSelected(0, "waiting", true, 0);
-//                            }
-                    else if (codeNo == 1) {
-                        dialog.dismiss();
-                        if (callback != null)
-                            callback.onOptionSelected(0, "waiting", true, 0);
-                    } else {
-                        dialog.dismiss();
-                        showCashBankBottomSheet(context, trip_id, price, booking_id, 1, (walletId, success, requestId) -> {
-                            if (callback != null) {
-                                callback.onOptionSelected(2, "on_verfy", success, requestId);
-                            }
-                        });
-                        if (callback != null)
-                            callback.onOptionSelected(2, "on_verfy", false, 0);
-//                            }
-//                        if (codeNo == 2) {
-//                            if (typeNo == 5) {
-//                                dialog.dismiss();
-//                                showCashBankBottomSheet(context, trip_id, price, 0, (walletId, success, requestId) -> {
-//                                    if (callback != null) callback.onOptionSelected(2, "on_verfy", success, requestId);
-//                                });
-//                            }
-//                        } else {
-//                            dialog.dismiss();
-//                            showCashBankBottomSheet(context, trip_id, price, 1, (walletId, success, requestId) -> {
-//                                if (callback != null) callback.onOptionSelected(2, "on_verfy", success, requestId);
-//                            });
-                    }
-                });
-
-
-                container.addView(itemView);
-            }
-        } catch (Exception e) {
-        }
-
-        if (showFirstItem == 1 || showFirstItem == 2) {
-            View balanceView = LayoutInflater.from(context).inflate(R.layout.item_cash_bank, container, false);
-            TextView txtName = balanceView.findViewById(R.id.txtName);
-            ImageView imgIcon = balanceView.findViewById(R.id.imgIcon);
-
-            SharedPreferences prefs = SharedPrefsHelper.get(context);
-            String balance = prefs.getString("user_balance", "0");
-
-            txtName.setText("الدفع من رصيدي\n (" + balance + ")");
-            imgIcon.setImageResource(R.drawable.wallet_setting);
-
-            balanceView.setOnClickListener(v -> {
-                double currentBalance = 0;
-                try {
-                    String cleanBalance = balance.replace(",", "").trim();
-                    currentBalance = Double.parseDouble(cleanBalance);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-//                double balance2 = Double.parseDouble(balance.replace(",", "").trim());
-//                if (balance2 < 0) {
-//                    ToastMessages(activity, "رصيدك سالب، يجب دفع كامل المبلغ");
-//                }
-                if (currentBalance < price) {
-                    dialog.dismiss();
-                    ToastMessages(activity, "رصيدك غير كافٍ، يرجى تعبئة الرصيد أولاً");
-                    if (context instanceof HomePage) {
-                        ((HomePage) context).openFullScreenFragment(new BalanceFragment(), "رصيدي", R.drawable.wallet, 7);
-                    }
-                } else {
-                    dialog.dismiss();
-                    if (callback != null)
-                        callback.onOptionSelected(2, "on_verfy", true, 0);
-                }
-            });
-
-            // إضافة زر "إضافة رصيد"
-            TextView btnAdd = new TextView(context);
-            btnAdd.setText("إضافة رصيد");
-            btnAdd.setTextColor(context.getResources().getColor(R.color.primary));
-            btnAdd.setPadding(15, 5, 15, 5);
-            btnAdd.setTextSize(12);
-            if (balanceView instanceof LinearLayout) {
-                LinearLayout itemLayout = (LinearLayout) balanceView;
-                itemLayout.addView(btnAdd, 3);
-            }
-            btnAdd.setOnClickListener(v -> {
-                dialog.dismiss();
-                if (context instanceof HomePage) {
-                    ((HomePage) context).openFullScreenFragment(new BalanceFragment(), "رصيدي", R.drawable.wallet, 7);
-                }
-            });
-
-            container.addView(balanceView);
-        }
-
-        dialog.show();
-
-
-    }
-
     public abstract static class SingleClickListener implements View.OnClickListener {
         private static final long THRESHOLD_TIME = 1000;
         private long lastClickTime = 0;
@@ -984,39 +973,142 @@ public class UserUtils {
         public abstract void onSingleClick(View v);
     }
 
-    public static void exeBuy(Context context, int cbId, String mobileNo, String code, double amount, String curCode, int userId, String notes,
-                              Integer bookingId, int trip_id, int pay_type, String requestId, CashBankCallback callback) {
+    public static void showErrorDialog(Activity activity, String errorMsg, String requestId, Integer cbId, String msg, int isbooking, CashBankCallback callback) {
+        activity.runOnUiThread(() -> {
+            DBHelper dbHelper = new DBHelper(activity);
+
+            SharedPreferences prefs = SharedPrefsHelper.get(activity);
+
+            View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_contact_support, null);
+            Dialog customDialog = new Dialog(activity);
+            customDialog.setContentView(dialogView);
+
+            if (customDialog.getWindow() != null) {
+                customDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            }
+
+            ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
+            jp.wasabeef.blurry.Blurry.with(activity).radius(15).sampling(2).onto(decorView);
+
+            TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
+            TextView tvMsg = dialogView.findViewById(R.id.tvMessage);
+            LinearLayout btnRetry = dialogView.findViewById(R.id.btnWhatsapp);
+            Button btnClose = dialogView.findViewById(R.id.btnCall);
+            ImageView iconWhatsapp = dialogView.findViewById(R.id.iconWhatsapp);
+            TextView textWhatsapp = dialogView.findViewById(R.id.textWhatsapp);
+            TextView tvNote = dialogView.findViewById(R.id.Note);
+            LinearLayout containerNote = dialogView.findViewById(R.id.containerNote);
+            ImageView paymenticon = dialogView.findViewById(R.id.paymenticon);
+
+            containerNote.setVisibility(View.VISIBLE);
+            if (isbooking == 1) {
+                paymenticon.setImageResource(R.drawable.info_new);
+            } else if (isbooking == 2) {
+                paymenticon.setImageResource(R.drawable.info);
+            } else {
+                paymenticon.setImageResource(R.drawable.paymenticon);
+            }
+            tvTitle.setText(msg);
+            tvMsg.setText(errorMsg);
+            textWhatsapp.setText("إعادة المحاولة");
+            iconWhatsapp.setVisibility(View.GONE);
+            btnClose.setVisibility(View.GONE);
+
+            // تنسيق نص الدعم الفني
+            String fullText = "إذا كنت تعتقد أن هذا خطأ، يمكنك التواصل مع الدعم الفني لمساعدتك.";
+            SpannableString spannableString = new SpannableString(fullText);
+            int startIndex = fullText.indexOf("الدعم الفني");
+            if (startIndex != -1) {
+                int endIndex = startIndex + "الدعم الفني".length();
+                spannableString.setSpan(new ForegroundColorSpan(Color.parseColor("#CC9407")), startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannableString.setSpan(new StyleSpan(Typeface.BOLD), startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            tvNote.setText(spannableString);
+
+            // رابط واتساب الدعم الفني
+            containerNote.setOnClickListener(v -> {
+                String countryCode = prefs.getString("country_code", "YE");
+                int messageId = "YE".equals(countryCode) ? 349 : 362;
+                String phone = getMessageFromLocalNew(messageId, dbHelper);
+                try {
+                    String url = "https://wa.me/" + phone;
+                    activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                } catch (Exception e) {
+                    ToastMessages(activity, "واتساب غير مثبت");
+                }
+            });
+
+            // التعامل مع الإغلاق وإعادة المحاولة
+            Runnable handleDismiss = () -> {
+                jp.wasabeef.blurry.Blurry.delete(decorView);
+                if (requestId != null && !requestId.isEmpty() && callback != null) {
+                    try {
+                        callback.onMethodSelected(cbId, false, Integer.parseInt(requestId));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+
+            btnRetry.setOnClickListener(v -> {
+                customDialog.dismiss();
+                if ("floosak".equals(requestId)) {
+                    callback.onMethodSelected(0, false, 0);
+                }
+            });
+
+            View closeX = dialogView.findViewById(R.id.dialogCancelButton);
+            if (closeX != null) closeX.setOnClickListener(v -> customDialog.dismiss());
+
+            customDialog.setOnDismissListener(d -> handleDismiss.run());
+            customDialog.show();
+
+        });
+
+    }
+
+    public static void exeBuy(Context context, int cbId, String mobileNo, String code,
+                              double amount, int userId, String notes, String car_code,
+                              Integer bookingId, Integer trip_id, int pay_type, String requestId,
+                              CashBankCallback callback) {
         if (!(context instanceof Activity)) return;
         Activity activity = (Activity) context;
-//        ProgressDialog progressDialog = new ProgressDialog(context);
-//        if (showGif == 1) {
+
         showSuccessGif(1, activity, null);
-//        } else {
-//            progressDialog.setMessage("جاري إرسال رمز التحقق...");
-//            progressDialog.setCancelable(false);
-//            progressDialog.show();
-//        }
+
         String deviceId = getDeviceID(context);
         String deviceInfo = getDeviceInfo();
         String url = BASE_URL + "exe-buy/" + cbId + "/?device_id=" + deviceId + "&device_info=" + deviceInfo;
-
+        SharedPreferences prefs = SharedPrefsHelper.get(context);
+        String cur_code = prefs.getString("cur_code", "");
+        String full_name = prefs.getString("full_name", "");
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("mobile_no", mobileNo);
             jsonBody.put("code", code);
             jsonBody.put("amount", amount);
-            jsonBody.put("cur_code", curCode);
+            if (car_code != null && !car_code.isEmpty()) {
+                jsonBody.put("cur_code", car_code);
+            } else {
+                jsonBody.put("cur_code", cur_code);
+            }
             jsonBody.put("user_id", userId);
             jsonBody.put("notes", notes);
-            jsonBody.put("booking_id", bookingId);
-            jsonBody.put("trip_id", trip_id);
+            jsonBody.put("full_name", full_name);
+            if (bookingId != null) {
+                jsonBody.put("booking_id", bookingId);
+            }
+            if (trip_id != null) {
+                jsonBody.put("trip_id", trip_id);
+            }
             jsonBody.put("pay_type", pay_type);
 
             if (requestId != null && !requestId.isEmpty()) {
                 jsonBody.put("requestID", requestId);
             }
+
         } catch (JSONException e) {
-            sendLog(context, "exeBuy", String.valueOf(e.getMessage()), "user_id = " + userId, "UserUtils");
+            sendLog(context, "exeBuy", String.valueOf(e.getMessage()), String.valueOf(jsonBody), "UserUtils");
 
         }
 
@@ -1035,11 +1127,11 @@ public class UserUtils {
                         ToastMessages(activity, msg);
 
                         if (callback != null) {
-                            callback.onMethodSelected(cbId, success, newIdFromSuccess); // فقط عند النجاح
+                            callback.onMethodSelected(cbId, success, newIdFromSuccess);
                         }
                     } else {
-                        ToastMessages(activity, msg);
-
+//                        ToastMessages(activity, msg);
+                        showErrorDialog(activity, msg, String.valueOf(newIdFromSuccess), cbId, "تعذر إتمام العملية", 0, callback);
                         if (callback != null && newIdFromSuccess != 0) {
                             callback.onMethodSelected(cbId, success, newIdFromSuccess);
                         }
@@ -1052,88 +1144,41 @@ public class UserUtils {
 //                        progressDialog.dismiss();
 //                    }
 //                    sendLog(context, "exeBuy", String.valueOf(error.getMessage()), "user_id = " + userId, "UserUtils");
+                    DBHelper dbHelper = new DBHelper(context);
 
-                    String finalErrorMsg = "حدث خطأ غير متوقع";
+                    String finalErrorMsg = "حاول مرة اخرى";
                     String finalRequestId = requestId;
                     String errorLogMessage = "Unknown Error";
 
                     if (error.networkResponse != null && error.networkResponse.data != null) {
                         try {
-                            String errorStr = new String(error.networkResponse.data, "UTF-8");
                             errorLogMessage = new String(error.networkResponse.data, "UTF-8");
 
-                            if (errorStr.trim().startsWith("{")) {
-                                JSONObject errorObj = new JSONObject(errorStr);
-                                finalErrorMsg = errorObj.optString("msg", "خطأ في السيرفر");
+                            if (errorLogMessage.trim().startsWith("{")) {
+                                JSONObject errorObj = new JSONObject(errorLogMessage);
+                                finalErrorMsg = errorObj.optString("msg", "خطأ في معالجة الطلب");
                                 finalRequestId = errorObj.optString("requestID", requestId);
                             } else {
-                                finalErrorMsg = "تأكد من اتصالك بالإنترنت.";
+                                finalErrorMsg = getMessageFromLocalNew(422, dbHelper);
                             }
                         } catch (Exception e) {
-                            errorLogMessage = "فشل في قراءة تفاصيل الخطأ";
-                            finalErrorMsg = "فشل في قراءة تفاصيل الخطأ";
+                            finalErrorMsg = getMessageFromLocalNew(347, dbHelper);
                         }
-                    } else if (error.getMessage() != null) {
-                        errorLogMessage = error.getMessage();
                     } else {
-                        errorLogMessage = error.toString();
-                        finalErrorMsg = "لا يوجد اتصال بالسيرفر، تأكد من الإنترنت.";
-                    }
-                    sendLog(context, "exeBuy", errorLogMessage, "user_id = " + userId, "UserUtils");
-                    String finalErrorMsg1 = finalErrorMsg;
-                    String finalRequestId1 = finalRequestId;
-                    activity.runOnUiThread(() -> {
-                        View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_contact_support, null);
-                        android.app.Dialog customDialog = new android.app.Dialog(activity);
-                        customDialog.setContentView(dialogView);
-
-                        if (customDialog.getWindow() != null) {
-                            customDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                        if (error instanceof com.android.volley.TimeoutError) {
+                            finalErrorMsg = getMessageFromLocalNew(421, dbHelper);
+                        } else if (error instanceof com.android.volley.NoConnectionError) {
+                            finalErrorMsg = getMessageFromLocalNew(423, dbHelper);
+                        } else if (error instanceof com.android.volley.NetworkError) {
+                            finalErrorMsg = getMessageFromLocalNew(424, dbHelper);
+                        } else {
+                            finalErrorMsg = getMessageFromLocalNew(348, dbHelper);
                         }
+                        errorLogMessage = (error.getMessage() != null) ? error.getMessage() : error.toString();
+                    }
 
-                        ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-                        jp.wasabeef.blurry.Blurry.with(context)
-                                .radius(15)
-                                .sampling(2)
-                                .onto(decorView);
-
-                        customDialog.setOnDismissListener(d -> jp.wasabeef.blurry.Blurry.delete(decorView));
-
-                        TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
-                        TextView tvMsg = dialogView.findViewById(R.id.tvMessage);
-                        LinearLayout btnRetry = dialogView.findViewById(R.id.btnWhatsapp);
-                        Button btnClose = dialogView.findViewById(R.id.btnCall);
-
-                        tvTitle.setText("فشلت العملية");
-                        tvMsg.setText(finalErrorMsg1);
-
-                        if (btnRetry.getChildAt(0) instanceof TextView)
-                            ((TextView) btnRetry.getChildAt(0)).setText("إعادة المحاولة");
-
-                        btnClose.setVisibility(View.GONE);
-                        btnRetry.setOnClickListener(new SingleClickListener() {
-                            @Override
-                            public void onSingleClick(View v) {
-                                if (finalRequestId1 != null && !finalRequestId1.isEmpty()) {
-                                    if (callback != null) {
-                                        try {
-                                            callback.onMethodSelected(cbId, false, Integer.parseInt(finalRequestId1));
-                                        } catch (NumberFormatException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                                customDialog.dismiss();
-                            }
-                        });
-
-                        btnClose.setOnClickListener(v -> customDialog.dismiss());
-
-                        View closeX = dialogView.findViewById(R.id.dialogCancelButton);
-                        if (closeX != null) closeX.setOnClickListener(v -> customDialog.dismiss());
-
-                        customDialog.show();
-                    });
+                    sendLog(context, "exeBuy", errorLogMessage, String.valueOf(jsonBody), "UserUtils");
+                    showErrorDialog(activity, finalErrorMsg, finalRequestId, cbId, "تعذر إتمام العملية", 0, callback);
                 }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -1145,24 +1190,29 @@ public class UserUtils {
                 return headers;
             }
         };
+        int socketTimeout = 30000;
+        DefaultRetryPolicy policy = new DefaultRetryPolicy(
+                socketTimeout,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        );
 
+        request.setRetryPolicy(policy);
         Volley.newRequestQueue(context).add(request);
     }
 
 
-    public static void floosakexe(Context context, int cbId, String mobileNo, double amount, int userId, String notes,
-                                  Integer bookingId, int trip_id, int pay_type, CashBankCallback2 callback) {
+    public static void floosakexe(Context context, int cbId, String mobileNo, double amount,
+                                  int userId, String notes,
+                                  Integer bookingId, Integer trip_id, int pay_type, CashBankCallback2 callback) {
         if (!(context instanceof Activity)) return;
         Activity activity = (Activity) context;
         ProgressDialog progressDialog = new ProgressDialog(context);
+        SharedPreferences prefs = SharedPrefsHelper.get(context);
 
-//        if (showGif == 1) {
-//            showSuccessGif(1, activity, null);
-//        } else {
         progressDialog.setMessage("جاري إرسال رمز التحقق...");
         progressDialog.setCancelable(false);
         progressDialog.show();
-//        }
         String deviceId = getDeviceID(context);
         String deviceInfo = getDeviceInfo();
         String url = BASE_URL + "floosak-exe/" + cbId + "/?device_id=" + deviceId + "&device_info=" + deviceInfo;
@@ -1171,16 +1221,16 @@ public class UserUtils {
         try {
             jsonBody.put("mobile_no", mobileNo);
             jsonBody.put("amount", amount);
-//            jsonBody.put("cur_code", curCode);
             jsonBody.put("user_id", userId);
             jsonBody.put("notes", notes);
-            jsonBody.put("booking_id", bookingId);
-            jsonBody.put("trip_id", trip_id);
+            if (bookingId != null) {
+                jsonBody.put("booking_id", bookingId);
+            }
+            if (trip_id != null) {
+                jsonBody.put("trip_id", trip_id);
+            }
             jsonBody.put("pay_type", pay_type);
 
-//            if (requestId != null && !requestId.isEmpty()) {
-//                jsonBody.put("requestID", requestId);
-//            }
         } catch (JSONException e) {
             sendLog(context, "floosakexe", String.valueOf(e.getMessage()), "user_id = " + userId, "UserUtils");
 
@@ -1188,7 +1238,6 @@ public class UserUtils {
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
                 response -> {
-//                    hideSuccessGif(activity);
                     progressDialog.dismiss();
                     boolean success = response.optBoolean("success");
                     String msg = response.optString("msg");
@@ -1202,7 +1251,7 @@ public class UserUtils {
                         }
                     } else {
                         ToastMessages(activity, msg);
-
+                        showErrorDialog(activity, msg, newIdFromSuccess, cbId, "تعذر إتمام العملية", 0, null);
                         if (callback != null) {
                             callback.onMethodSelected(cbId, success, newIdFromSuccess);
                         }
@@ -1212,88 +1261,43 @@ public class UserUtils {
 //                    hideSuccessGif(activity);
                     progressDialog.dismiss();
 //                    sendLog(context, "exeBuy", String.valueOf(error.getMessage()), "user_id = " + userId, "UserUtils");
+                    DBHelper dbHelper = new DBHelper(context);
 
-                    String finalErrorMsg = "حدث خطأ غير متوقع";
+                    String finalErrorMsg = "حاول مرة اخرى";
                     String finalRequestId = null;
                     String errorLogMessage = "Unknown Error";
 
                     if (error.networkResponse != null && error.networkResponse.data != null) {
+                        // حالة 1: السيرفر استلم الطلب ورد بخطأ (مثل 400 أو 500)
                         try {
-                            String errorStr = new String(error.networkResponse.data, "UTF-8");
                             errorLogMessage = new String(error.networkResponse.data, "UTF-8");
 
-                            if (errorStr.trim().startsWith("{")) {
-                                JSONObject errorObj = new JSONObject(errorStr);
-                                finalErrorMsg = errorObj.optString("msg", "خطأ في السيرفر");
+                            if (errorLogMessage.trim().startsWith("{")) {
+                                JSONObject errorObj = new JSONObject(errorLogMessage);
+                                finalErrorMsg = errorObj.optString("msg", "خطأ في معالجة الطلب");
 //                                finalRequestId = errorObj.optString("requestID", requestId);
                             } else {
-                                finalErrorMsg = "تأكد من اتصالك بالإنترنت.";
+                                finalErrorMsg = getMessageFromLocalNew(422, dbHelper);
                             }
                         } catch (Exception e) {
-                            errorLogMessage = "فشل في قراءة تفاصيل الخطأ";
-                            finalErrorMsg = "فشل في قراءة تفاصيل الخطأ";
+                            finalErrorMsg = getMessageFromLocalNew(347, dbHelper);
                         }
-                    } else if (error.getMessage() != null) {
-                        errorLogMessage = error.getMessage();
                     } else {
-                        errorLogMessage = error.toString();
-                        finalErrorMsg = "لا يوجد اتصال بالسيرفر، تأكد من الإنترنت.";
-                    }
-                    sendLog(context, "floosakexe", errorLogMessage, "user_id = " + userId, "UserUtils");
-                    String finalErrorMsg1 = finalErrorMsg;
-//                    String finalRequestId1 = finalRequestId;
-                    activity.runOnUiThread(() -> {
-                        View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_contact_support, null);
-                        android.app.Dialog customDialog = new android.app.Dialog(activity);
-                        customDialog.setContentView(dialogView);
-
-                        if (customDialog.getWindow() != null) {
-                            customDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                        if (error instanceof com.android.volley.TimeoutError) {
+                            finalErrorMsg = getMessageFromLocalNew(421, dbHelper);
+                        } else if (error instanceof com.android.volley.NoConnectionError) {
+                            finalErrorMsg = getMessageFromLocalNew(423, dbHelper);
+                        } else if (error instanceof com.android.volley.NetworkError) {
+                            finalErrorMsg = getMessageFromLocalNew(424, dbHelper);
+                        } else {
+                            finalErrorMsg = getMessageFromLocalNew(348, dbHelper);
                         }
 
-                        ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-                        jp.wasabeef.blurry.Blurry.with(context)
-                                .radius(15)
-                                .sampling(2)
-                                .onto(decorView);
+                        errorLogMessage = (error.getMessage() != null) ? error.getMessage() : error.toString();
+                    }
 
-                        customDialog.setOnDismissListener(d -> jp.wasabeef.blurry.Blurry.delete(decorView));
-
-                        TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
-                        TextView tvMsg = dialogView.findViewById(R.id.tvMessage);
-                        LinearLayout btnRetry = dialogView.findViewById(R.id.btnWhatsapp);
-                        Button btnClose = dialogView.findViewById(R.id.btnCall);
-
-                        tvTitle.setText("فشلت العملية");
-                        tvMsg.setText(finalErrorMsg1);
-
-                        if (btnRetry.getChildAt(0) instanceof TextView)
-                            ((TextView) btnRetry.getChildAt(0)).setText("إعادة المحاولة");
-
-                        btnClose.setVisibility(View.GONE);
-                        btnRetry.setOnClickListener(new SingleClickListener() {
-                            @Override
-                            public void onSingleClick(View v) {
-//                                if (finalRequestId1 != null && !finalRequestId1.isEmpty()) {
-                                if (callback != null) {
-                                    try {
-//                                            callback.onMethodSelected(cbId, false, Integer.parseInt(finalRequestId1));
-                                    } catch (NumberFormatException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-//                                }
-                                customDialog.dismiss();
-                            }
-                        });
-
-                        btnClose.setOnClickListener(v -> customDialog.dismiss());
-
-                        View closeX = dialogView.findViewById(R.id.dialogCancelButton);
-                        if (closeX != null) closeX.setOnClickListener(v -> customDialog.dismiss());
-
-                        customDialog.show();
-                    });
+                    sendLog(context, "floosakexe", errorLogMessage, "user_id = " + userId, "UserUtils");
+                    showErrorDialog(activity, finalErrorMsg, finalRequestId, cbId, "تعذر إتمام العملية", 0, null);
                 }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -1309,385 +1313,974 @@ public class UserUtils {
         Volley.newRequestQueue(context).add(request);
     }
 
-    public static void showCashBankBottomSheet(Context context, int trip_id, double price, int booking_id,
-                                               int is_wallet_flg, CashBankCallback callback) {
-        if (!(context instanceof Activity)) return;
-        Activity activity = (Activity) context;
+    private static class PaymentMethodAdapter extends ArrayAdapter<Map<String, Object>> {
+        private final Context context;
+        private final List<Map<String, Object>> items;
 
-        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.TransparentBottomDialog);
-
-        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_cash_bank, null);
-        dialog.setContentView(dialogView);
-
-        LinearLayout step1 = dialogView.findViewById(R.id.step1_Selection);
-        LinearLayout step2 = dialogView.findViewById(R.id.step2_Inputs);
-        LinearLayout container = dialogView.findViewById(R.id.paymentMethodsContainer);
-        EditText etAmount = dialogView.findViewById(R.id.etAmount);
-        EditText etPurchaseCode = dialogView.findViewById(R.id.etPurchaseCode);
-        Button btnConfirm = dialogView.findViewById(R.id.btnConfirm);
-        TextView dialogTitle = dialogView.findViewById(R.id.dialogTitle);
-        etAmount.setText(String.valueOf(price));
-
-        EditText etNotes = dialogView.findViewById(R.id.etNotes);
-        final String[] currentRequestId = {null};
-
-        dialog.setOnKeyListener((dialogInterface, keyCode, event) -> {
-            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-
-                if (step2.getVisibility() == View.VISIBLE) {
-                    step2.setVisibility(View.GONE);
-                    step1.setVisibility(View.VISIBLE);
-
-                    if (is_wallet_flg == 1) {
-                        dialogTitle.setText("وسيلة الدفع");
-                    } else {
-                        dialogTitle.setText("الدفع عبر محفظة إلكترونية");
-                    }
-                    return true;
-                } else if (step1.getVisibility() == View.VISIBLE) {
-                    dialog.dismiss();
-                    showGenericOptionsBottomSheet(context, 5, price, trip_id, 2, booking_id, callback != null ? (option, msg, success, req_id) -> {
-                        if (callback instanceof GenericOptionsCallback) {
-                            ((GenericOptionsCallback) callback).onOptionSelected(option, msg, success, req_id);
-                        }
-                    } : null);
-
-                    return true;
-                }
-            }
-            return false;
-        });
-        setEditTextState(etAmount, false);
-        setEditTextState(etPurchaseCode, false);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().findViewById(com.google.android.material.R.id.design_bottom_sheet).setBackgroundResource(android.R.color.transparent);
+        public PaymentMethodAdapter(Context context, List<Map<String, Object>> items) {
+            super(context, R.layout.item_spinner_payment, items);
+            this.context = context;
+            this.items = items;
         }
 
-        ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-        Blurry.with(context).radius(15).sampling(2).onto(decorView);
-        dialog.setOnDismissListener(d -> Blurry.delete(decorView));
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return createView(position, convertView, parent);
+        }
 
-        DBHelper dbHelper = new DBHelper(context);
-        List<Map<String, Object>> methods = dbHelper.getAllCashBank(is_wallet_flg);
-        final int[] selectedWalletId = {-1};
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            return createView(position, convertView, parent);
+        }
 
-        for (Map<String, Object> method : methods) {
-            int is_active = (int) method.get("is_active");
-
-            // 2. التحقق مما إذا كانت المحفظة مفعلة
-            // إذا كانت 0، نستخدم 'continue' لتخطي هذه المحفظة والانتقال للتالية
-            if (is_active != 1) {
-                continue;
+        private View createView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(context).inflate(R.layout.item_spinner_payment, parent, false);
             }
-            View itemView = LayoutInflater.from(context).inflate(R.layout.item_cash_bank, container, false);
-            TextView txtName = itemView.findViewById(R.id.txtName);
-            ImageView imgIcon = itemView.findViewById(R.id.imgIcon);
+            ImageView imgIcon = convertView.findViewById(R.id.imgIcon);
+            TextView txtName = convertView.findViewById(R.id.txtName);
 
-            int id = (int) method.get("cb_id");
-            int comfirm_wallet_pay_flag = (int) method.get("comfirm_wallet_pay_flag");
-            String name = (String) method.get("cb_name");
-            String iconName = (String) method.get("wallet_icon");
+            Map<String, Object> item = items.get(position);
+            txtName.setText((String) item.get("cb_name"));
 
-            txtName.setText(name);
-
-            if (is_wallet_flg == 1) {
-                dialogTitle.setText("وسيلة الدفع");
-                etNotes.setVisibility(View.VISIBLE);
-                SharedPreferences prefs = SharedPrefsHelper.get(context);
-                String full_name = prefs.getString("full_name", "");
-                etNotes.setText(full_name + " (مستخدم التطبيق) ");
-                setEditTextState(etNotes, false);
-//                etPurchaseCode.setHint("رقم العملية");
-            } else {
-                dialogTitle.setText("الدفع عبر محفظة إلكترونية");
-                etNotes.setVisibility(View.GONE);
-//                etPurchaseCode.setHint("كود الشراء");
-            }
-//            int resId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
-//            imgIcon.setImageResource(resId != 0 ? resId : R.drawable.wallet_setting);
-
+            String iconName = (String) item.get("wallet_icon");
             if (iconName != null && !iconName.isEmpty()) {
-                String finalIconUrl = iconName.startsWith("http") ? iconName : ImageUrl + iconName;
-
-                Glide.with(context)
-                        .load(finalIconUrl)
-                        .placeholder(R.drawable.wallet_setting)
-                        .error(R.drawable.wallet_setting)
-                        .into(imgIcon);
+                String fullUrl = iconName.startsWith("http") ? iconName : ImageUrl + iconName;
+                Glide.with(context).load(fullUrl).placeholder(R.drawable.wallet_setting).into(imgIcon);
             } else {
                 imgIcon.setImageResource(R.drawable.wallet_setting);
             }
+            return convertView;
+        }
+    }
 
-            itemView.setOnClickListener(v -> {
-                selectedWalletId[0] = id;
+    private static View addPaymentOptionCard(Context context, LinearLayout container, String
+            title, String desc, int type) {
+        View itemView = LayoutInflater.from(context).inflate(R.layout.item_cash_bank, container, false);
+        TextView txtName = itemView.findViewById(R.id.txtName);
+        TextView txtDescription = itemView.findViewById(R.id.txtDescription);
+        ImageView imgIcon = itemView.findViewById(R.id.imgIcon);
+        MaterialCardView cardRoot = itemView.findViewById(R.id.cardRoot);
+        RadioButton radioButton = itemView.findViewById(R.id.radioButton);
+        txtName.setText(title);
+        txtDescription.setText(desc);
 
-                String amountStr = etAmount.getText().toString().trim();
-                if (amountStr.isEmpty()) amountStr = "0";
-                double amount = Double.parseDouble(amountStr);
+        // تحميل الأيقونة (يمكنك استخدام Glide هنا)
+//        if (icon != null && !icon.isEmpty()) {
+//            int resId = context.getResources().getIdentifier(icon, "drawable", context.getPackageName());
+//            if (resId != 0) imgIcon.setImageResource(resId);
+//        }
 
-                SharedPreferences prefs = SharedPrefsHelper.get(context);
-                int user_id = prefs.getInt("user_id", 0);
-                String phone = prefs.getString("user_phone", "");
-                String balanceStr = prefs.getString("user_balance", "0");
+        itemView.setOnClickListener(v -> {
+            // تصفير كل الكروت
+            for (int j = 0; j < container.getChildCount(); j++) {
+                View child = container.getChildAt(j);
+                MaterialCardView c = child.findViewById(R.id.cardRoot);
+                RadioButton rb = child.findViewById(R.id.radioButton);
+                if (c != null) {
+                    c.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray2)));
+                    c.setCardBackgroundColor(Color.WHITE);
+                }
+                if (rb != null) rb.setChecked(false);
+            }
 
-                int payTypeForServer = (is_wallet_flg == 1) ? 3 : 2;
-                if (comfirm_wallet_pay_flag == 1) {
-                    View dialogView2 = activity.getLayoutInflater().inflate(R.layout.dialog_contact_support, null);
-                    android.app.Dialog customDialog = new android.app.Dialog(activity);
-                    customDialog.setContentView(dialogView2);
+            // تمييز الكرت المختار (أصفر باهت وحدود ذهبية)
+            cardRoot.setCardBackgroundColor(Color.parseColor("#FFFBEB"));
+            cardRoot.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.primary2)));
+            if (radioButton != null) radioButton.setChecked(true);
+        });
 
-                    if (customDialog.getWindow() != null) {
-                        customDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        container.addView(itemView);
+        return itemView;
+    }
+
+
+    private static void clearContainerSelection(LinearLayout container) {
+        for (int j = 0; j < container.getChildCount(); j++) {
+            View child = container.getChildAt(j);
+            updateCardSelectionVisuals(child, false);
+        }
+    }
+
+    private static void updateCardSelectionVisuals(View view, boolean isSelected) {
+        MaterialCardView card = view.findViewById(R.id.cardRoot);
+        RadioButton rb = view.findViewById(R.id.radioButton);
+        if (card != null) {
+            if (isSelected) {
+                card.setCardBackgroundColor(Color.parseColor("#FFFBEB"));
+                card.setStrokeColor(Color.parseColor("#CC9407"));
+                card.setStrokeWidth(3);
+                if (rb != null) rb.setChecked(true);
+            } else {
+                card.setCardBackgroundColor(Color.WHITE);
+                card.setStrokeColor(Color.parseColor("#E0E0E0"));
+                card.setStrokeWidth(1);
+                if (rb != null) rb.setChecked(false);
+            }
+        }
+    }
+
+    private static String extractUrl(String text) {
+        if (text == null) return null;
+        int startIndex = text.indexOf("http");
+        if (startIndex != -1) {
+            return text.substring(startIndex).split(" ")[0]; // جلب الرابط حتى أول مسافة
+        }
+        return null;
+    }
+
+    private static String removeUrl(String text) {
+        if (text == null) return "";
+        int startIndex = text.indexOf("http");
+        if (startIndex != -1) {
+            // نأخذ النص الذي يسبق الرابط فقط
+            return text.substring(0, startIndex).trim();
+        }
+        return text;
+    }
+
+
+    public interface BalanceCallback {
+        void onResult(String success);
+    }
+
+    public static void fetchBalanceNew(Context context, BalanceCallback callback) {
+
+        SharedPreferences prefs = SharedPrefsHelper.get(context);
+
+        int userId = prefs.getInt("user_id", 0);
+        String token = prefs.getString("auth_token", "");
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        if (userId == 0) {
+            if (callback != null) {
+                callback.onResult("error");
+            }
+            return;
+        }
+
+        String url = BASE_URL + "user-balance/?user_id=" + userId;
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                null,
+
+                response -> {
+
+                    try {
+
+                        JSONArray results = response.getJSONArray("results");
+
+                        for (int i = 0; i < results.length(); i++) {
+
+                            JSONObject item = results.getJSONObject(i);
+
+                            String curCode = item.getString("cur_code");
+                            double balance = item.getDouble("balance");
+
+                            DecimalFormat formatter =
+                                    (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
+
+                            formatter.applyPattern("#,###,##0");
+
+                            String formattedBalance =
+                                    formatter.format(balance);
+
+                            if (curCode.equalsIgnoreCase("YER")) {
+
+                                prefs.edit()
+                                        .putString("user_balance", formattedBalance)
+                                        .apply();
+
+                            } else if (curCode.equalsIgnoreCase("SAR")) {
+
+                                prefs.edit()
+                                        .putString("user_balance_sa", formattedBalance)
+                                        .apply();
+                            }
+                        }
+
+                        if (callback != null) {
+                            callback.onResult("success");
+                        }
+
+                    } catch (JSONException e) {
+
+                        if (callback != null) {
+                            callback.onResult("error");
+                        }
                     }
+                },
 
-                    ViewGroup decorView2 = (ViewGroup) activity.getWindow().getDecorView();
-                    jp.wasabeef.blurry.Blurry.with(context)
-                            .radius(15)
-                            .sampling(2)
-                            .onto(decorView2);
+                error -> {
 
-                    customDialog.setOnDismissListener(d -> jp.wasabeef.blurry.Blurry.delete(decorView2));
+                    if (callback != null) {
+                        callback.onResult("error");
+                    }
+                }
 
-                    TextView tvTitle = dialogView2.findViewById(R.id.tvTitle);
-                    TextView tvMsg = dialogView2.findViewById(R.id.tvMessage);
-                    LinearLayout btnRetry = dialogView2.findViewById(R.id.btnWhatsapp);
-                    Button btnClose = dialogView2.findViewById(R.id.btnCall);
+        ) {
 
-                    tvTitle.setText("تأكيد عملية الدفع");
-                    btnClose.setText("إلغاء");
-                    tvMsg.setText("دفع مبلغ " + amount + " ريال من محفظة \"" + name + "\" المرتبطة بالرقم \"" + phone + "\". هل تود الاستمرار؟");
+            @Override
+            public Map<String, String> getHeaders() {
 
-                    if (btnRetry.getChildAt(0) instanceof TextView)
-                        ((TextView) btnRetry.getChildAt(0)).setText("تأكيد");
+                Map<String, String> headers = new HashMap<>();
 
-//                    btnClose.setVisibility(View.GONE);
-                    btnRetry.setOnClickListener(new SingleClickListener() {
-                        @Override
-                        public void onSingleClick(View v) {
-                            floosakexe(context, selectedWalletId[0], phone, amount, user_id, "",
-                                    booking_id, trip_id, payTypeForServer, new CashBankCallback2() {
+                headers.put("Authorization", "Bearer " + token);
 
-                                        @Override
-                                        public void onMethodSelected(int id, boolean success, String request_id) {
-                                            if (success) {
-                                                currentRequestId[0] = String.valueOf(request_id);
-                                                step1.setVisibility(View.GONE);
-                                                step2.setVisibility(View.VISIBLE);
+                return headers;
+            }
+        };
 
-                                            } else {
-                                                ToastMessages(activity, "فشل طلب العملية، يرجى المحاولة لاحقاً");
+        queue.add(request);
+    }
+
+    public static void fetchBalance(Context context) {
+        SharedPreferences prefs = SharedPrefsHelper.get(context);
+        int userId = prefs.getInt("user_id", 0);
+        String token = prefs.getString("auth_token", "");
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        if (userId == 0) return;
+
+        String url = BASE_URL + "user-balance/?user_id=" + userId;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONArray results = response.getJSONArray("results");
+                        for (int i = 0; i < results.length(); i++) {
+                            JSONObject item = results.getJSONObject(i);
+                            String curCode = item.getString("cur_code");
+                            String curName = item.optString("cur_name", "");
+                            double balance = item.getDouble("balance");
+                            int user_id = item.optInt("user_id", 0);
+
+                            DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
+                            formatter.applyPattern("#,###,##0");
+
+                            String formattedBalance = formatter.format(balance);
+                            if (curCode.equalsIgnoreCase("YER")) {
+                                prefs.edit().putString("user_balance", formattedBalance).apply();
+                            } else if (curCode.equalsIgnoreCase("SAR")) {
+                                prefs.edit().putString("user_balance_sa", formattedBalance).apply();
+                            }
+                        }
+                    } catch (JSONException e) {
+//                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        queue.add(request);
+    }
+
+    public static void showUnifiedPaymentBottomSheet(Context context, int typeNo,
+                                                     int price, Integer trip_id, String car_code,
+                                                     int showFirstItem, Integer booking_id, int is_booking, GenericOptionsCallback callback) {
+        if (!(context instanceof Activity)) return;
+        Activity activity = (Activity) context;
+        DBHelper dbHelper = new DBHelper(context);
+
+        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.TransparentBottomDialog);
+        View mainView = LayoutInflater.from(context).inflate(R.layout.dialog_cash_bank, null);
+        dialog.setContentView(mainView);
+
+        // 1. تعريف العناصر
+        TextView dialogTitle = mainView.findViewById(R.id.dialogTitle);
+        TextView textpay = mainView.findViewById(R.id.textpay);
+        TextView textPurchaseCode = mainView.findViewById(R.id.textPurchaseCode);
+        TextView send_otp = mainView.findViewById(R.id.send_otp);
+        TextView t_note = mainView.findViewById(R.id.Note);
+        LinearLayout containerNote = mainView.findViewById(R.id.containerNote);
+        ImageView imgNoteLink = mainView.findViewById(R.id.imgNoteLink);
+        EditText etName = mainView.findViewById(R.id.etName);
+        FrameLayout containerNameText = mainView.findViewById(R.id.containerNameText);
+        LinearLayout containerName = mainView.findViewById(R.id.containerName);
+        LinearLayout containerBooking = mainView.findViewById(R.id.containerBooking);
+        LinearLayout container = mainView.findViewById(R.id.paymentMethodsContainer);
+        Spinner typePayment = mainView.findViewById(R.id.typePayment);
+        View step2Inputs = mainView.findViewById(R.id.step2_Inputs);
+        EditText etAmount = mainView.findViewById(R.id.etAmount);
+        TextView AmountError = mainView.findViewById(R.id.AmountError);
+        EditText etPurchaseCode = mainView.findViewById(R.id.etPurchaseCode);
+        Button btnConfirm = mainView.findViewById(R.id.btnConfirm);
+        textpay.setText(getMessageFromLocalNew(385, dbHelper));
+        step2Inputs.setVisibility(View.VISIBLE);
+        typePayment.setVisibility(View.VISIBLE);
+        etAmount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String amountStr = s.toString().trim();
+
+                if (amountStr.isEmpty()) {
+                    AmountError.setText("");
+                    return;
+                }
+                if (booking_id != null) {
+                    try {
+                        double inputAmount = Double.parseDouble(amountStr);
+
+                        if (car_code.contains("YER") && inputAmount < 1000) {
+                            AmountError.setText(getMessageFromLocalNew(491, dbHelper));
+                            AmountError.setVisibility(View.VISIBLE);
+                        } else if (car_code.contains("SAR") && inputAmount < 10) {
+                            AmountError.setText(getMessageFromLocalNew(492, dbHelper));
+                            AmountError.setVisibility(View.VISIBLE);
+                        } else {
+                            AmountError.setText("");
+                            AmountError.setVisibility(View.GONE);
+                        }
+
+                    } catch (NumberFormatException e) {
+                        AmountError.setText("");
+                    }
+                } else {
+                    try {
+                        double inputAmount = Double.parseDouble(amountStr);
+                        SharedPreferences prefs = SharedPrefsHelper.get(context);
+                        String countryCode = prefs.getString("country_code", "YE");
+
+                        if (countryCode != null) {
+                            if (countryCode.contains("YE") && inputAmount < 1000) {
+                                AmountError.setText(getMessageFromLocalNew(491, dbHelper));
+                                AmountError.setVisibility(View.VISIBLE);
+                            } else if (countryCode.contains("SA") && inputAmount < 10) {
+                                AmountError.setText(getMessageFromLocalNew(492, dbHelper));
+                                AmountError.setVisibility(View.VISIBLE);
+                            } else {
+                                AmountError.setText("");
+                                AmountError.setVisibility(View.GONE);
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        AmountError.setText("");
+                    }
+                }
+            }
+        });
+
+        if (is_booking == 0) {
+            containerBooking.setVisibility(View.GONE);
+        } else {
+            containerBooking.setVisibility(View.VISIBLE);
+        }
+        final int[] selectedWalletId = {-1};
+        final String[] currentRequestId = {null};
+        final int[] currentIsWalletFlg = {0};
+        final List<Map<String, Object>> activeMethods = new ArrayList<>();
+
+
+        String balanceStr = SharedPrefsHelper.get(context).getString("user_balance", "0");
+        double userBalance = 0;
+        try {
+            userBalance = Double.parseDouble(balanceStr.replace(",", "").trim());
+        } catch (NumberFormatException e) {
+            userBalance = 0;
+        }
+
+        double finalPriceToPay;
+        if (userBalance > 0) {
+            finalPriceToPay = Math.max(0, price - userBalance);
+        } else {
+            finalPriceToPay = price;
+        }
+
+        etAmount.setText(finalPriceToPay <= 0 ? "" : String.valueOf((int) finalPriceToPay));
+
+        setEditTextState(etAmount, false);
+
+        etAmount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String input = s.toString().trim();
+                if (!input.isEmpty()) {
+                    try {
+                        if (Double.parseDouble(input) > 0) {
+                            setEditTextState(etAmount, false);
+                            etAmount.setError(null);
+                        }
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        List<Map<String, Object>> rawMethods = dbHelper.getAllCashBankNew();
+        for (Map<String, Object> m : rawMethods) {
+            if ((int) m.get("is_active") == 1) {
+                activeMethods.add(m);
+            }
+        }
+        PaymentMethodAdapter spinnerAdapter = new PaymentMethodAdapter(context, activeMethods);
+        typePayment.setAdapter(spinnerAdapter);
+        final int[] payTypeForServer = {3};
+
+        typePayment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!activeMethods.isEmpty()) {
+                    Map<String, Object> method = activeMethods.get(position);
+                    int wId = (int) method.get("cb_id");
+                    String wName = (String) method.get("cb_name");
+                    String link_code = (String) method.get("link_code");
+
+                    selectedWalletId[0] = wId;
+                    container.removeAllViews();
+
+                    final View[] firstItem = {null}; // مصفوفة لتخزين أول عنصر نشط
+                    List<Map<String, Object>> localPayTypes = dbHelper.getPayTypesByCbId(wId);
+                    SharedPreferences prefs = SharedPrefsHelper.get(context);
+                    for (int i = 0; i < localPayTypes.size(); i++) {
+                        Map<String, Object> payType = localPayTypes.get(i);
+                        String title = (String) payType.get("type_title");
+                        String desc = (String) payType.get("type_desc");
+                        String pay_code = (String) payType.get("pay_type_code");
+                        String p_note = (String) payType.get("note");
+                        int inactive = (int) payType.get("inactive");
+                        int maxLength = (int) payType.get("maxlength");
+                        InputFilter[] editFilters = new InputFilter[1];
+                        editFilters[0] = new InputFilter.LengthFilter(maxLength);
+
+                        // إنشاء الكارد
+                        View cardView = addPaymentOptionCard(context, container, title, desc, (i == 0 && inactive == 0 ? 1 : 0));
+
+                        if (inactive == 1) {
+                            cardView.setEnabled(false);
+                            cardView.setAlpha(0.5f);
+                            if (cardView instanceof ViewGroup) {
+                                ViewGroup group = (ViewGroup) cardView;
+                                for (int j = 0; j < group.getChildCount(); j++) {
+                                    group.getChildAt(j).setEnabled(false);
+                                }
+                            }
+                            cardView.setOnClickListener(null);
+                        } else {
+
+                            cardView.setOnClickListener(v -> {
+                                etPurchaseCode.setText("");
+                                etPurchaseCode.setFilters(editFilters);
+                                if (p_note != null && !p_note.isEmpty()) {
+                                    containerNote.setVisibility(View.VISIBLE);
+                                    String cleanNote = removeUrl(p_note);
+                                    t_note.setText(cleanNote);
+                                    t_note.setPaintFlags(t_note.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+                                    String url = extractUrl(p_note);
+                                    if (url != null) {
+                                        imgNoteLink.setVisibility(View.VISIBLE);
+                                        containerNote.setOnClickListener(vLink -> {
+                                            try {
+                                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                                context.startActivity(intent);
+                                            } catch (Exception e) {
+                                                ToastMessages(activity, "تعذر فتح الرابط");
                                             }
-                                        }
+                                        });
+                                    } else {
+                                        imgNoteLink.setVisibility(View.GONE);
+                                    }
+                                } else {
+                                    containerNote.setVisibility(View.GONE);
+                                }
+                                clearContainerSelection(container);
+                                updateCardSelectionVisuals(cardView, true);
+                                Typeface rptBold = ResourcesCompat.getFont(context, R.font.rptbold);
+                                Typeface rptRegular = ResourcesCompat.getFont(context, R.font.rptregular);
+                                if ("maunal".equalsIgnoreCase(pay_code)) {
+                                    payTypeForServer[0] = 3;
+                                    btnConfirm.setEnabled(true);
+                                    btnConfirm.setAlpha(1.0f);
+                                    send_otp.setVisibility(View.GONE);
+                                    etPurchaseCode.setHint("رقم الإيداع أو الحوالة");
+                                    textPurchaseCode.setText("رقم الإيداع أو الحوالة");
+                                    etName.setVisibility(View.VISIBLE);
+                                    containerNameText.setVisibility(View.VISIBLE);
+                                    containerName.setVisibility(View.VISIBLE);
+                                    etPurchaseCode.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+                                    etPurchaseCode.setTypeface(rptRegular);
+                                    textPurchaseCode.setTypeface(rptRegular);
+//                                    etName.setText(prefs.getString("full_name", "") + " (مستخدم التطبيق)");
+                                }
+//                                payTypeForServer = "auto".equalsIgnoreCase(pay_code) ? 3 : 0;
+
+                                if ("Floosak".equalsIgnoreCase(link_code) && "auto".equalsIgnoreCase(pay_code)) {
+                                    payTypeForServer[0] = 2;
+                                    send_otp.setVisibility(View.VISIBLE);
+//                                    btnConfirm.setEnabled(false);
+                                    btnConfirm.setAlpha(0.5f);
+                                    etPurchaseCode.setHint("رمز التحقق");
+                                    textPurchaseCode.setText("رمز التحقق");
+                                    etName.setVisibility(View.GONE);
+                                    containerNameText.setVisibility(View.GONE);
+                                    containerName.setVisibility(View.GONE);
+
+                                    etPurchaseCode.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+                                    etPurchaseCode.setTypeface(rptRegular);
+                                    textPurchaseCode.setTypeface(rptRegular);
+
+                                    btnConfirm.setEnabled(true);
+//                                    btnConfirm.setAlpha(1.0f);
+                                    btnConfirm.setOnClickListener(vConfirm -> {
+                                        String alertMessage = getMessageFromLocalNew(486, dbHelper);
+
+                                        showErrorDialog(activity, alertMessage,
+                                                "floosak", null, "تنبيه هام", 0, (id1, success, request_id) -> {
+                                                    send_otp.requestFocus();
+
+                                                    send_otp.animate()
+                                                            .scaleX(1.15f)
+                                                            .scaleY(1.15f)
+                                                            .setDuration(300)
+                                                            .withEndAction(() -> send_otp.animate().scaleX(1.0f).scaleY(1.0f).setDuration(200).start())
+                                                            .start();
+                                                    if (textPurchaseCode != null) {
+                                                        textPurchaseCode.animate()
+                                                                .translationX(20f)
+                                                                .setDuration(50)
+//                                                                .setRepeatCount(5)
+                                                                .withEndAction(() -> textPurchaseCode.setTranslationX(0f))
+                                                                .start();
+
+                                                        textPurchaseCode.setTextColor(Color.parseColor("#FF9800"));
+                                                        new Handler(Looper.getMainLooper()).postDelayed(() ->
+                                                                textPurchaseCode.setTextColor(Color.BLACK), 1500);
+                                                    }
+                                                });
                                     });
 
 
-                            if (id == 3) {
-                                etPurchaseCode.setHint("كود الشراء");
-                            } else {
-                                etPurchaseCode.setHint("رمز التحقق");
+                                    send_otp.setOnClickListener(v2 -> {
+                                        String currentAmountStr = etAmount.getText().toString().trim();
+                                        if (currentAmountStr.isEmpty() || Double.parseDouble(currentAmountStr) <= 0) {
+                                            setEditTextState(etAmount, true);
+                                            etAmount.setError("يرجى ادخال المبلغ");
+                                            ToastMessages(activity, "يرجى ادخال المبلغ");
+                                            return;
+                                        }
+                                        int currentAmount = Integer.parseInt(currentAmountStr);
+                                        showConfirmationDialog(activity, context, wName, currentAmount, isConfirmed -> {
+                                            if (isConfirmed) {
+                                                floosakexe(context, wId, prefs.getString("user_phone", ""),
+                                                        currentAmount, prefs.getInt("user_id", 0), "",
+                                                        booking_id, trip_id, (currentIsWalletFlg[0] == 1 ? 3 : 2),
+                                                        (resId, success, requestId) -> {
+                                                            if (success) {
+                                                                currentRequestId[0] = requestId;
+                                                                ToastMessages(activity, "تم إرسال رمز التحقق");
+                                                                btnConfirm.setEnabled(true);
+                                                                btnConfirm.setAlpha(1.0f);
+                                                            }
+                                                        });
+                                            } else {
+                                            }
+                                        });
+                                    });
+
+                                } else if ("Jaib".equalsIgnoreCase(link_code) && "auto".equalsIgnoreCase(pay_code)) {
+                                    payTypeForServer[0] = 2;
+                                    etPurchaseCode.setHint("كود الشراء");
+                                    textPurchaseCode.setText("كود الشراء");
+                                    etName.setText("");
+                                    etName.setVisibility(View.GONE);
+                                    containerName.setVisibility(View.GONE);
+                                    containerNameText.setVisibility(View.GONE);
+                                    send_otp.setVisibility(View.GONE);
+                                    btnConfirm.setEnabled(true);
+                                    btnConfirm.setAlpha(1.0f);
+
+                                    etPurchaseCode.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+                                    etPurchaseCode.setTypeface(rptRegular);
+                                    textPurchaseCode.setTypeface(rptRegular);
+
+//                                    etPurchaseCode.setTypeface(rptRegular);
+//                                    etPurchaseCode.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+
+                                } else if ("KJawal".equalsIgnoreCase(link_code) && "auto".equalsIgnoreCase(pay_code)) {
+                                    payTypeForServer[0] = 2;
+                                    etPurchaseCode.setHint("رمز PIN");
+                                    textPurchaseCode.setText("رمز PIN");
+                                    etName.setText("");
+                                    etName.setVisibility(View.GONE);
+                                    containerName.setVisibility(View.GONE);
+                                    containerNameText.setVisibility(View.GONE);
+                                    send_otp.setVisibility(View.GONE);
+                                    btnConfirm.setEnabled(true);
+                                    btnConfirm.setAlpha(1.0f);
+
+                                    etPurchaseCode.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+                                    etPurchaseCode.setTypeface(rptRegular);
+                                    textPurchaseCode.setTypeface(rptRegular);
+//                                    textPurchaseCode.setTypeface(rptRegular);
+//                                    etPurchaseCode.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+
+                                } else {
+                                    payTypeForServer[0] = 3;
+                                    btnConfirm.setEnabled(true);
+                                    btnConfirm.setAlpha(1.0f);
+                                    send_otp.setVisibility(View.GONE);
+                                    etPurchaseCode.setHint("رقم الإيداع أو الحوالة");
+                                    textPurchaseCode.setText("رقم الإيداع أو الحوالة");
+                                    etName.setVisibility(View.VISIBLE);
+                                    containerNameText.setVisibility(View.VISIBLE);
+                                    containerName.setVisibility(View.VISIBLE);
+//                                    etPurchaseCode.setTypeface(rptRegular);
+//                                    etPurchaseCode.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+                                    etPurchaseCode.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+                                    etPurchaseCode.setTypeface(rptRegular);
+                                    textPurchaseCode.setTypeface(rptRegular);
+//                                    etName.setText(prefs.getString("full_name", "") + " (مستخدم التطبيق)");
+                                }
+                            });
+
+                            if (firstItem[0] == null) {
+                                firstItem[0] = cardView;
                             }
-                            dialogTitle.setText("تأكيد الدفع عبر " + name);
-                            customDialog.dismiss();
                         }
-                    });
+                    }
 
-                    btnClose.setOnClickListener(v2 -> customDialog.dismiss());
-
-                    View closeX = dialogView2.findViewById(R.id.dialogCancelButton);
-                    if (closeX != null) closeX.setOnClickListener(v2 -> customDialog.dismiss());
-
-                    customDialog.show();
-//                    new androidx.appcompat.app.AlertDialog.Builder(context)
-//                            .setTitle("تأكيد عملية الدفع")
-//                            .setMessage("سيتم دفع مبلغ " + amount + " ريال من محفظة \"" + name + "\" المرتبطة بالرقم \"" + phone + "\". هل تود الاستمرار؟")
-//                            .setCancelable(false)
-//                            .setPositiveButton("تأكيد", (confirmDialog, which) -> {
-//
-//                            })
-//                            .setNegativeButton("إلغاء", (confirmDialog, which) -> {
-//                                confirmDialog.dismiss();
-//                                currentRequestId[0] = null;
-//                            })
-//                            .show();
-
-                } else {
-                    step1.setVisibility(View.GONE);
-                    step2.setVisibility(View.VISIBLE);
-                    etPurchaseCode.setHint("رقم العملية");
-                    dialogTitle.setText("تأكيد الدفع عبر " + name);
+                    // تفعيل أول كارد نشط تلقائياً
+                    if (firstItem[0] != null) {
+                        firstItem[0].performClick();
+                    }
                 }
-                if (id == 3) {
-                    etPurchaseCode.setHint("كود الشراء");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        if (showFirstItem == 1 || showFirstItem == 2) {
+            String balance = SharedPrefsHelper.get(context).getString("user_balance", "0");
+            View balanceView = LayoutInflater.from(context).inflate(R.layout.item_cash_bank, container, false);
+            ((TextView) balanceView.findViewById(R.id.txtName)).setText("الدفع من رصيدي\n (" + balance + ")");
+            ((ImageView) balanceView.findViewById(R.id.imgIcon)).setImageResource(R.drawable.wallet_setting);
+            ((TextView) balanceView.findViewById(R.id.txtDescription)).setText(getMessageFromLocalNew(405, dbHelper));
+            TextView AddBalance = balanceView.findViewById(R.id.AddBalance);
+            AddBalance.setVisibility(View.VISIBLE);
+            AddBalance.setOnClickListener(v -> {
+                dialog.dismiss();
+                if (context instanceof HomePage) {
+                    ((HomePage) context).openFullScreenFragment(new BalanceFragment(), "رصيدي", R.drawable.wallet, 7);
                 }
-//                dialogTitle.setText("تأكيد الدفع عبر " + name);
             });
-            container.addView(itemView);
+            balanceView.setOnClickListener(v -> {
+                double currentBalance = Double.parseDouble(balance.replace(",", "").trim());
+                if (currentBalance < price) {
+                    ToastMessages(activity, getMessageFromLocalNew(341, dbHelper));
+                } else {
+                    dialog.dismiss();
+                    if (callback != null) callback.onOptionSelected(2, "on_verfy", true, 0);
+                }
+            });
+            container.addView(balanceView);
         }
 
 
         btnConfirm.setOnClickListener(new SingleClickListener() {
             @Override
             public void onSingleClick(View v) {
+                if (selectedWalletId[0] == -1) {
+                    ToastMessages(activity, "يرجى اختيار وسيلة دفع أولاً");
+                    return;
+                }
                 String amountStr = etAmount.getText().toString().trim();
                 String code = etPurchaseCode.getText().toString().trim();
-                etPurchaseCode.setError(null);
-                etAmount.setError(null);
+                String notes = etName.getText().toString().trim();
 
-                if (amountStr.isEmpty()) {
-                    etAmount.setError("يرجى إدخال المبلغ");
-                    etAmount.requestFocus();
+                if (amountStr.isEmpty() || Double.parseDouble(amountStr) <= 0) {
+                    etAmount.setError("يرجى ادخال المبلغ");
+                    ToastMessages(activity, "يرجى ادخال المبلغ");
                     return;
                 }
-                if (amountStr.equals("0.0") || amountStr.equals("0")) {
-                    etAmount.setError("المبلغ يجب أن يكون أكبر من صفر");
-                    etAmount.requestFocus();
+                try {
+                    double inputAmount = Double.parseDouble(amountStr);
+
+                    // 1. تحديد الدولة/العملة للتحقق من الحد الأدنى
+                    String activeCurrency = "";
+                    if (booking_id != null && car_code != null && !car_code.isEmpty()) {
+                        activeCurrency = car_code; // في حال الحجز نعتمد على كود الرحلة
+                    } else {
+                        activeCurrency = SharedPrefsHelper.get(context).getString("country_code", "YE"); // في حال الشحن نعتمد على الإعدادات
+                    }
+
+                    // 2. التحقق من الحد الأدنى للمبلغ
+                    if ((activeCurrency.contains("YE") || activeCurrency.contains("YER")) && inputAmount < 1000) {
+                        String errorMsg = getMessageFromLocalNew(491, dbHelper);
+                        AmountError.setText(errorMsg);
+                        AmountError.setVisibility(View.VISIBLE);
+                        showErrorDialog(activity, errorMsg, null, selectedWalletId[0], "تعذر إتمام العملية", 0, null);
+//                        ToastMessages(activity, errorMsg);
+                        return;
+                    } else if ((activeCurrency.contains("SA") || activeCurrency.contains("SAR")) && inputAmount < 10) {
+                        String errorMsg = getMessageFromLocalNew(492, dbHelper);
+                        AmountError.setText(errorMsg);
+                        AmountError.setVisibility(View.VISIBLE);
+                        showErrorDialog(activity, errorMsg, null, selectedWalletId[0], "تعذر إتمام العملية", 0, null);
+//                        ToastMessages(activity, errorMsg);
+                        return;
+                    } else {
+                        AmountError.setText("");
+                        AmountError.setVisibility(View.GONE);
+                    }
+
+                    if (booking_id != null) {
+                        String balanceStr = SharedPrefsHelper.get(context).getString("user_balance", "0");
+                        double userBalance = Double.parseDouble(balanceStr.replace(",", "").trim());
+
+                        if (userBalance < 0) userBalance = 0;
+
+                        if ((inputAmount + userBalance) < price) {
+                            String errorMsg = getMessageFromLocalNew(487, dbHelper) + " (" + price + ")";
+                            showErrorDialog(activity, errorMsg, null, selectedWalletId[0], "تعذر إتمام العملية", 0, null);
+//                            ToastMessages(activity, errorMsg);
+                            return;
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    etAmount.setError("");
                     return;
                 }
-
+//                if (booking_id != null) {
+//                    try {
+//                        double inputAmount = Double.parseDouble(amountStr);
+//
+//                        if (car_code.contains("YER") && inputAmount < 1000) {
+//                            AmountError.setText(getMessageFromLocalNew(491, dbHelper));
+//                            AmountError.setVisibility(View.VISIBLE);
+//                            return;
+//                        } else if (car_code.contains("SAR") && inputAmount < 10) {
+//                            AmountError.setText(getMessageFromLocalNew(492, dbHelper));
+//                            AmountError.setVisibility(View.VISIBLE);
+//                            return;
+//                        } else {
+//                            AmountError.setText("");
+//                            AmountError.setVisibility(View.GONE);
+//                        }
+//                        String balanceStr = SharedPrefsHelper.get(context).getString("user_balance", "0");
+//                        double userBalance = Double.parseDouble(balanceStr.replace(",", "").trim());
+//
+//                        if (userBalance < 0) {
+//                            userBalance = 0;
+//                        }
+//
+//
+//                        if ((inputAmount + userBalance) < price) {
+//                            String errorMsg = getMessageFromLocalNew(Integer.parseInt(487 + " (" + price + ")"), dbHelper);
+//                            ToastMessages(activity, errorMsg);
+//                            return;
+//                        }
+//                    } catch (NumberFormatException e) {
+//                        AmountError.setText("");
+//                        return;
+//                    }
+//                } else {
+//                    try {
+//                        double inputAmount = Double.parseDouble(amountStr);
+//                        SharedPreferences prefs = SharedPrefsHelper.get(context);
+//                        String countryCode = prefs.getString("country_code", "YE");
+//
+//                        if (countryCode != null) {
+//                            if (countryCode.contains("YE") && inputAmount < 1000) {
+//                                String errorMsg = getMessageFromLocalNew(491, dbHelper);
+//                                AmountError.setText(errorMsg);
+//                                AmountError.setVisibility(View.VISIBLE);
+//                                ToastMessages(activity, errorMsg);
+//                                return;
+//                            } else if (countryCode.contains("SA") && inputAmount < 10) {
+//                                String errorMsg = getMessageFromLocalNew(492, dbHelper);
+//                                AmountError.setText(errorMsg);
+//                                AmountError.setVisibility(View.VISIBLE);
+//                                ToastMessages(activity, errorMsg);
+//                                return;
+//                            } else {
+//                                AmountError.setText("");
+//                                AmountError.setVisibility(View.GONE);
+//                            }
+//                        }
+//                    } catch (NumberFormatException e) {
+//                        etAmount.setError("");
+//                        return;
+//                    }
+//                }
                 if (code.isEmpty()) {
-                    String errorMsg = (is_wallet_flg == 1) ? "يرجى إدخال رقم العملية" : "يرجى إدخال كود الشراء";
-                    etPurchaseCode.setError(errorMsg);
+                    String fieldName = (etPurchaseCode.getHint() != null) ? etPurchaseCode.getHint().toString() : "البيانات المطلوبة";
+                    String errorMessage = "يرجى إدخال " + fieldName;
+
+                    etPurchaseCode.setError(errorMessage);
+                    ToastMessages(activity, errorMessage);
                     etPurchaseCode.requestFocus();
                     return;
                 }
 
-                if (amountStr.isEmpty() || code.isEmpty()) return;
-
-                double amount = Double.parseDouble(amountStr);
-                SharedPreferences prefs = SharedPrefsHelper.get(context);
-                int user_id = prefs.getInt("user_id", 0);
-                String phone = prefs.getString("user_phone", "");
-
-                String balanceStr = prefs.getString("user_balance", "0");
-                double balance = Double.parseDouble(balanceStr.replace(",", "").trim());
-                double minAmount;
-
-                if (balance < 0) {
-                    minAmount = price;
-                } else {
-                    minAmount = price - balance;
-                    if (minAmount < 0) minAmount = 0;
-                }
-
-                if (amount < minAmount) {
-                    ToastMessages(activity, "المبلغ يجب أن لا يقل عن " + minAmount);
-                    return;
-                }
-//                if (selectedWalletId[0] == 1 && balance < 0) {
-//                    ToastMessages(activity, "رصيدك سالب، يجب دفع كامل المبلغ");
-//                }
-                int payTypeForServer = (is_wallet_flg == 1) ? 3 : 2;
-                exeBuy(context, selectedWalletId[0], phone, code, amount, "", user_id, "",
-                        booking_id, trip_id, payTypeForServer, currentRequestId[0], new CashBankCallback() {
-
+                exeBuy(
+                        context,
+                        selectedWalletId[0],
+                        SharedPrefsHelper.get(context).getString("user_phone", ""),
+                        code,
+                        Double.parseDouble(amountStr),
+                        SharedPrefsHelper.get(context).getInt("user_id", 0),
+                        notes,
+                        car_code,
+                        booking_id,
+                        trip_id,
+                        payTypeForServer[0],
+                        currentRequestId[0],
+                        new CashBankCallback() {
                             @Override
                             public void onMethodSelected(int id, boolean success, int request_id) {
 
-                                currentRequestId[0] = String.valueOf(request_id);
-//
-                                if (success) {
-//                                    if (id == 6) {
-////                                            ToastMessages(activity, "تم إرسال رمز التحقق بنجاح");
-//                                    } else {
-                                    if (callback != null) {
-                                        callback.onMethodSelected(id, true, Integer.parseInt(currentRequestId[0]));
-                                    }
-                                    dialog.dismiss();
-//                                    }
+                                if (request_id != 0) {
+                                    currentRequestId[0] = String.valueOf(request_id);
                                 }
 
+                                if (success) {
+                                    activity.runOnUiThread(() -> {
+                                        if (callback != null) {
+                                            callback.onOptionSelected(2, "on_verfy", true, request_id);
+                                        }
+                                        if (dialog != null && dialog.isShowing()) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                } else {
+                                }
                             }
                         });
             }
         });
 
-        dialog.show();
+        ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
+        Blurry.with(context).radius(15).sampling(2).onto(decorView);
+        dialog.setOnDismissListener(d -> Blurry.delete(decorView));
 
+        dialog.show();
+        FrameLayout bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (bottomSheet != null) {
+            BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
+
+            ViewGroup.LayoutParams layoutParams = bottomSheet.getLayoutParams();
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            bottomSheet.setLayoutParams(layoutParams);
+
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            behavior.setSkipCollapsed(true);
+
+            behavior.setPeekHeight(context.getResources().getDisplayMetrics().heightPixels);
+        }
     }
 
-//    private static void showTransferInputDialog(Context context, int trip_id, int codeNo,
-//                                                double price, CashBankCallback callback) {
-//        if (!(context instanceof Activity)) return;
-//
-//        Activity activity = (Activity) context;
-//
-//        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.TransparentBottomDialog);
-//
-//        View view = LayoutInflater.from(context).inflate(R.layout.dialog_manual_transfer, null);
-//        dialog.setContentView(view);
-//
-//        EditText etAmount = view.findViewById(R.id.etAmount);
-//        EditText etTransferNo = view.findViewById(R.id.etTransferNo);
-//        EditText etNotes = view.findViewById(R.id.etNotes);
-//        Button btnSave = view.findViewById(R.id.btnSave);
-//        SharedPreferences prefs = SharedPrefsHelper.get(context);
-//
+    public static void fetchAndSavePayTypes(Context context, final GenericCallback callback) {
+        String baseUrl = BASE_URL + "cash_bank_pay_type/";
+        RequestQueue queue = Volley.newRequestQueue(context);
+        DBHelper dbHelper = new DBHelper(context);
 
-    /// /                SharedPreferences prefs = context.getApplicationContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-//        String full_name = prefs.getString("full_name", "");
-//        etAmount.setText("" + price);
-//        etNotes.setText(full_name + " (مستخدم التطبيق) ");
-//        setEditTextState(etAmount, false);
-//        setEditTextState(etTransferNo, false);
-//        setEditTextState(etNotes, false);
-//        if (dialog.getWindow() != null) {
-//            View bottomSheet = dialog.getWindow().findViewById(com.google.android.material.R.id.design_bottom_sheet);
-//            if (bottomSheet != null) {
-//                bottomSheet.setBackgroundResource(android.R.color.transparent);
-//            }
-//        }
-//        final String[] currentRequestId = {null};
-//
-//        btnSave.setOnClickListener(v -> {
-//            String amountStr = etAmount.getText().toString().trim();
-//            String refNo = etTransferNo.getText().toString().trim();
-//            String notes = etNotes.getText().toString().trim();
-//            int user_id = prefs.getInt("user_id", 0);
-//            String phone = prefs.getString("user_phone", "");
-//
-//            if (amountStr.isEmpty() || refNo.isEmpty()) {
-//                ToastMessages(activity, "يرجى ملء كافة الحقول");
-//                return;
-//            }
-//
-//            double amount = Double.parseDouble(amountStr);
-//            double balance = Double.parseDouble(prefs.getString("user_balance", "0").replace(",", ""));
-//
-//            double minAmount = (balance < 0) ? price : Math.max(0, price - balance);
-//
-//            if (amount < minAmount) {
-//                ToastMessages(activity, "المبلغ يجب أن لا يقل عن " + minAmount);
-//                return;
-//            }
-//
-//            showSuccessGif(2, activity, null);
-//
-//            exeBuy(context, 3, phone, refNo, amount, "", user_id, notes,
-//                    null, trip_id, 2, currentRequestId[0], new CashBankCallback() {
-//
-//                        @Override
-//                        public void onMethodSelected(int id, boolean success, int request_id) {
-//                            hideSuccessGif(activity);
-//
-//                            if (success) {
-//                                if (callback != null) {
-//                                    callback.onMethodSelected(id, true, request_id);
-//                                }
-//                                dialog.dismiss();
-//                            } else {
-//                                currentRequestId[0] = String.valueOf(request_id);
-//                            }
-//                        }
-//                    });
-//        });
-//
-//        ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-//        Blurry.with(context).radius(15).sampling(2).onto(decorView);
-//        dialog.setOnDismissListener(d -> Blurry.delete(decorView));
-//
-//        dialog.show();
-//    }
-//
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, baseUrl, null,
+                response -> {
+                    dbHelper.saveCashBankPayTypes(response);
+
+                    if (callback != null) callback.onSuccess("done");
+                },
+                error -> {
+                    sendLog(context, "fetchAndSavePayTypes", error.toString(), "Error fetching pay types", "UserUtils");
+                    if (callback != null) callback.onError(error.getMessage());
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                SharedPreferences prefs = SharedPrefsHelper.get(context);
+                String token = prefs.getString("auth_token", null);
+
+                if (token != null) {
+                    headers.put("Authorization", "Bearer " + token);
+                }
+                return headers;
+            }
+        }; // إغلاق تعريف الكلاس والطلب هنا
+
+        // ضبط سياسة المحاولة
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                30000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        // إضافة الطلب للطابور
+        queue.add(request);
+    }
+
+    private static void showConfirmationDialog(Activity activity, Context context, String name,
+                                               int amount, ActionCallback onConfirm) {
+        View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_contact_support, null);
+        android.app.Dialog customDialog = new android.app.Dialog(activity);
+        customDialog.setContentView(dialogView);
+        if (customDialog.getWindow() != null)
+            customDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        TextView tvMsg = dialogView.findViewById(R.id.tvMessage);
+        Button btnClose = dialogView.findViewById(R.id.btnCall);
+        TextView textWhatsapp = dialogView.findViewById(R.id.textWhatsapp);
+        ImageView iconWhatsapp = dialogView.findViewById(R.id.iconWhatsapp);
+        TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
+        LinearLayout btnRetry = dialogView.findViewById(R.id.btnWhatsapp);
+        ImageView paymenticon = dialogView.findViewById(R.id.paymenticon);
+        paymenticon.setImageResource(R.drawable.paymenticonsuccess);
+        LinearLayout containerNote = dialogView.findViewById(R.id.containerNote);
+        containerNote.setVisibility(View.GONE);
+        if (btnClose instanceof com.google.android.material.button.MaterialButton) {
+            ((com.google.android.material.button.MaterialButton) btnClose).setIcon(null);
+        }
+        SharedPreferences prefs = SharedPrefsHelper.get(context);
+        int user_id = prefs.getInt("user_id", 0);
+        String phone = prefs.getString("user_phone", "");
+        textWhatsapp.setText("تأكيد");
+        iconWhatsapp.setVisibility(View.GONE);
+        View closeX = dialogView.findViewById(R.id.dialogCancelButton);
+        if (closeX != null) closeX.setOnClickListener(v2 -> customDialog.dismiss());
+        tvTitle.setText("تأكيد عملية الدفع");
+        btnClose.setText("إلغاء");
+        tvMsg.setText("دفع مبلغ " + amount + " ريال من محفظة \"" + name + "\" المرتبطة بالرقم \"" + phone + "\". هل تود الاستمرار؟");
+        dialogView.findViewById(R.id.btnWhatsapp).setOnClickListener(v -> {
+            customDialog.dismiss();
+            onConfirm.onAction(true);
+        });
+        dialogView.findViewById(R.id.btnCall).setOnClickListener(v -> customDialog.dismiss());
+        customDialog.show();
+    }
+
+    interface ActionCallback {
+        void onAction(boolean success); // إضافة بارامتر هنا
+    }
+
     public static void fetchAndSaveMessages(Context context, final FetchCallback callback) {
         String baseUrl = BASE_URL + "MessageApp/";
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -1703,7 +2296,7 @@ public class UserUtils {
 
                             dbHelper.insertMessage(id, message);
                         }
-                        callback.onSuccess("تم تحديث البيانات بنجاح");
+                        callback.onSuccess(getMessageFromLocalNew(61, dbHelper));
                     } catch (JSONException e) {
                         sendLog(context, "fetchAndSaveMessages", String.valueOf(e), String.valueOf(e), "UserUtils");
 
@@ -1736,10 +2329,11 @@ public class UserUtils {
                             JSONObject msgObj = response.getJSONObject(i);
                             int id = msgObj.getInt("country_id");
                             String country_name = msgObj.getString("country_name");
+                            String country_code = msgObj.getString("country_code");
 
-                            dbHelper.addCountry(id, country_name);
+                            dbHelper.addCountry(id, country_name, country_code);
                         }
-                        callback.onSuccess("تم تحديث البيانات بنجاح");
+                        callback.onSuccess(getMessageFromLocalNew(61, dbHelper));
                     } catch (JSONException e) {
                         sendLog(context, "fetchAndSaveCountry", String.valueOf(e), String.valueOf(e), "UserUtils");
                         callback.onError(e.getMessage());
@@ -1782,10 +2376,10 @@ public class UserUtils {
                             String city_code = msgObj.getString("city_code");
                             int country_id = msgObj.getInt("country_id");
 
-                            // حفظ الرسائل في SQLite
+
                             dbHelper.insertOrUpdateCity(id, city_name, city_name_en, country_id, city_code);
                         }
-                        callback.onSuccess("تم تحديث البيانات بنجاح");
+                        callback.onSuccess(getMessageFromLocalNew(61, dbHelper));
                     } catch (JSONException e) {
                         sendLog(context, "fetchAndSaveMessages", String.valueOf(e), String.valueOf(e), "UserUtils");
 
@@ -1812,6 +2406,12 @@ public class UserUtils {
         void onError(String error);
     }
 
+    public interface GenericCallback {
+        void onSuccess(String message);
+
+        void onError(String error);
+    }
+
     public static void getMessageFromLocal(int messageId, DBHelper dbHelper, MessageCallback
             callback) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -1828,6 +2428,26 @@ public class UserUtils {
         cursor.close();
     }
 
+    public static String getMessageFromLocalNew(int messageId, DBHelper dbHelper) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = null;
+        String message = "حاول مرة اخرى";
+
+        try {
+            cursor = db.rawQuery("SELECT messages FROM messages WHERE message_id = ?",
+                    new String[]{String.valueOf(messageId)});
+
+            if (cursor != null && cursor.moveToFirst()) {
+                message = cursor.getString(cursor.getColumnIndexOrThrow("messages"));
+            }
+        } catch (Exception e) {
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return message;
+    }
+
+
     public interface MessageCallback {
         void onSuccess(String message);
 
@@ -1842,12 +2462,6 @@ public class UserUtils {
         if (attempt > 1) return; // لا تزيد عن محاولتين
         new Thread(() -> {
             try {
-//                String manufacturer = Build.MANUFACTURER;
-//                String model = Build.MODEL;
-//                String deviceName = model.toLowerCase().startsWith(manufacturer.toLowerCase()) ? model : manufacturer + " " + model;
-//                String osVersion = Build.VERSION.RELEASE;
-//                int sdkVersion = Build.VERSION.SDK_INT;
-//                String deviceInfo = "Device: " + deviceName + ", OS: " + osVersion + " (SDK " + sdkVersion + ")";
 
                 URL url = new URL(BASE_URL + "s_log/");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -1859,12 +2473,13 @@ public class UserUtils {
 
 //                SharedPreferences prefs = context.getApplicationContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
                 int user_id = prefs.getInt("user_id", 0);
+                String phone_number = prefs.getString("phone_number", "");
 
                 JSONObject jsonBody = new JSONObject();
                 jsonBody.put("user_id", user_id);
                 jsonBody.put("log_name", "sendLog2");
                 jsonBody.put("log_text", logText);
-                jsonBody.put("log_body", getDeviceInfo());
+                jsonBody.put("log_body", "app_version = " + app_version + " " + phone_number + " " + getDeviceInfo() + " " + getDeviceID(context));
                 jsonBody.put("page_name", "UserUtils");
                 jsonBody.put("log_app", "msafer.app");
 
@@ -1884,6 +2499,49 @@ public class UserUtils {
         }).start();
     }
 
+    public static void sendLogClob(Context context, String logName, String logText, String
+            logBody, String pageName, String crash_message) {
+
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "s_log/");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Authorization", "Bearer 1");
+                SharedPreferences prefs = SharedPrefsHelper.get(context);
+
+//                SharedPreferences prefs = context.getApplicationContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+                int user_id = prefs.getInt("user_id", 0);
+                String phone_number = prefs.getString("phone_number", "");
+
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("user_id", user_id);
+                jsonBody.put("log_name", logName);
+                jsonBody.put("log_text", logText);
+                jsonBody.put("log_body", "app_version = " + app_version + " " + phone_number + " " + getDeviceInfo() + " " + getDeviceID(context) + " " + logBody);
+                jsonBody.put("page_name", pageName);
+                jsonBody.put("crash_message", crash_message);
+                jsonBody.put("log_app", "msafer.app");
+
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                writer.write(jsonBody.toString());
+                writer.flush();
+                writer.close();
+                os.close();
+
+                conn.getResponseCode();
+                conn.disconnect();
+
+            } catch (Exception e) {
+//                sendLog2(context, e.toString());
+
+            }
+        }).start();
+    }
+
     public static void sendLog(Context context, String logName, String logText, String
             logBody, String pageName) {
         new Thread(() -> {
@@ -1898,12 +2556,13 @@ public class UserUtils {
 
 //                SharedPreferences prefs = context.getApplicationContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
                 int user_id = prefs.getInt("user_id", 0);
+                String phone_number = prefs.getString("phone_number", "");
 
                 JSONObject jsonBody = new JSONObject();
                 jsonBody.put("user_id", user_id);
                 jsonBody.put("log_name", logName);
                 jsonBody.put("log_text", logText);
-                jsonBody.put("log_body", "app_version = " + app_version + " " + logBody);
+                jsonBody.put("log_body", "app_version = " + app_version + " " + phone_number + " " + getDeviceInfo() + " " + getDeviceID(context) + " " + logBody);
                 jsonBody.put("page_name", pageName);
                 jsonBody.put("log_app", "msafer.app");
 
@@ -2029,6 +2688,7 @@ public class UserUtils {
 //                    SharedPreferences.Editor editor = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE).edit();
                     editor.putString("is_verified", String.valueOf(isVerified));
                     editor.putString("is_active", String.valueOf(isActive));
+
                     editor.apply();
 
                     if (callback != null && context instanceof Activity) {
@@ -2064,9 +2724,17 @@ public class UserUtils {
                             int is_wallet_flg = obj.getInt("is_wallet_flg");
                             int comfirm_wallet_pay_flag = obj.getInt("comfirm_wallet_pay_flag");
                             int is_active = obj.getInt("is_active");
+                            int manul_pay_flg = obj.getInt("manul_pay_flg");
+                            int auto_pay_flg = obj.getInt("auto_pay_flg");
                             String cb_name = obj.getString("cb_name");
                             String wallet_icon = obj.optString("wallet_icon", "");
-                            dbHelper.saveCashBank(cb_id, cb_name, wallet_icon, is_wallet_flg, comfirm_wallet_pay_flag, is_active);
+                            String manul_pay_title = obj.optString("manul_pay_title", "");
+                            String manul_pay_desc = obj.optString("manul_pay_desc", "");
+                            String auto_pay_title = obj.optString("auto_pay_title", "");
+                            String auto_pay_desc = obj.optString("auto_pay_desc", "");
+                            String link_code = obj.optString("link_code", "");
+                            dbHelper.saveCashBank(cb_id, cb_name, wallet_icon, is_wallet_flg, comfirm_wallet_pay_flag, is_active,
+                                    manul_pay_flg, auto_pay_flg, manul_pay_title, manul_pay_desc, auto_pay_title, auto_pay_desc, link_code);
                             cashBanks.add(new DBHelper.CashBank(cb_id, cb_name, wallet_icon, is_wallet_flg));
                         }
 
@@ -2093,12 +2761,6 @@ public class UserUtils {
         };
 
         Volley.newRequestQueue(context).add(request);
-    }
-
-    public interface OnMessageSentListener {
-        void onSuccess(String message);
-
-        void onError(String error);
     }
 
     public static void sendMessage(Context context, int userId, String message, boolean isMe) {
@@ -2143,6 +2805,10 @@ public class UserUtils {
                 return headers;
             }
         };
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                60000, // رفع وقت الانتظار إلى 60 ثانية (60000 ملي ثانية)
+                0,     // عدد مرات إعادة المحاولة (0) لمنع تكرار الرسالة إذا تأخر الرد
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         Volley.newRequestQueue(context).add(request);
     }
@@ -2162,7 +2828,6 @@ public class UserUtils {
                 successDialog = null;
             }
 
-            // حذف الضبابية باستخدام الـ Activity الممررة
             if (activity != null) {
                 ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
                 Blurry.delete(decorView);
@@ -2226,66 +2891,51 @@ public class UserUtils {
         handler.post(countdownRunnable);
     }
 
-//    public static void showSuccessGif(int type_img, Activity activity, Runnable onDismiss) {
-//        if (activity == null || activity.isFinishing()) return;
-//
-//        Dialog dialog = new Dialog(activity);
-//        dialog.setContentView(R.layout.dialog_gif_loading);
-//        dialog.setCancelable(false);
-//        dialog.setCanceledOnTouchOutside(false);
-//
-//        if (dialog.getWindow() != null) {
-//            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-//            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-//
-//            ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-//            Blurry.with(activity).radius(25).sampling(2).onto(decorView);
-//        }
-//
-//        ImageView gifImageView = dialog.findViewById(R.id.gifImageView);
-//        TextView tvCountdown = dialog.findViewById(R.id.tvCountdown);
-//
-//        if (type_img == 1) {
-//            Glide.with(activity).asGif().load(R.drawable.saved_successfully).into(gifImageView);
-//        } else {
-//            Glide.with(activity).asGif().load(R.drawable.saved_successfully2).into(gifImageView);
-//        }
-//        dialog.show();
-//
-//        final int[] count = {1};
-//        Handler handler = new Handler(Looper.getMainLooper());
-//        Runnable countdownRunnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                if (count[0] > 0) {
-//                    tvCountdown.setText(String.valueOf(count[0]));
-//                    count[0]++;
-//                    handler.postDelayed(this, 1000);
-//                } else {
-//                    try {
-//                        if (dialog.isShowing() && !activity.isFinishing()) {
-//                            dialog.dismiss();
-//                            ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-//                            Blurry.delete(decorView);
-//
-//                            if (onDismiss != null) {
-//                                onDismiss.run();
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        };
-//        handler.post(countdownRunnable);
-//    }
+    public static void app_Pages(Context context) {
+        DBHelper dbHelper = new DBHelper(context);
+        SharedPreferences prefs = SharedPrefsHelper.get(context);
+        String token = prefs.getString("auth_token", null);
+
+        List<Map<String, Object>> unsyncedVisits = dbHelper.getUnsyncedPageVisits();
+
+        if (unsyncedVisits.isEmpty()) return;
+
+        new Thread(() -> {
+            for (Map<String, Object> visit : unsyncedVisits) {
+                int pvId = (int) visit.get("pv_id");
+                int userId = (int) visit.get("user_id");
+                int pageId = (int) visit.get("page_id");
+                int count = (int) visit.get("visit_count");
+
+                try {
+                    URL url = new URL(BASE_URL + "app_page_users/visit/?user_id=" + userId +
+                            "&page_id=" + pageId + "&visit_count=" + count);
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    if (token != null) {
+                        conn.setRequestProperty("Authorization", "Bearer " + token);
+                    }
+
+                    int responseCode = conn.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        dbHelper.markAsSynced(pvId);
+                    } else {
+                        sendLog(context, "app_Pages", "Code: " + responseCode, "pv_id: " + pvId, "UserUtils");
+                    }
+                    conn.disconnect();
+                } catch (Exception e) {
+                    sendLog(context, "app_Pages_Error", e.toString(), "pv_id: " + pvId, "UserUtils");
+                }
+            }
+        }).start();
+    }
 
     public static void app_Page(Context context, int pageId) {
         SharedPreferences prefs = SharedPrefsHelper.get(context);
-//        SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         int user_id = prefs.getInt("user_id", 0);
         String token = prefs.getString("auth_token", null);
+        DBHelper dbHelper = new DBHelper(context);
 
         if (user_id != 0) {
             new Thread(() -> {
@@ -2295,9 +2945,11 @@ public class UserUtils {
                     conn.setRequestMethod("GET");
                     conn.setDoInput(true);
                     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
                     if (token != null) {
                         conn.setRequestProperty("Authorization", "Bearer " + token);
                     }
+
                     int responseCode = conn.getResponseCode();
                     if (responseCode == HttpURLConnection.HTTP_OK) {
                         InputStream inputStream = conn.getInputStream();
@@ -2312,9 +2964,9 @@ public class UserUtils {
                         JSONObject responseJson = new JSONObject(response.toString());
                         int visitCount = responseJson.optInt("visit_count", 0);
 
+                        // --- حفظ البيانات في الجدول المحلي ---
+                        dbHelper.savePageVisit(user_id, pageId, visitCount);
 
-                    } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
-                        sendLog(context, "app_Page", String.valueOf(responseCode), "user_id = " + user_id + " pageId = " + pageId, "UserUtils");
                     } else {
                         sendLog(context, "app_Page", String.valueOf(responseCode), "user_id = " + user_id + " pageId = " + pageId, "UserUtils");
                     }
@@ -2323,8 +2975,6 @@ public class UserUtils {
                     sendLog(context, "app_Page", e.toString(), "user_id = " + user_id + " pageId = " + pageId, "UserUtils");
                 }
             }).start();
-        } else {
-
         }
     }
 

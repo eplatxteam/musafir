@@ -4,27 +4,33 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.example.musafir.LocationWorker.getCityNameFromIp;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -38,29 +44,30 @@ import androidx.work.WorkManager;
 import android.os.Handler;
 import android.os.Looper;
 
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
+import android.view.WindowManager;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.request.target.CustomTarget;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.takusemba.spotlight.OnSpotlightListener;
 import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.Target;
@@ -79,7 +86,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import jp.wasabeef.blurry.Blurry;
 
 public class PageHome extends Fragment {
 
@@ -110,10 +120,9 @@ public class PageHome extends Fragment {
     private ImageView[] dots;
     private int selectedCountryId = -1;
     GridLayout gridCardsReligious;
-    //    TextView  name_Drivertrip;
-//    ImageView icon_trip, icon1, icon2;
-//    MaterialCardView ticket, Support, TripsRequest, trips, booking, TripPassenger, TripLocal, TripWorld, TripPrivate;
     NestedScrollView NestedScrollView2;
+    private RecyclerView recyclerViewTrv;
+    private DBHelper dbHelper;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -122,16 +131,42 @@ public class PageHome extends Fragment {
         View view = inflater.inflate(R.layout.fragment_page_home, container, false);
         SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         recyclerView2 = view.findViewById(R.id.horizontalRecyclerView);
-        DBHelper dbHelper = new DBHelper(getContext());
+        recyclerViewTrv = view.findViewById(R.id.recyclerViewTrv);
+        dbHelper = new DBHelper(getContext());
         SharedPreferences prefs = SharedPrefsHelper.get(getContext());
         AppBarLayout appBarLayout = view.findViewById(R.id.appBarLayout);
         gridCardsReligious = view.findViewById(R.id.gridCardsReligious);
-        if (dbHelper.getAllServiceHome().isEmpty()) {
-            refreshHomeData(swipeRefreshLayout, prefs, dbHelper, types -> {
-                updateServiceCards();
-            });
+//        UserUtils.fetchBalance(getContext());
+        boolean justLoggedIn = false;
+
+        if (getActivity() != null &&
+                getActivity().getIntent() != null) {
+
+            justLoggedIn = getActivity()
+                    .getIntent()
+                    .getBooleanExtra("is_just_logged_in", false);
+        }
+
+        if (justLoggedIn) {
+
+            refreshBalanceUI();
+
+            getActivity()
+                    .getIntent()
+                    .removeExtra("is_just_logged_in");
+
         } else {
-            updateServiceCards();
+
+            if (dbHelper.getAllServiceHome().isEmpty()) {
+
+                refreshHomeData(swipeRefreshLayout, prefs, dbHelper, types -> {
+                    updateServiceCards();
+                });
+
+            } else {
+
+                updateServiceCards();
+            }
         }
 
         SharedPreferences preferences = SharedPrefsHelper.get(getContext());
@@ -149,7 +184,6 @@ public class PageHome extends Fragment {
                 return false;
             }
         });
-
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
@@ -236,8 +270,9 @@ public class PageHome extends Fragment {
                         });
                     }
                 });
-                getCityNameFromIp(getContext(), (cityAr, cityId) -> {
+                getCityNameFromIp(getContext(), (cityAr, cityId, country_code) -> {
                     prefs.edit().putString("default_city", cityAr).apply();
+                    prefs.edit().putString("country_code", country_code).apply();
                     prefs.edit().putInt("default_city_id", cityId).apply();
                 });
             } else {
@@ -246,7 +281,7 @@ public class PageHome extends Fragment {
             }
         });
 
-        loadProfileData();
+//        loadProfileData();
         scheduleLocationUpdate();
 
 
@@ -260,101 +295,109 @@ public class PageHome extends Fragment {
                 }
         );
 
-        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            FragmentActivity activity = getActivity();
-            if (activity != null) {
-                Fragment currentFragment = activity.getSupportFragmentManager()
-                        .findFragmentById(R.id.full_screen_container);
-
-                if (currentFragment instanceof HomeFragment) {
-                    Bundle args = currentFragment.getArguments();
-                    String tripType = args != null ? args.getString("trip_type", "1") : "1";
-                    switch (tripType) {
-                        case "1":
-                            updateToolbar("رحلات تشاركية", false, R.drawable.big_car, 0);
-                            break;
-                        case "2":
-                            updateToolbar("نقل دولي", false, R.drawable.world_new, 0);
-                            break;
-                        case "3":
-                            updateToolbar("رحلات محلية", false, R.drawable.bus_2, 0);
-                            break;
-                    }
-                } else if (currentFragment instanceof BookingFragment) {
-//                    BookingFragment bf = (BookingFragment) currentFragment;
-//                    Bundle args = bf.getArguments();
-//                    int tab = args != null ? args.getInt("tab_to_open", 0) : 0;
-                    updateToolbar("رحلاتي", false, R.drawable.airplane_new, 1);
-                } else if (currentFragment instanceof DriverTripRequest) {
-                    updateToolbar("طلبات المسافرين", false, R.drawable.solo_traveller, 0);
-                } else if (currentFragment instanceof AddTripFragment) {
-                    updateToolbar("إضافة رحلة", false, R.drawable.locations, 1);
-                } else if (currentFragment instanceof NotificationFragment) {
-                    updateToolbar("الإشعارات", false, R.drawable.notification_new, 1);
-                } else if (currentFragment instanceof AddTripRequests) {
-                    updateToolbar("طلب رحلة", false, R.drawable.locations, 1);
-                } else if (currentFragment instanceof TravelerRequests) {
-                    updateToolbar("خدمات المسافرين", false, R.drawable.solo_traveller, 0);
-                } else if (currentFragment instanceof BookingDetailsFragment) {
-                    updateToolbar("تفاصيل الحجز", false, R.drawable.checklist, 0);
-                } else if (currentFragment instanceof VehicleFragment) {
-                    updateToolbar("بيانات المركبات", false, R.drawable.local, 0);
-                } else if (currentFragment instanceof SharingFragment) {
-                    updateToolbar("الأعضاء المنضمون", false, R.drawable.frame_5__1_, 0);
-                } else if (currentFragment instanceof BalanceFragment) {
-                    updateToolbar("رصيدي", false, R.drawable.wallet, 0);
-                } else if (currentFragment instanceof TripDetailsFragment) {
-                    updateToolbar("تفاصيل الطلب", false, R.drawable.add_trip, 0);
-                } else if (currentFragment instanceof AllTravelerRequests) {
-                    updateToolbar("طلبات الخدمات", false, R.drawable.solo_traveller, 0);
-                } else if (currentFragment instanceof TravelerRequestsDetails) {
-                    updateToolbar("تفاصيل الخدمة", false, R.drawable.solo_traveller, 0);
-                } else if (currentFragment instanceof AddTravelerRequests) {
-                    Bundle args = currentFragment.getArguments();
-                    String title = (args != null) ? args.getString("type_tr_name", "طلب خدمة") : "طلب خدمة";
-//                    int typeId = (args != null) ? args.getInt("type_tr_id", 0) : 0;
-//                    int icon = (typeId == 81) ? R.drawable.kaaba_new : R.drawable.solo_traveller;
-                    int icon = (args != null) ? args.getInt("icon_tr", 0) : 0;
-                    updateToolbar(title, false, icon, 0);
-                } else if (currentFragment instanceof AllImagesFragment) {
-                    updateToolbar("الإعلانات", false, R.drawable.ads, 0);
-                } else if (currentFragment instanceof Advertisements) {
-                    updateToolbar("تفاصيل الإعلان", false, R.drawable.ads, 0);
-                } else if (currentFragment instanceof MoreDetails) {
-                    updateToolbar("تفاصيل الرحلة", false, R.drawable.booking, 0);
-                } else {
-                    String full_name = prefs.getString("full_name", "");
-                    Toolbar toolbar = requireActivity().findViewById(R.id.main_toolbar);
-                    String fullNames = full_name.trim();
-                    String firstName = "";
-                    if (!fullNames.isEmpty()) {
-                        String[] parts = fullNames.split("\\s+");
-                        if (parts.length > 0) {
-                            firstName = parts[0];
-                            if (!firstName.isEmpty()) {
-                                firstName = firstName.substring(0, 1).toUpperCase() +
-                                        firstName.substring(1).toLowerCase();
-                            }
-                        }
-                    }
-                    for (int i = 0; i < toolbar.getChildCount(); i++) {
-                        View child = toolbar.getChildAt(i);
-                        if (child.getId() == R.id.textGreeting || (child.findViewById(R.id.textGreeting) != null)) {
-                            toolbar.removeViewAt(i);
-                            break;
-                        }
-                    }
-
-                    View customView = getLayoutInflater().inflate(R.layout.toolbar_custom, null);
-                    TextView textGreeting = customView.findViewById(R.id.textGreeting);
-                    int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-                    String greeting = (hour >= 5 && hour < 12) ? "صباح الخير" : "مساء الخير";
-                    String fullText = greeting + " " + firstName;
-                    textGreeting.setText(fullText);
-                    toolbar.addView(customView);
-                }
-            }
-        });
+//        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+//            FragmentActivity activity = getActivity();
+//            if (activity != null) {
+//
+//                Fragment currentFragment = activity.getSupportFragmentManager()
+//                        .findFragmentById(R.id.full_screen_container);
+//
+//                if (currentFragment instanceof HomeFragment) {
+//                    Bundle args = currentFragment.getArguments();
+//                    String tripType = args != null ? args.getString("trip_type", "1") : "1";
+//                    switch (tripType) {
+//                        case "1":
+//                            updateToolbar("رحلات تشاركية", false, R.drawable.big_car, 0);
+//                            break;
+//                        case "2":
+//                            updateToolbar("نقل دولي", false, R.drawable.world_new, 0);
+//                            break;
+//                        case "3":
+//                            updateToolbar("رحلات محلية", false, R.drawable.bus_2, 0);
+//                            break;
+//                    }
+//                } else if (currentFragment instanceof BookingFragment) {
+//                    updateToolbar("رحلاتي", false, R.drawable.airplane_t, 1);
+//                } else if (currentFragment instanceof DriverTripRequest) {
+//                    updateToolbar("طلبات المسافرين", false, R.drawable.solo_traveller, 0);
+//                } else if (currentFragment instanceof AddTripFragment) {
+//                    updateToolbar("إضافة رحلة", false, R.drawable.locations, 0);
+//                } else if (currentFragment instanceof NotificationFragment) {
+//                    updateToolbar("الإشعارات", false, R.drawable.notification_new, 1);
+//                } else if (currentFragment instanceof AddTripRequests) {
+//                    updateToolbar("طلب رحلة خاصة", false, R.drawable.locations, 0);
+//                } else if (currentFragment instanceof TravelerRequests) {
+//                    updateToolbar("خدمات المسافرين", false, R.drawable.solo_traveller, 0);
+//                } else if (currentFragment instanceof BookingDetailsFragment) {
+//                    updateToolbar("تفاصيل الحجز", false, R.drawable.checklist, 0);
+//                } else if (currentFragment instanceof CustomBooking) {
+//                    updateToolbar("حجز رحلة", false, R.drawable.booking, 0);
+//                } else if (currentFragment instanceof VehicleFragment) {
+//                    updateToolbar("بيانات المركبات", false, R.drawable.local, 0);
+//                } else if (currentFragment instanceof AddVehicleFragment) {
+//                    Bundle args = currentFragment.getArguments();
+//                    String title = (args != null && args.containsKey("vehicle_id")) ? "تعديل المركبة" : "إضافة مركبة";
+//                    updateToolbar(title, false, R.drawable.local, 0);
+//                } else if (currentFragment instanceof SharingFragment) {
+//                    updateToolbar("الأعضاء المنضمون", false, R.drawable.frame, 0);
+//                } else if (currentFragment instanceof BalanceFragment) {
+//                    updateToolbar("رصيدي", false, R.drawable.wallet, 0);
+//                } else if (currentFragment instanceof TripDetailsFragment) {
+//                    updateToolbar("تفاصيل الطلب", false, R.drawable.add_trip, 0);
+//                } else if (currentFragment instanceof AllTravelerRequests) {
+//                    updateToolbar("طلبات الخدمات", false, R.drawable.solo_traveller, 0);
+//                } else if (currentFragment instanceof ProfileFragment) {
+//                    updateToolbar("الملف الشخصي", false, R.drawable.profile_new, 0);
+//                } else if (currentFragment instanceof SettingFragment) {
+//                    updateToolbar("الملف الشخصي", false, R.drawable.profile_new, 0);
+//                } else if (currentFragment instanceof TravelerRequestsDetails) {
+//                    updateToolbar("تفاصيل الخدمة", false, R.drawable.solo_traveller, 0);
+//                } else if (currentFragment instanceof AddTravelerRequests) {
+//                    Bundle args = currentFragment.getArguments();
+//                    String title = (args != null) ? args.getString("type_tr_name", "طلب خدمة") : "طلب خدمة";
+//                    int icon = (args != null) ? args.getInt("icon_tr", 0) : 0;
+//                    updateToolbar(title, false, icon, 0);
+//                } else if (currentFragment instanceof AllImagesFragment) {
+//                    updateToolbar("الإعلانات", false, R.drawable.ads, 0);
+//                } else if (currentFragment instanceof Advertisements) {
+//                    updateToolbar("تفاصيل الإعلان", false, R.drawable.ads, 0);
+//                } else if (currentFragment instanceof MoreDetails) {
+//                    updateToolbar("تفاصيل الرحلة", false, R.drawable.booking, 0);
+//                } else if (currentFragment instanceof GuideFragment) {
+//                    updateToolbar("دليل المسافر", false, R.drawable.solo_traveller, 0);
+//                } else {
+//                    String full_name = prefs.getString("full_name", "");
+//                    Toolbar toolbar = requireActivity().findViewById(R.id.main_toolbar);
+//                    String fullNames = full_name.trim();
+//                    String firstName = "";
+//                    if (!fullNames.isEmpty()) {
+//                        String[] parts = fullNames.split("\\s+");
+//                        if (parts.length > 0) {
+//                            firstName = parts[0];
+//                            if (!firstName.isEmpty()) {
+//                                firstName = firstName.substring(0, 1).toUpperCase() +
+//                                        firstName.substring(1).toLowerCase();
+//                            }
+//                        }
+//                    }
+//                    for (int i = 0; i < toolbar.getChildCount(); i++) {
+//                        View child = toolbar.getChildAt(i);
+//                        if (child.getId() == R.id.textGreeting || (child.findViewById(R.id.textGreeting) != null)) {
+//                            toolbar.removeViewAt(i);
+//                            break;
+//                        }
+//                    }
+//
+//                    View customView = getLayoutInflater().inflate(R.layout.toolbar_custom, null);
+//                    TextView textGreeting = customView.findViewById(R.id.textGreeting);
+//                    int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+//                    String greeting = (hour >= 5 && hour < 12) ? "صباح الخير" : "مساء الخير";
+//                    String fullText = greeting + " " + firstName;
+//                    textGreeting.setText(fullText);
+//                    toolbar.addView(customView);
+//                }
+//            }
+//        });
 
 
         dotsLayout = view.findViewById(R.id.dotsLayout);
@@ -367,30 +410,73 @@ public class PageHome extends Fragment {
 
             @Override
             public void onError(String error) {
-                UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        if (isAdded() && getActivity() != null) {
-                            UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                    }
-
-                });
             }
         });
-
         return view;
     }
 
-    private void startTutorial() {
-        SharedPreferences appPrefs = getContext().getSharedPreferences("AppConfig", Context.MODE_PRIVATE);
-        if (!appPrefs.getBoolean("isFirstRun_Tutorial_V2", true) || isTutorialRunning) return;
+    public static BookingAdapter adapter;
 
+    public void refreshBalanceUI() {
+
+        UserUtils.fetchBalanceNew(getContext(), success -> {
+
+            if (!isAdded() || getActivity() == null) return;
+
+            requireActivity().runOnUiThread(() -> {
+
+                gridCardsReligious.removeAllViews();
+
+                updateServiceCards();
+
+                gridCardsReligious.invalidate();
+                gridCardsReligious.requestLayout();
+            });
+        });
+    }
+
+    public void onResume() {
+        super.onResume();
+        SharedPreferences appPrefs = getContext().getSharedPreferences("AppConfig", Context.MODE_PRIVATE);
+
+        boolean isForced = appPrefs.getBoolean("FORCE_SHOW_TUTORIAL", false);
+        if (isForced) {
+            int delayTime = isForced ? 300 : 2000;
+            appPrefs.edit().putBoolean("FORCE_SHOW_TUTORIAL", false).apply();
+
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (isAdded() && !isTutorialRunning) {
+                    startTutorial(true);
+                }
+            }, delayTime);
+        }
+
+        Intent intent = getActivity().getIntent();
+        boolean isJustLoggedIn = intent.getBooleanExtra("is_just_logged_in", false);
+
+        SharedPreferences preferences = SharedPrefsHelper.get(getContext());
+        int userId = preferences.getInt("user_id", -1);
+
+        if (userId != -1) {
+            if (isJustLoggedIn) {
+                intent.putExtra("is_just_logged_in", false);
+            } else {
+            }
+        }
+    }
+
+
+    private void startTutorial(boolean isManual) {
+        if (isTutorialRunning) return;
+        int internalDelay = isManual ? 100 : 2000;
+        SharedPreferences appPrefs = getContext().getSharedPreferences("AppConfig", Context.MODE_PRIVATE);
+
+        if (!isManual && !appPrefs.getBoolean("isFirstRun_Tutorial_V2", true)) {
+            return;
+        }
+
+        isTutorialRunning = true;
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (!isAdded() || getActivity() == null) return;
 
@@ -409,79 +495,106 @@ public class PageHome extends Fragment {
 
             Runnable checkCompletion = () -> {
                 completedRequests[0]++;
-                if (completedRequests[0] == totalRequests) {
+                if (completedRequests[0] >= totalRequests) {
                     if (!targets.isEmpty() && isAdded()) {
                         startSpotlightNow(targets);
                     }
                 }
             };
 
-            if (cardTransport != null)
+            // 1. نقل دولي
+            if (cardTransport != null) {
                 UserUtils.getMessageFromLocal(281, dbHelper, new UserUtils.MessageCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        targets.add(createTarget(cardTransport, "نقل دولي", message, 1));
+                        targets.add(createTarget(cardTransport, "نقل دولي", message, "التالي"));
+                        checkCompletion.run(); // استدعاء في حال النجاح
                     }
 
                     @Override
                     public void onError(String error) {
-                        targets.add(createTarget(cardTransport, "نقل دولي", "أبدأ من هنا لحجز رحلتك الدولية", 1));
-                        checkCompletion.run();
+                        targets.add(createTarget(cardTransport, "نقل دولي", "أبدأ من هنا لحجز رحلتك الدولية", "التالي"));
+                        checkCompletion.run(); // استدعاء في حال الفشل
                     }
                 });
-            if (targetVip != null)
+            } else {
+                checkCompletion.run();
+            }
+
+            if (targetVip != null) {
                 UserUtils.getMessageFromLocal(282, dbHelper, new UserUtils.MessageCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        targets.add(createTarget(targetVip, "رحلات خاصة", message, 1));
+                        targets.add(createTarget(targetVip, "رحلات خاصة", message, "التالي"));
+                        checkCompletion.run();
                     }
 
                     @Override
                     public void onError(String error) {
-                        targets.add(createTarget(targetVip, "رحلات خاصة", "إذا أردت رحلة خاصة اطلبها من هنا", 0));
+                        targets.add(createTarget(targetVip, "رحلات خاصة", "إذا أردت رحلة خاصة اطلبها من هنا", "التالي"));
                         checkCompletion.run();
                     }
                 });
-            if (targetWallet != null)
+            } else {
+                checkCompletion.run();
+            }
+
+            if (targetWallet != null) {
                 UserUtils.getMessageFromLocal(283, dbHelper, new UserUtils.MessageCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        targets.add(createTarget(targetWallet, "رصيدي", message, 1));
+                        targets.add(createTarget(targetWallet, "رصيدي", message, "التالي"));
+                        checkCompletion.run();
                     }
 
                     @Override
                     public void onError(String error) {
-                        targets.add(createTarget(targetWallet, "رصيدي", "اطلع على رصيدك وحركاتك المالية من هنا", 0));
+                        targets.add(createTarget(targetWallet, "رصيدي", "اطلع على رصيدك وحركاتك المالية من هنا", "التالي"));
                         checkCompletion.run();
                     }
                 });
-            if (targetHelp != null)
+            } else {
+                checkCompletion.run();
+            }
+
+            if (targetHelp != null) {
                 UserUtils.getMessageFromLocal(284, dbHelper, new UserUtils.MessageCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        targets.add(createTarget(targetHelp, "تواصل معنا", message, 1));
+                        targets.add(createTarget(targetHelp, "تواصل معنا", message, "التالي"));
+                        checkCompletion.run();
                     }
 
                     @Override
                     public void onError(String error) {
-                        targets.add(createTarget(targetHelp, "تواصل معنا", "إذا احتجت أي مساعدة فتواصل معنا من هنا", 0));
+                        targets.add(createTarget(targetHelp, "تواصل معنا", "إذا احتجت أي مساعدة فتواصل معنا من هنا", "التالي"));
                         checkCompletion.run();
                     }
                 });
-            if (aiChat != null)
+            } else {
+                checkCompletion.run();
+            }
+
+            if (aiChat != null) {
                 UserUtils.getMessageFromLocal(285, dbHelper, new UserUtils.MessageCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        targets.add(createTarget(aiChat, "مساعد مسافر", message, 1));
+                        targets.add(createTarget(aiChat, "المساعد الذكي", message, "موافق"));
+                        checkCompletion.run();
                     }
 
                     @Override
                     public void onError(String error) {
-                        targets.add(createTarget(aiChat, "مساعد مسافر", "بإمكانك التواصل مع المساعد الذكي من هنا", 0));
+                        targets.add(createTarget(aiChat, "المساعد الذكي", "بإمكانك التواصل مع المساعد الذكي من هنا", "موافق"));
                         checkCompletion.run();
                     }
                 });
-        }, 2000);
+            } else {
+                checkCompletion.run();
+            }
+
+        }, internalDelay);
+
     }
 
     private void startSpotlightNow(List<Target> targets) {
@@ -499,6 +612,7 @@ public class PageHome extends Fragment {
                     public void onEnded() {
                         isTutorialRunning = false;
                         if (getContext() != null) {
+                            isTutorialRunning = false;
                             getContext().getSharedPreferences("AppConfig", Context.MODE_PRIVATE)
                                     .edit()
                                     .putBoolean("isFirstRun_Tutorial_V2", false)
@@ -510,122 +624,17 @@ public class PageHome extends Fragment {
 
         spotlight.start();
     }
-//    private void startTutorial() {
-//        SharedPreferences appPrefs = getContext().getSharedPreferences("AppConfig", Context.MODE_PRIVATE);
-//
-//        if (!appPrefs.getBoolean("isFirstRun_Tutorial_V2", true) || isTutorialRunning) return;
-//        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-//            if (!isAdded() || getActivity() == null) return;
-//
-//            Toolbar toolbar = getActivity().findViewById(R.id.main_toolbar);
-//            View aiChat = (toolbar != null) ? toolbar.findViewById(R.id.ai_chat) : null;
-//            View targetVip = getActivity().findViewById(R.id.card_vip);
-//            View targetWallet = getActivity().findViewById(R.id.card_wallet);
-//            View targetHelp = getActivity().findViewById(R.id.card_help);
-//            View cardTransport = getActivity().findViewById(R.id.cardTransport);
-//            DBHelper dbHelper = new DBHelper(getContext());
-//            List<Target> targets = new ArrayList<>();
-//            if (cardTransport != null)
-//                UserUtils.getMessageFromLocal(281, dbHelper, new UserUtils.MessageCallback() {
-//                    @Override
-//                    public void onSuccess(String message) {
-//                        targets.add(createTarget(cardTransport, "نقل دولي", message, 1));
-//                    }
-//
-//                    @Override
-//                    public void onError(String error) {
-//                        targets.add(createTarget(cardTransport, "نقل دولي", "أبدأ من هنا لحجز رحلتك الدولية", 1));
-//
-//                    }
-//                });
-//            if (targetVip != null)
-//                UserUtils.getMessageFromLocal(282, dbHelper, new UserUtils.MessageCallback() {
-//                    @Override
-//                    public void onSuccess(String message) {
-//                        targets.add(createTarget(targetVip, "رحلات خاصة", message, 1));
-//                    }
-//
-//                    @Override
-//                    public void onError(String error) {
-//                        targets.add(createTarget(targetVip, "رحلات خاصة", "إذا أردت رحلة خاصة اطلبها من هنا", 0));
-//
-//                    }
-//                });
-//            if (targetWallet != null)
-//                UserUtils.getMessageFromLocal(283, dbHelper, new UserUtils.MessageCallback() {
-//                    @Override
-//                    public void onSuccess(String message) {
-//                        targets.add(createTarget(targetWallet, "رصيدي", message, 1));
-//                    }
-//
-//                    @Override
-//                    public void onError(String error) {
-//                        targets.add(createTarget(targetWallet, "رصيدي", "اطلع على رصيدك وحركاتك المالية من هنا", 0));
-//
-//                    }
-//                });
-//            if (targetHelp != null)
-//                UserUtils.getMessageFromLocal(284, dbHelper, new UserUtils.MessageCallback() {
-//                    @Override
-//                    public void onSuccess(String message) {
-//                        targets.add(createTarget(targetHelp, "تواصل معنا", message, 1));
-//                    }
-//
-//                    @Override
-//                    public void onError(String error) {
-//                        targets.add(createTarget(targetHelp, "تواصل معنا", "إذا احتجت أي مساعدة فتواصل معنا من هنا", 0));
-//
-//                    }
-//                });
-//            if (aiChat != null)
-//                UserUtils.getMessageFromLocal(285, dbHelper, new UserUtils.MessageCallback() {
-//                    @Override
-//                    public void onSuccess(String message) {
-//                        targets.add(createTarget(aiChat, "مساعد مسافر", message, 1));
-//                    }
-//
-//                    @Override
-//                    public void onError(String error) {
-//                        targets.add(createTarget(aiChat, "مساعد مسافر", "بإمكانك التواصل مع المساعد الذكي من هنا", 0));
-//
-//                    }
-//                });
-//            if (targets.isEmpty()) return;
-//            spotlight = new Spotlight.Builder(getActivity())
-//                    .setTargets(targets.toArray(new Target[0]))
-//                    .setBackgroundColor(Color.parseColor("#BF000000"))
-//                    .setDuration(400L)
-//                    .setOnSpotlightListener(new OnSpotlightListener() {
-//                        @Override
-//                        public void onStarted() {
-//                            isTutorialRunning = true;
-//                        }
-//
-//                        @Override
-//                        public void onEnded() {
-//                            isTutorialRunning = false;
-//                            getContext().getSharedPreferences("AppConfig", Context.MODE_PRIVATE)
-//                                    .edit()
-//                                    .putBoolean("isFirstRun_Tutorial_V2", false)
-//                                    .apply();
-//                        }
-//                    })
-//                    .build();
-//
-//            spotlight.start();
-//
-//        }, 2000);
-//    }
 
     private Spotlight spotlight;
 
-    private Target createTarget(View view, String title, String description, int bottom_card) {
+    private Target createTarget(View view, String title, String description, String btn_txt) {
         View overlay = getLayoutInflater().inflate(R.layout.layout_tutorial_bus, null);
 
-        ((TextView) overlay.findViewById(R.id.tvTutorialTitle)).setText(title);
+//        ((TextView) overlay.findViewById(R.id.tvTutorialTitle)).setText(title);
         ((TextView) overlay.findViewById(R.id.tvTutorialDesc)).setText(description);
 
-        View btnNext = overlay.findViewById(R.id.btnCloseTutorial);
+        Button btnNext = overlay.findViewById(R.id.btnCloseTutorial);
+        btnNext.setText(btn_txt);
         if (btnNext != null) {
             btnNext.setOnClickListener(v -> {
                 if (spotlight != null) {
@@ -688,6 +697,7 @@ public class PageHome extends Fragment {
 //        SharedPreferences preferences = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         int userId = preferences.getInt("user_id", -1);
         String user_type = preferences.getString("user_type", "");
+        String user_balance = preferences.getString("user_balance", "");
 
         for (DBHelper.ServiceHome type : types) {
             boolean isActive = (type.inactive != 0);
@@ -703,16 +713,6 @@ public class PageHome extends Fragment {
             cardView.setCardElevation(0);
             ImageView imageView = new ImageView(context);
 
-//            if (type.type_tr_id == 2) {
-//                // 1. تطبيق التصميم المميز (الحافة الصفراء والخلفية الفاتحة) كما في الصورة
-//                cardView.setStrokeColor(ColorStateList.valueOf(Color.parseColor("#FFC107"))); // لون أصفر/ذهبي
-//                cardView.setStrokeWidth(4); // عرض الحافة
-//                cardView.setCardBackgroundColor(Color.parseColor("#FFFDE7")); // خلفية صفراء فاتحة جداً
-//
-//                // 2. تعيين ID برمجي للكارد لكي تستهدفه مكتبة Spotlight لاحقاً
-//                cardView.setId(R.id.cardTransport); // يجب تعريف هذا الـ ID في ids.xml (انظر الخطوة 3)
-//            } else {
-            // التصميم الافتراضي لبقية الكاردات
             cardView.setStrokeWidth(0);
             cardView.setCardBackgroundColor(Color.WHITE);
 //            }
@@ -726,8 +726,8 @@ public class PageHome extends Fragment {
             contentLayout.setGravity(Gravity.CENTER);
             contentLayout.setLayoutParams(new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
-            int imgWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, getResources().getDisplayMetrics());
-            int imgHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+            int imgWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, getResources().getDisplayMetrics());
+            int imgHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics());
             imageView.setLayoutParams(new LinearLayout.LayoutParams(imgWidth, imgHeight));
 
             TextView textView = new TextView(context);
@@ -758,21 +758,64 @@ public class PageHome extends Fragment {
                 case 4:
                     if (user_type.equals("driver")) {
                         textView.setText("طلبات الرحلات");
-                        imageView.setImageResource(R.drawable.airplanes);
+                        imageView.setImageResource(R.drawable.airplane_t);
                     } else {
                         textView.setText("تأشيرات الحج والعمرة");
                         imageView.setImageResource(R.drawable.kaaba_new);
+                    }
+                    break;
+                case 7:
+                    if (user_type.equals("driver")) {
+                        cardView.setEnabled(false);
+                        textView.setText("رصيدي");
+                        imageView.setImageResource(R.drawable.wallet);
+                        cardView.setAlpha(0.5f);
+                    } else {
+                        textView.setText("رصيدي");
+                        imageView.setImageResource(R.drawable.wallet);
+
+                        String liveBalance = preferences.getString("user_balance", "0");
+                        double balanceValue = 0;
+                        try {
+                            if (liveBalance != null && !liveBalance.isEmpty() && !liveBalance.equalsIgnoreCase("null")) {
+                                String cleanBalance = liveBalance.replace(",", "");
+                                balanceValue = Double.parseDouble(cleanBalance);
+                            }
+                        } catch (NumberFormatException e) {
+                            balanceValue = 0;
+                        }
+
+                        if (balanceValue > 0) {
+                            View redDot = new View(context);
+                            int dotSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+
+                            FrameLayout.LayoutParams dotParams = new FrameLayout.LayoutParams(dotSize, dotSize);
+                            dotParams.gravity = Gravity.TOP | Gravity.START;
+
+                            int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+                            dotParams.setMargins(0, margin, margin, 0);
+                            redDot.setLayoutParams(dotParams);
+
+                            GradientDrawable shape = new GradientDrawable();
+                            shape.setShape(GradientDrawable.OVAL);
+                            shape.setColor(getResources().getColor(R.color.holo_green_dark));
+                            redDot.setBackground(shape);
+                            ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(redDot, View.ALPHA, 1.0f, 0.2f);
+                            alphaAnimator.setDuration(800);
+                            alphaAnimator.setRepeatMode(ValueAnimator.REVERSE);
+                            alphaAnimator.setRepeatCount(ValueAnimator.INFINITE);
+                            alphaAnimator.start();
+                            frameLayout.addView(redDot);
+                        }
                     }
                     break;
 
                 case 8:
                     if (user_type.equals("driver")) {
                         textView.setText("إضافة رحلة");
-//                        ((HomePage) requireActivity()).selectTab(R.id.fab);
                         imageView.setImageResource(R.drawable.locations);
                     } else {
-                        textView.setText("طلب رحلة");
-//                        ((HomePage) requireActivity()).selectTab(R.id.fab);
+                        textView.setText("طلب رحلة خاصة");
                         imageView.setImageResource(R.drawable.locations);
                     }
                     break;
@@ -790,75 +833,88 @@ public class PageHome extends Fragment {
             contentLayout.addView(imageView);
             contentLayout.addView(textView);
             frameLayout.addView(contentLayout);
+            if (!user_type.equals("driver")) {
 
-            if (!isActive) {
-                cardView.setCardBackgroundColor(Color.WHITE);
-                contentLayout.setAlpha(0.3f);
+                if (!isActive) {
+//                    contentLayout.setAlpha(0.4f);
 
-                LinearLayout blurOverlay = new LinearLayout(context);
-                blurOverlay.setLayoutParams(new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-                blurOverlay.setBackgroundColor(ContextCompat.getColor(context, R.color.gray3));
-                blurOverlay.setAlpha(0.6f);
+                    cardView.setStrokeWidth(0);
 
-                frameLayout.addView(blurOverlay);
+                    TextView tvSoon = new TextView(context);
+                    tvSoon.setText("قريباً");
+                    tvSoon.setTextSize(7.5f);
+                    tvSoon.setTextColor(Color.WHITE);
+                    Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.rptregular);
+                    tvSoon.setTypeface(typeface, Typeface.NORMAL);
+                    tvSoon.setGravity(Gravity.CENTER);
 
-                TextView tvSoon = new TextView(context);
+                    GradientDrawable badgeShape = new GradientDrawable();
+                    badgeShape.setShape(GradientDrawable.RECTANGLE);
+                    badgeShape.setColor(Color.parseColor("#9E9E9E"));
+                    badgeShape.setCornerRadius(15f);
+                    tvSoon.setBackground(badgeShape);
 
-                GradientDrawable shape = new GradientDrawable();
-                shape.setShape(GradientDrawable.RECTANGLE);
-                shape.setColor(ContextCompat.getColorStateList(context, R.color.primary));
-                shape.setCornerRadius(50f);
+                    int pH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+                    int pV = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
+                    tvSoon.setPadding(pH, pV, pH, pV);
 
-                tvSoon.setBackground(shape);
-                int paddingVertical = 8;
-                int paddingHorizontal = 30;
-                tvSoon.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
+                    FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    badgeParams.gravity = Gravity.TOP | Gravity.CENTER;
+                    tvSoon.setLayoutParams(badgeParams);
 
-                tvSoon.setText("قريباً");
-                tvSoon.setTextSize(14);
-                tvSoon.setTextColor(Color.WHITE);
-                tvSoon.setTypeface(null, Typeface.BOLD);
-                tvSoon.setGravity(Gravity.CENTER);
+                    tvSoon.setZ(25f);
+                    frameLayout.addView(tvSoon);
+                    tvSoon.bringToFront();
 
-                FrameLayout.LayoutParams soonParams = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
-                );
-                soonParams.gravity = Gravity.CENTER;
-                tvSoon.setLayoutParams(soonParams);
-                frameLayout.addView(tvSoon);
-                cardView.setClickable(false);
-                cardView.setFocusable(false);
+//                cardView.setEnabled(false);
+
+
+//                cardView.setClickable(false);
+                }
             }
-//            if (type.type_tr_id == 2) { // فقط لـ "نقل دولي"
-//                TextView tvBadge = new TextView(context);
-//                tvBadge.setText("الأكثر استخداماً 🔥");
-//                tvBadge.setTextSize(10);
-//                tvBadge.setTextColor(Color.WHITE);
-//                tvBadge.setTypeface(null, Typeface.BOLD);
-//                tvBadge.setGravity(Gravity.CENTER);
+//            if (!isActive) {
+//                cardView.setCardBackgroundColor(Color.WHITE);
+//                contentLayout.setAlpha(0.3f);
 //
-//                // خلفية برتقالية دائرية للحافة
-//                GradientDrawable badgeShape = new GradientDrawable();
-//                badgeShape.setShape(GradientDrawable.RECTANGLE);
-//                badgeShape.setColor(Color.parseColor("#FF9800")); // برتقالي
-//                badgeShape.setCornerRadii(new float[]{0f, 0f, 20f, 20f, 0f, 0f, 0f, 0f}); // زوايا دائرية سفلية فقط
-//                tvBadge.setBackground(badgeShape);
+//                LinearLayout blurOverlay = new LinearLayout(context);
+//                blurOverlay.setLayoutParams(new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+//                blurOverlay.setBackgroundColor(ContextCompat.getColor(context, R.color.gray3));
+//                blurOverlay.setAlpha(0.6f);
 //
-//                int paddingH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
-//                int paddingV = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
-//                tvBadge.setPadding(paddingH, paddingV, paddingH, paddingV);
+//                frameLayout.addView(blurOverlay);
 //
-//                // وضع الشارة في أعلى المنتصف
-//                FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(
+//                TextView tvSoon = new TextView(context);
+//
+//                GradientDrawable shape = new GradientDrawable();
+//                shape.setShape(GradientDrawable.RECTANGLE);
+//                shape.setColor(ContextCompat.getColorStateList(context, R.color.primary));
+//                shape.setCornerRadius(50f);
+//
+//                tvSoon.setBackground(shape);
+//                int paddingVertical = 8;
+//                int paddingHorizontal = 30;
+//                tvSoon.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
+//
+//                tvSoon.setText("قريباً");
+//                tvSoon.setTextSize(14);
+//                tvSoon.setTextColor(Color.WHITE);
+//                Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.rptregular);
+//
+//                tvSoon.setTypeface(typeface, Typeface.BOLD);
+//                tvSoon.setGravity(Gravity.CENTER);
+//
+//                FrameLayout.LayoutParams soonParams = new FrameLayout.LayoutParams(
 //                        FrameLayout.LayoutParams.WRAP_CONTENT,
 //                        FrameLayout.LayoutParams.WRAP_CONTENT
 //                );
-//                badgeParams.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-//                tvBadge.setLayoutParams(badgeParams);
-//
-//                // إضافتها للـ frameLayout (الذي يحتوي أصلاً على المحتوى Blur أو Soon)
-//                frameLayout.addView(tvBadge);
+//                soonParams.gravity = Gravity.CENTER;
+//                tvSoon.setLayoutParams(soonParams);
+//                frameLayout.addView(tvSoon);
+//                cardView.setClickable(false);
+//                cardView.setFocusable(false);
 //            }
             if (type.type_tr_id == 2) {
                 cardView.setId(R.id.cardTransport);
@@ -874,10 +930,10 @@ public class PageHome extends Fragment {
                 tvBadge.setText("الأكثر استخداماً 🔥");
                 tvBadge.setTextSize(7.5f);
                 tvBadge.setTextColor(Color.WHITE);
-                tvBadge.setTypeface(null, Typeface.BOLD);
+                Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.rptregular);
+                tvBadge.setTypeface(typeface, Typeface.NORMAL);
                 tvBadge.setGravity(Gravity.CENTER);
 
-                // تصميم الشارة ككبسولة صغيرة جداً
                 GradientDrawable badgeShape = new GradientDrawable();
                 badgeShape.setShape(GradientDrawable.RECTANGLE);
                 badgeShape.setColor(Color.parseColor("#FF9800"));
@@ -894,8 +950,6 @@ public class PageHome extends Fragment {
                 );
 
                 badgeParams.gravity = Gravity.TOP | Gravity.CENTER;
-//                badgeParams.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
-//                badgeParams.setMarginStart((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics()));
 
                 cardView.setClipChildren(true);
                 frameLayout.setClipChildren(true);
@@ -911,17 +965,12 @@ public class PageHome extends Fragment {
             }
             cardView.addView(frameLayout);
 
-//            imageView.setImageTintList(null);
-//            imageView.setImageTintList(ContextCompat.getColorStateList(context, R.color.icon_tint_selector));
-
-//            imageView.invalidate();
             cardView.setOnClickListener(v -> {
 
-                if (!isActive) return;
-//
-//                int primaryColor = ContextCompat.getColor(context, R.color.primary);
-//
-//                imageView.setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN);
+                if (!isActive) {
+                    UserUtils.ToastMessages(getActivity(), UserUtils.getMessageFromLocalNew(462, dbHelper));
+                    return;
+                }
                 int primaryColor = ContextCompat.getColor(context, R.color.primary);
 
                 imageView.setImageTintList(ColorStateList.valueOf(primaryColor));
@@ -1005,6 +1054,10 @@ public class PageHome extends Fragment {
                             handleUnauthenticated();
                             return;
                         }
+                        if (user_type.equals("driver")) {
+                            cardView.setEnabled(false);
+                        }
+
                         fragment = new BalanceFragment();
                         title = "رصيدي";
                         icon = R.drawable.wallet;
@@ -1021,15 +1074,15 @@ public class PageHome extends Fragment {
                             title = "إضافة رحلة";
                             fragmentId = 1;
                             icon = R.drawable.locations;
-                            ((HomePage) requireActivity()).selectTab(R.id.fab);
+                            ((HomePage) requireActivity()).selectTab(R.id.nav_home);
 
                             UserUtils.app_Page(context, 6);
                         } else {
                             fragment = new AddTripRequests();
-                            title = "طلب رحلة";
+                            title = "طلب رحلة خاصة";
                             fragmentId = 1;
                             icon = R.drawable.locations;
-                            ((HomePage) requireActivity()).selectTab(R.id.fab);
+                            ((HomePage) requireActivity()).selectTab(R.id.nav_home);
 
                             UserUtils.app_Page(context, 11);
                         }
@@ -1037,7 +1090,13 @@ public class PageHome extends Fragment {
 
                     case 9:
                         UserUtils.app_Page(context, 46);
-                        openWhatsApp("967785050270");
+//                        openWhatsApp(UserUtils.getMessageFromLocalNew(349, dbHelper));
+//                        String phone = UserUtils.getMessageFromLocalNew(349, dbHelper);
+                        String countryCode = preferences.getString("country_code", "967785050270");
+
+//                        int messageId = "YE".equals(countryCode) ? 349 : 362;
+//                        String phone = UserUtils.getMessageFromLocalNew(349, dbHelper);
+                        showContactMenu();
                         return;
 
                     default:
@@ -1055,7 +1114,7 @@ public class PageHome extends Fragment {
             });
             gridCardsReligious.addView(cardView);
         }
-        startTutorial();
+        startTutorial(false);
     }
 
 
@@ -1140,7 +1199,7 @@ public class PageHome extends Fragment {
 //                    .addToBackStack(null)
                     .commitNowAllowingStateLoss();
 
-            home.updateToolbar(title, false, R.drawable.airplane_new, 1);
+            home.updateToolbar(title, false, R.drawable.airplane_t, 1);
         }
     }
 
@@ -1161,6 +1220,191 @@ public class PageHome extends Fragment {
         startActivity(new Intent(getContext(), MainActivity.class));
     }
 
+    private void showContactMenu() {
+        if (getActivity() == null) return;
+
+        final Dialog dialog = new Dialog(getContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_contact_options, null);
+        dialog.setContentView(dialogView);
+        TextView ci_time = dialogView.findViewById(R.id.ci_time);
+        TextView tv_support = dialogView.findViewById(R.id.tv_support);
+        TextView tv_support2 = dialogView.findViewById(R.id.tv_support2);
+        TextView tv_support3 = dialogView.findViewById(R.id.tv_support3);
+        ci_time.setText(UserUtils.getMessageFromLocalNew(482, dbHelper));
+        tv_support.setText(UserUtils.getMessageFromLocalNew(483, dbHelper));
+        tv_support2.setText(UserUtils.getMessageFromLocalNew(484, dbHelper));
+        tv_support3.setText(UserUtils.getMessageFromLocalNew(485, dbHelper));
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setGravity(Gravity.BOTTOM);
+            dialog.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
+            dialog.getWindow().setWindowAnimations(R.style.DialogSlideUpAnimation);
+        }
+
+        View btnCancelMenu = dialogView.findViewById(R.id.btnCancelMenu);
+        LinearLayout containerWhatsapp = dialogView.findViewById(R.id.containerWhatsapp);
+
+        List<DBHelper.ContactInfo> contactList = dbHelper.getAllContactInfo();
+        final List<View> animatedItems = new ArrayList<>();
+        int delayOffset = 150;
+
+        for (DBHelper.ContactInfo contact : contactList) {
+            final String name = contact.getCiName();
+            final String phoneNumber = contact.getCiPhone(); // هنا رقم الهاتف الفعلي لكل صف من قاعدة البيانات
+            final String ci_display = contact.getci_display();
+            String ci_type = contact.getci_type();
+            String CiIcon = contact.getCiIcon();
+
+            // إنشاء كارد العنصر بنمط احترافي
+            MaterialCardView itemCard = new MaterialCardView(getContext());
+            LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+            cardParams.setMargins(0, 0, 0, dpToPx(12));
+            itemCard.setLayoutParams(cardParams);
+            itemCard.setRadius(dpToPx(20));
+            itemCard.setCardElevation(0f);
+            itemCard.setStrokeColor(ColorStateList.valueOf(Color.parseColor("#F5F5F5")));
+            itemCard.setStrokeWidth(dpToPx(1));
+            itemCard.setClickable(true);
+            itemCard.setFocusable(true);
+
+            itemCard.setOnClickListener(v -> {
+                if ("whatsapp".equals(ci_type) || "all".equals(ci_type)) {
+                    openWhatsApp(phoneNumber);
+                } else if ("phone".equals(ci_type)) {
+                    openCall(phoneNumber);
+                }
+                dialog.dismiss();
+            });
+
+            LinearLayout itemLayout = new LinearLayout(getContext());
+            itemLayout.setOrientation(LinearLayout.HORIZONTAL);
+            itemLayout.setGravity(Gravity.CENTER_VERTICAL);
+            itemLayout.setPadding(dpToPx(12), dpToPx(12), dpToPx(12), dpToPx(12));
+            itemLayout.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+
+            // 1. الأيقونة الرئيسية للصنف (يمين)
+            FrameLayout mainIconFrame = new FrameLayout(getContext());
+            mainIconFrame.setLayoutParams(new LinearLayout.LayoutParams(dpToPx(48), dpToPx(48)));
+            GradientDrawable mainBg = new GradientDrawable();
+            mainBg.setShape(GradientDrawable.OVAL);
+
+            if (name.contains("العامة")) mainBg.setColor(Color.parseColor("#FFF8E1"));
+            else if (name.contains("الفني")) mainBg.setColor(Color.parseColor("#E3F2FD"));
+            else mainBg.setColor(Color.parseColor("#FEF2F2"));
+
+            mainIconFrame.setBackground(mainBg);
+
+            ImageView mainIcon = new ImageView(getContext());
+            int resId = getContext().getResources().getIdentifier(CiIcon, "drawable", getContext().getPackageName());
+            if (resId != 0) {
+                mainIcon.setImageResource(resId);
+            } else {
+                mainIcon.setImageResource(R.drawable.support2); // أيقونة افتراضية
+            }
+            mainIcon.setPadding(dpToPx(12), dpToPx(12), dpToPx(12), dpToPx(12));
+            mainIcon.setColorFilter(Color.parseColor("#333333"));
+            mainIconFrame.addView(mainIcon);
+
+            // 2. النصوص (منتصف)
+            LinearLayout textLayout = new LinearLayout(getContext());
+            LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f);
+            textParams.setMargins(0, 0, dpToPx(14), 0);
+            textLayout.setLayoutParams(textParams);
+            textLayout.setOrientation(LinearLayout.VERTICAL);
+            textLayout.setGravity(Gravity.RIGHT);
+
+            TextView tvName = new TextView(getContext());
+            tvName.setText(name);
+            tvName.setTextColor(Color.parseColor("#1A1D21"));
+            tvName.setTextSize(15);
+            try {
+                tvName.setTypeface(ResourcesCompat.getFont(getContext(), R.font.rptbold), Typeface.BOLD);
+            } catch (Exception e) {
+                tvName.setTypeface(Typeface.DEFAULT_BOLD);
+            }
+
+            TextView tvPhoneNum = new TextView(getContext());
+            tvPhoneNum.setText("\u202A" + ci_display + "\u202C");
+            tvPhoneNum.setTextColor(Color.parseColor("#888888"));
+            tvPhoneNum.setTextSize(13);
+            tvPhoneNum.setPadding(0, dpToPx(2), 0, 0);
+            tvPhoneNum.setTextDirection(View.TEXT_DIRECTION_RTL); // لكي يظهر كود الدولة والأرقام مرتبة من اليسار لليمين بشكل صحيح
+
+            textLayout.addView(tvName);
+            textLayout.addView(tvPhoneNum);
+
+            // 3. أزرار الأكشن (يسار)
+            LinearLayout actionsLayout = new LinearLayout(getContext());
+            actionsLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+            if (ci_type.equals("phone") || ci_type.equals("all")) {
+                actionsLayout.addView(createActionCircle(R.drawable.phone_new, "#F8F9FA", "#444444", v -> {
+                    openCall(phoneNumber);
+                    dialog.dismiss();
+                }));
+            }
+            if (ci_type.equals("whatsapp") || ci_type.equals("all")) {
+                // إعطاء مسافة بسيطة تفصل بين الدائرتين إذا ظهرتا معاً في جهة اليسار
+                View actionCircle = createActionCircle(R.drawable.whatsapp, "#E8F9EF", "#25D366", v -> {
+                    openWhatsApp(phoneNumber);
+                    dialog.dismiss();
+                });
+                if (actionsLayout.getChildCount() > 0) {
+                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) actionCircle.getLayoutParams();
+                    params.setMargins(dpToPx(8), 0, 0, 0);
+                    actionCircle.setLayoutParams(params);
+                }
+                actionsLayout.addView(actionCircle);
+            }
+
+            itemLayout.addView(mainIconFrame);
+            itemLayout.addView(textLayout);
+            itemLayout.addView(actionsLayout);
+            itemCard.addView(itemLayout);
+            containerWhatsapp.addView(itemCard);
+
+            // أنيميشن الدخول التتابعي
+            itemCard.setAlpha(0f);
+            itemCard.setTranslationY(dpToPx(20));
+            itemCard.animate().alpha(1f).translationY(0).setDuration(400).setStartDelay(delayOffset).start();
+            animatedItems.add(itemCard);
+            delayOffset += 80;
+        }
+
+        // تأثير الضبابية (Blur)
+        ViewGroup decorView = (ViewGroup) getActivity().getWindow().getDecorView();
+        Blurry.with(getContext()).radius(15).sampling(2).onto(decorView);
+        dialog.setOnDismissListener(d -> Blurry.delete(decorView));
+
+        if (btnCancelMenu != null) btnCancelMenu.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private View createActionCircle(int icon, String bgColor, String tint, View.OnClickListener listener) {
+        FrameLayout frame = new FrameLayout(getContext());
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dpToPx(38), dpToPx(38));
+        p.setMargins(dpToPx(8), 0, 0, 0);
+        frame.setLayoutParams(p);
+        GradientDrawable gd = new GradientDrawable();
+        gd.setShape(GradientDrawable.OVAL);
+        gd.setColor(Color.parseColor(bgColor));
+        frame.setBackground(gd);
+        ImageView iv = new ImageView(getContext());
+        iv.setImageResource(icon);
+        iv.setPadding(dpToPx(10), dpToPx(10), dpToPx(10), dpToPx(10));
+        iv.setColorFilter(Color.parseColor(tint));
+        frame.addView(iv);
+        frame.setOnClickListener(listener);
+        return frame;
+    }
+
+
+    private int dpToPx(int dp) {
+        float density = getContext().getResources().getDisplayMetrics().density;
+        return Math.round((float) dp * density);
+    }
+
     private void openWhatsApp(String phoneNumber) {
         String url = "https://wa.me/" + phoneNumber;
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -1168,16 +1412,36 @@ public class PageHome extends Fragment {
         try {
             startActivity(intent);
         } catch (Exception e) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         }
     }
 
+    private void openCall(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        startActivity(intent);
+    }
+
     private void refreshHomeData(SwipeRefreshLayout swipeRefreshLayout, SharedPreferences prefs, DBHelper dbHelper, RefreshCallback callback) {
+        if (!UserUtils.isNetworkAvailable(getContext())) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(getActivity(), message);
+                }
+
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         Context context = getContext();
         if (context == null || !isAdded()) {
             if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
             return;
         }
-
+//        fetchBooking(1, getContext(), true);
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setRefreshing(true);
         }
@@ -1205,10 +1469,20 @@ public class PageHome extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded()) handleError(dbHelper);
             }
         });
+        UserUtils.syncDayTimesFromServer(context, new UserUtils.DayTimeCallback() {
 
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+        });
         UserUtils.fetchAndSaveMessages(context, new UserUtils.FetchCallback() {
             @Override
             public void onSuccess(String message) {
@@ -1229,17 +1503,7 @@ public class PageHome extends Fragment {
 
             @Override
             public void onError(String error) {
-                UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        UserUtils.ToastMessages(getActivity(), message);
-                    }
 
-                    @Override
-                    public void onError(String error) {
-                    }
-
-                });
             }
         });
 
@@ -1252,6 +1516,7 @@ public class PageHome extends Fragment {
             public void onError(String error) {
             }
         });
+        UserUtils.fetchAndSaveContactInfo(context, dbHelper);
 
         UserUtils.fetchRoutes(context, new UserUtils.FetchCallback() {
             @Override
@@ -1271,19 +1536,7 @@ public class PageHome extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
 
@@ -1294,22 +1547,20 @@ public class PageHome extends Fragment {
 
             @Override
             public void onError(String error) {
-                if (isAdded() && getActivity() != null) {
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            if (getActivity() != null)
-                                UserUtils.ToastMessages(getActivity(), message);
-                        }
 
-                        @Override
-                        public void onError(String error) {
-                        }
-                    });
-                }
             }
         });
+        UserUtils.fetchAndSavePayTypes(context, new UserUtils.GenericCallback() {
 
+            @Override
+            public void onSuccess(String message) {
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+        });
         UserUtils.fetchAndSavecities(context, new UserUtils.citiesCallback() {
             @Override
             public void onSuccess(String message) {
@@ -1327,7 +1578,6 @@ public class PageHome extends Fragment {
         loadImages();
         fetchCities();
 
-        // 3. التحقق من swipeRefreshLayout قبل استخدام postDelayed
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.postDelayed(() -> {
                 if (isAdded()) {
@@ -1361,7 +1611,7 @@ public class PageHome extends Fragment {
 
 
     private void handleError(DBHelper dbHelper) {
-        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+        UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
             @Override
             public void onSuccess(String message) {
                 UserUtils.ToastMessages(getActivity(), message);
@@ -1371,131 +1621,6 @@ public class PageHome extends Fragment {
             public void onError(String error) {
             }
         });
-    }
-
-    private void loadProfileData() {
-        SharedPreferences prefs = SharedPrefsHelper.get(getContext());
-
-//        SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", getActivity().MODE_PRIVATE);
-        String token = prefs.getString("auth_token", "");
-        DBHelper dbHelper = new DBHelper(getContext());
-
-        if (token.isEmpty()) {
-//            UserUtils.getMessageFromLocal(41, dbHelper, new UserUtils.MessageCallback() {
-//                @Override
-//                public void onSuccess(String message) {
-//                    UserUtils.ToastMessages(getActivity(), message);
-//                }
-//
-//                @Override
-//                public void onError(String error) {
-//                }
-//
-//            });
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                String deviceId = UserUtils.getDeviceID(getContext());
-                String deviceInfo = UserUtils.getDeviceInfo();
-                URL url = new URL(BASE_URL + "auth/profile/?device_id=" + deviceId + "&device_info=" + deviceInfo);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setDoOutput(true);
-                if (token != null) {
-                    conn.setRequestProperty("Authorization", "Bearer " + token);
-                }
-                JSONObject body = new JSONObject();
-                body.put("token", token);
-                conn.getOutputStream().write(body.toString().getBytes("UTF-8"));
-                conn.connect();
-
-                int responseCode = conn.getResponseCode();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        (responseCode == 200) ? conn.getInputStream() : conn.getErrorStream()));
-
-                StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-                reader.close();
-                if (responseCode == 200) {
-                    JSONObject json = new JSONObject(result.toString());
-
-                    // ✅ تخزين البيانات محليًا
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("user_type", json.optString("user_type", ""));
-                    editor.putString("full_name", json.optString("full_name", ""));
-                    editor.putString("phone_number", json.optString("phone_number", ""));
-                    editor.putString("national_id", json.optString("national_id", ""));
-                    editor.putString("date_of_birth", json.optString("date_of_birth", "").equals("null") ? "" : json.optString("date_of_birth", ""));
-                    editor.putString("gender", json.optString("gender", ""));
-                    editor.putString("address", json.optString("address", ""));
-                    editor.putString("driver_license", json.optString("driver_license", ""));
-                    editor.putString("license_expire_date", json.optString("license_expire_date", "").equals("null") ? "" : json.optString("date_of_birth", ""));
-                    editor.putString("license_image", json.optString("license_image", "").equals("null") ? "" : json.optString("license_image", ""));
-                    editor.putString("national_id_image", json.optString("national_id_image", "").equals("null") ? "" : json.optString("national_id_image", ""));
-                    editor.putString("passport_image", json.optString("passport_image", "").equals("null") ? "" : json.optString("passport_image", ""));
-                    editor.putString("visit_document", json.optString("visit_document", "").equals("null") ? "" : json.optString("visit_document", ""));
-                    editor.apply();
-                    if (isAdded() && getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-//                            loadCachedProfileData();
-                        });
-                    }
-                } else {
-                    String errorMsg = result.toString();
-                    try {
-                        JSONObject errorJson = new JSONObject(errorMsg);
-                        if (errorJson.has("message"))
-                            errorMsg = errorJson.getString("message");
-                        else if (errorJson.has("detail"))
-                            errorMsg = errorJson.getString("detail");
-                    } catch (Exception e) {
-                        UserUtils.sendLog(getContext(), "loadProfileData", e.toString(), e.toString(), "PageHome");
-                    }
-
-                    final String displayMsg = errorMsg.length() > 100 ? errorMsg.substring(0, 100) + "..." : errorMsg;
-                    if (isAdded() && getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
-                                @Override
-                                public void onSuccess(String message) {
-                                    UserUtils.ToastMessages(getActivity(), message);
-                                }
-
-                                @Override
-                                public void onError(String error) {
-                                }
-
-                            });
-                            UserUtils.sendLog(getContext(), "loadProfileData", displayMsg, displayMsg, "PageHome");
-                        });
-                    }
-                }
-            } catch (Exception e) {
-                if (isAdded() && getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        UserUtils.sendLog(getContext(), "loadProfileData", e.toString(), e.toString(), "PageHome");
-                        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                            @Override
-                            public void onSuccess(String message) {
-                                UserUtils.ToastMessages(getActivity(), message);
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                            }
-
-                        });
-                    });
-                }
-            }
-        }).start();
     }
 
     private void scheduleLocationUpdate() {
@@ -1545,6 +1670,7 @@ public class PageHome extends Fragment {
 
 
             } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }).start();
     }

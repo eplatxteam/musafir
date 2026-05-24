@@ -149,7 +149,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="عدد الأفراد"
+                        android:text="عدد المسافرين"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -204,7 +204,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="أسماء الأفراد"
+                        android:text="أسماء المسافرين"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
                 </LinearLayout>

@@ -1,12 +1,9 @@
 package com.example.musafir;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
@@ -32,6 +30,7 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -41,10 +40,15 @@ public class BalanceFragment extends Fragment {
     private TextView tvBalanceYER, tvBalanceSAR, tvBalanceUSD, tvBalanceYERN;
     private TextView tvNameYER, tvNameSAR, tvNameUSD, tvNameYERN;
     private LinearLayout detailsContainer;
-    private TextView tvDetailsTitle;
+    private LinearLayout tvDetailsTitle;
     private ProgressBar progressBar;
     private RequestQueue requestQueue;
-    private Button btnAddBalance;
+    Button btnAddBalance;
+    ImageView ivArrowYER, ivArrowYERN, ivArrowSAR, ivArrowUSD;
+    private int currentPage = 1;
+    private boolean isLoading = false;
+    private boolean isLastPage = false;
+    private String currentCurCode = ""; // لحفظ العملة المحددة حالياً
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,21 +75,66 @@ public class BalanceFragment extends Fragment {
         tvDetailsTitle = view.findViewById(R.id.tvDetailsTitle);
         progressBar = view.findViewById(R.id.progressBar);
 
+        ivArrowYER = view.findViewById(R.id.ivArrowYER);
+        ivArrowYERN = view.findViewById(R.id.ivArrowYERN);
+        ivArrowSAR = view.findViewById(R.id.ivArrowSAR);
+        ivArrowUSD = view.findViewById(R.id.ivArrowUSD);
+
         requestQueue = Volley.newRequestQueue(requireContext());
         btnAddBalance = view.findViewById(R.id.btnAddBalance);
+        DBHelper dbHelper = new DBHelper(getContext());
 
-        btnAddBalance.setOnClickListener(v -> {
+        btnAddBalance.setOnClickListener(new UserUtils.SingleClickListener() {
+            @Override
+            public void onSingleClick(View v) {
 //            UserUtils.showCashBankBottomSheet(getContext(), id -> {
-//                Log.d("Selection", "تم اختيار المحفظة رقم: " + id);
 ////                    selectedWalletId = id;
 //            });
-            UserUtils.showGenericOptionsBottomSheet(getContext(), 5, 0, 0, 0, 0, null);
+                UserUtils.fetchAndSavePayTypes(getContext(), new UserUtils.GenericCallback() {
+
+                    @Override
+                    public void onSuccess(String message) {
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                    }
+                });
+                UserUtils.fetchCashBankData(getContext(), dbHelper, new UserUtils.OnCashBankFetchedListener() {
+                    @Override
+                    public void onFetched(List<DBHelper.CashBank> types) {
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                    }
+                });
+                UserUtils.showUnifiedPaymentBottomSheet(getContext(), 5, 0, null, null,
+                        0, null, 0,
+                        (payType, paymentStatus, success, request_id) -> {
+                            if (success) {
+                                fetchBalance();
+//                                UserUtils.ToastMessages(getActivity(), UserUtils.getMessageFromLocalNew(325, dbHelper));
+                            }
+                        });
+//            UserUtils.showGenericOptionsBottomSheet(getContext(), 5, 0, 0, 0, 0, null);
+            }
         });
 
         cardYERN.setVisibility(View.GONE);
         cardYER.setVisibility(View.GONE);
         cardSAR.setVisibility(View.GONE);
         cardUSD.setVisibility(View.GONE);
+        NestedScrollView nestedScrollView = view.findViewById(R.id.nestedScrollView);
+        nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            if (scrollY > (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight() - 200)) {
+                if (!isLoading && !isLastPage) {
+                    SharedPreferences prefs = SharedPrefsHelper.get(getContext());
+                    int userId = prefs.getInt("user_id", 0);
+                    fetchBalanceDetails(userId, currentCurCode, false);
+                }
+            }
+        });
         return view;
     }
 
@@ -96,7 +145,7 @@ public class BalanceFragment extends Fragment {
         UserUtils.app_Page(getContext(), 10);
     }
 
-    private void fetchBalance() {
+    public void fetchBalance() {
         SharedPreferences prefs = SharedPrefsHelper.get(getContext());
         int userId = prefs.getInt("user_id", 0);
         String token = prefs.getString("auth_token", "");
@@ -131,7 +180,7 @@ public class BalanceFragment extends Fragment {
                             updateUI(curCode, curName, balance, user_id);
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                     }
                 },
                 error -> {
@@ -148,136 +197,88 @@ public class BalanceFragment extends Fragment {
         requestQueue.add(request);
     }
 
-//    @Override
-//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        MenuItem addVehicleItem = menu.findItem(R.id.action_placeholder2);
-//        if (addVehicleItem != null) {
-//            addVehicleItem.setIcon(R.drawable.baseline_add_24);
-//            addVehicleItem.setVisible(true);
-
-    /// /            addVehicleItem.setTitle("إضافة مركبة");
-//        }
-//
-//        MenuItem placeholderItem = menu.findItem(R.id.action_placeholder);
-//        if (placeholderItem != null) {
-//            placeholderItem.setVisible(true);
-//            View actionView = placeholderItem.getActionView();
-//            if (actionView != null) {
-//                actionView.setPressed(true);
-//                actionView.postDelayed(() -> actionView.setPressed(false), 100);
-//            }
-//            actionView.setOnClickListener(v -> {
-//                requireActivity().onBackPressed();
-//            });
-//        }
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        if (item.getItemId() == R.id.action_placeholder2) {
-//
-//            View rootView = getView();
-//
-//            if (rootView != null) {
-//                UserUtils.showGenericOptionsBottomSheet(getContext(), 5);
-//
-//            }
-//            return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
-
-
-//    private void updateUI(String curCode, String curName, double balance, int user_id) {
-//        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
-//        formatter.applyPattern("#,###,##0.00");
-//
-//        String formattedBalance = formatter.format(balance);
-//        CardView targetCard = null;
-//        switch (curCode) {
-//            case "YER":
-//                targetCard = cardYER;
-//                tvBalanceYER.setText(formattedBalance);
-//                if (!curName.isEmpty()) tvNameYER.setText(curName);
-//                break;
-//            case "YERN":
-//                targetCard = cardYERN;
-//                tvBalanceYERN.setText(formattedBalance);
-//                if (!curName.isEmpty()) tvNameYERN.setText(curName);
-//                break;
-//            case "SAR":
-//                targetCard = cardSAR;
-//                tvBalanceSAR.setText(formattedBalance);
-//                if (!curName.isEmpty()) tvNameSAR.setText(curName);
-//                break;
-//            case "USD":
-//                targetCard = cardUSD;
-//                tvBalanceUSD.setText(formattedBalance);
-//                if (!curName.isEmpty()) tvNameUSD.setText(curName);
-//                break;
-//        }
-//
-//        if (targetCard != null) {
-//            targetCard.setOnClickListener(v -> fetchBalanceDetails(user_id, curCode, true));
-//        }
-//    }
     private void updateUI(String curCode, String curName, double balance, int user_id) {
         DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
         formatter.applyPattern("#,###,##0");
 
         String formattedBalance = formatter.format(balance);
         CardView targetCard = null;
+        ImageView targetArrow = null; // متغير لمسك السهم المطلوب
 
         switch (curCode) {
             case "YER":
                 targetCard = cardYER;
+                targetArrow = ivArrowYER;
                 tvBalanceYER.setText(formattedBalance);
                 if (!curName.isEmpty()) tvNameYER.setText(curName);
                 break;
             case "YERN":
                 targetCard = cardYERN;
+                targetArrow = ivArrowYERN;
                 tvBalanceYERN.setText(formattedBalance);
                 if (!curName.isEmpty()) tvNameYERN.setText(curName);
                 break;
             case "SAR":
                 targetCard = cardSAR;
+                targetArrow = ivArrowSAR;
                 tvBalanceSAR.setText(formattedBalance);
                 if (!curName.isEmpty()) tvNameSAR.setText(curName);
                 break;
             case "USD":
                 targetCard = cardUSD;
+                targetArrow = ivArrowUSD;
                 tvBalanceUSD.setText(formattedBalance);
                 if (!curName.isEmpty()) tvNameUSD.setText(curName);
                 break;
         }
 
-        if (targetCard != null) {
+        if (targetCard != null && targetArrow != null) {
             targetCard.setVisibility(View.VISIBLE);
-            targetCard.setOnClickListener(v -> fetchBalanceDetails(user_id, curCode, true));
+
+            final ImageView finalArrow = targetArrow;
+
+            targetCard.setOnClickListener(v -> {
+                if (finalArrow.getRotation() == 0) {
+                    resetAllArrows();
+                    finalArrow.animate().rotation(180).setDuration(300).start();
+                    fetchBalanceDetails(user_id, curCode, true);
+                } else {
+                    finalArrow.animate().rotation(0).setDuration(300).start();
+                    detailsContainer.removeAllViews();
+                    tvDetailsTitle.setVisibility(View.GONE);
+                }
+            });
         }
     }
 
+    private void resetAllArrows() {
+        ivArrowYER.setRotation(0);
+        ivArrowYERN.setRotation(0);
+        ivArrowSAR.setRotation(0);
+        ivArrowUSD.setRotation(0);
+    }
     private void fetchBalanceDetails(int user_id, String curCode, boolean clearContainer) {
-        if (user_id == 0) return;
+        if (user_id == 0 || isLoading || (isLastPage && !clearContainer)) return;
 
-        requestQueue.cancelAll("balance_details");
-
-        SharedPreferences prefs = SharedPrefsHelper.get(getContext());
-        String token = prefs.getString("auth_token", "");
-
+        isLoading = true;
         progressBar.setVisibility(View.VISIBLE);
+
         if (clearContainer) {
+            currentPage = 1;
+            isLastPage = false;
+            currentCurCode = curCode;
             detailsContainer.removeAllViews();
             tvDetailsTitle.setVisibility(View.GONE);
         }
 
-        String url = UserUtils.BASE_URL + "user-balance-details/?ac_code_dtl=" + user_id;
+        String url = UserUtils.BASE_URL + "user-balance-details/?ac_code_dtl=" + user_id + "&page=" + currentPage;
         if (curCode != null && !curCode.isEmpty()) {
             url += "&cur_code=" + curCode;
         }
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
+                    isLoading = false;
                     progressBar.setVisibility(View.GONE);
                     try {
                         JSONArray results = response.getJSONArray("results");
@@ -286,24 +287,28 @@ public class BalanceFragment extends Fragment {
                             for (int i = 0; i < results.length(); i++) {
                                 addDetailItem(results.getJSONObject(i));
                             }
+                            currentPage++; // زيادة رقم الصفحة للمرة القادمة
+                        } else {
+                            isLastPage = true; // لا توجد بيانات أخرى
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        isLastPage = true;
                     }
                 },
-                error -> progressBar.setVisibility(View.GONE)) {
+                error -> {
+                    isLoading = false;
+                    progressBar.setVisibility(View.GONE);
+                }) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + token);
+                headers.put("Authorization", "Bearer " + SharedPrefsHelper.get(getContext()).getString("auth_token", ""));
                 return headers;
             }
         };
-
         request.setTag("balance_details");
         requestQueue.add(request);
     }
-
     private void addDetailItem(JSONObject detail) throws JSONException {
         View itemView = LayoutInflater.from(getContext()).inflate(R.layout.item_balance_detail, detailsContainer, false);
 
@@ -317,6 +322,9 @@ public class BalanceFragment extends Fragment {
         TextView tvDescription = itemView.findViewById(R.id.tvDescription);
         TextView tvDocSrl = itemView.findViewById(R.id.tvDocSrl);
         ImageView ivIcon = itemView.findViewById(R.id.ivIcon);
+        ImageView circleIcon = itemView.findViewById(R.id.circleIcon);
+        ImageView ivIconbal = itemView.findViewById(R.id.ivIconbal);
+
         TextView tvCurCodeView = itemView.findViewById(R.id.tvCurCode);
         tvDocType.setText(detail.getString("doc_type_name"));
         double amt = detail.getDouble("amt");
@@ -327,8 +335,6 @@ public class BalanceFragment extends Fragment {
         formatter.applyPattern("#,###,##0.00");
 
         String formattedBalance = formatter.format(amt);
-//        String amountStr = String.format(Locale.ENGLISH, "%.2f", amt);
-//        tvAmount.setText((amt >= 0 ? "+" : "") + formattedBalance + " \n" + curCode);
         tvAmount.setText((amt >= 0 ? "+" : "") + formattedBalance);
         tvAmount.setText((amt >= 0 ? "+" : "") + formattedBalance);
         if (tvCurCodeView != null) {
@@ -345,28 +351,34 @@ public class BalanceFragment extends Fragment {
         if (amt >= 0) {
             tvAmount.setTextColor(getResources().getColor(R.color.holo_green_dark));
             ivIcon.setBackgroundResource(R.drawable.badge_background_bal);
+            ivIconbal.setImageResource(R.drawable.ei_arrow_up);
+            ivIconbal.setBackgroundResource(R.drawable.badge_bal_up);
             ivIcon.setImageResource(R.drawable.ic_plus);
-            ivIcon.setColorFilter(getResources().getColor(android.R.color.white));
+            ivIcon.setColorFilter(getResources().getColor(R.color.holo_green_dark));
+            circleIcon.setColorFilter(getResources().getColor(R.color.holo_green_dark));
         } else {
             tvAmount.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-            ivIcon.setBackgroundResource(R.drawable.badge_background_details);
+            ivIcon.setBackgroundResource(R.drawable.badge_background_bal_new);
+            ivIconbal.setImageResource(R.drawable.ei_arrow_dow);
+            ivIconbal.setBackgroundResource(R.drawable.badge_bal_dow);
             ivIcon.setImageResource(R.drawable.ic_minus);
-            ivIcon.setColorFilter(getResources().getColor(android.R.color.black));
+            ivIcon.setColorFilter(getResources().getColor(R.color.primary2));
+            circleIcon.setColorFilter(getResources().getColor(android.R.color.holo_red_dark));
         }
 
         tvDate.setText(detail.getString("doc_date"));
         tvDescription.setText(detail.getString("doc_dsc"));
 
         String srl = detail.optString("doc_srl", "");
-        tvDocSrl.setText("#" + srl);
+        tvDocSrl.setText(srl + "#");
 
         mainLayout.setOnClickListener(v -> {
             if (expandableLayout.getVisibility() == View.VISIBLE) {
                 expandableLayout.setVisibility(View.GONE);
-                ivArrow.setRotation(0);
+                ivArrow.animate().rotation(0).setDuration(300).start();
             } else {
                 expandableLayout.setVisibility(View.VISIBLE);
-                ivArrow.setRotation(180);
+                ivArrow.animate().rotation(180).setDuration(300).start();
             }
         });
 

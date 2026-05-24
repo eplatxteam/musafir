@@ -57,8 +57,8 @@
             android:layout_height="0dp"
             android:layout_marginTop="20dp"
             android:layout_weight="1"
-            android:fillViewport="true"
             android:background="@color/gray"
+            android:fillViewport="true"
             android:overScrollMode="ifContentScrolls"
             android:scrollbars="vertical"
             android:visibility="gone">
@@ -93,19 +93,14 @@
         <!-- زر الموافقة -->
         <Button
             android:id="@+id/agreeButton"
+            style="@style/PrimaryButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="46dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_button"
             android:gravity="center"
-            android:stateListAnimator="@null"
             android:text="موافقة ومتابعة"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textColor="@color/primary2"
-            android:textSize="18sp"
-            app:backgroundTint="@null" />
+            android:textAllCaps="false" />
 
     </LinearLayout>
 

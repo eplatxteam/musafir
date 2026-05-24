@@ -54,11 +54,11 @@
             android:layout_marginEnd="15dp"
             android:layout_weight="1"
             app:backgroundTint="@null"
-            android:backgroundTint="@color/primary3"
+            android:backgroundTint="@color/secondary2"
             android:elevation="0dp"
             android:text="تقييم"
             android:textAllCaps="false"
-            android:textColor="@color/primary2"
+            android:textColor="@color/white"
             android:textSize="14sp" />
 
         <!-- زر الإلغاء -->

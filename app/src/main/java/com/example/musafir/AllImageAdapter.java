@@ -1,19 +1,16 @@
 package com.example.musafir;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,8 +18,6 @@ import com.bumptech.glide.Glide;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class AllImageAdapter extends RecyclerView.Adapter<AllImageAdapter.ImageViewHolder> {
 
@@ -100,6 +95,7 @@ public class AllImageAdapter extends RecyclerView.Adapter<AllImageAdapter.ImageV
 
             });
         } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
     }
 

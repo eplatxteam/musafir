@@ -1,5 +1,6 @@
 package com.example.musafir;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,15 +12,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "musafir.db";
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 36;
 
     private static final String TABLE_MESSAGES = "messages";
     private static final String TABLE_BOOKINGS = "bookings";
@@ -53,18 +57,52 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String COL_COMPANY_ID = "company_id";
     private static final String COL_COMPANY_NAME = "company_name";
 
+    private static final String TABLE_DAY_TIMES = "day_times";
+    private static final String COL_DT_NO = "dt_no";
+    private static final String COL_DT_DSPLY = "dt_dsply";
+    private static final String COL_DT_START = "dt_start";
+    private static final String COL_DT_END = "dt_end";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     private static final String TABLE_VEHICLE_TYPES = "vehicle_types";
+    public static final String TABLE_PAY_TYPES = "cash_bank_pay_type";
+    public static final String CB_TYPE_ID = "cb_type_id";
+    public static final String COL_PAY_TYPE_CODE = "pay_type_code";
+    public static final String COL_TYPE_TITLE = "type_title";
+    public static final String COL_CB_ID = "cb_id";
+    public static final String COL_TYPE_DESC = "type_desc";
 
+    String CREATE_PAY_TYPES_TABLE = "CREATE TABLE " + TABLE_PAY_TYPES + "("
+            + CB_TYPE_ID + " INTEGER PRIMARY KEY,"
+            + COL_PAY_TYPE_CODE + " TEXT,"
+            + COL_TYPE_TITLE + " TEXT,"
+            + "note TEXT,"
+            + COL_CB_ID + " INTEGER,"
+            + "maxlength INTEGER,"
+            + "inactive INTEGER default 0,"
+            + COL_TYPE_DESC + " TEXT" + ")";
+    public static final String TABLE_PAGE_VISITS = "page_visits";
+    public static final String COLUMN_PV_ID = "pv_id";
+    public static final String COLUMN_PV_PAGE_ID = "page_id";
+    public static final String COLUMN_PV_USER_ID = "user_id";
+    public static final String COLUMN_PV_VISIT_COUNT = "visit_count";
+    public static final String COLUMN_PV_LAST_VISIT = "last_visit";
+    public static final String COLUMN_PV_IS_SYNCED = "is_synced";
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MESSAGES + " (message_id INTEGER PRIMARY KEY, messages TEXT)");
-
+        String CREATE_PAGE_VISITS_TABLE = "CREATE TABLE " + TABLE_PAGE_VISITS + "("
+                + COLUMN_PV_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_PV_PAGE_ID + " INTEGER,"
+                + COLUMN_PV_USER_ID + " INTEGER,"
+                + COLUMN_PV_VISIT_COUNT + " INTEGER,"
+                + COLUMN_PV_LAST_VISIT + " TEXT,"
+                + COLUMN_PV_IS_SYNCED + " INTEGER DEFAULT 0" + ")";
+        db.execSQL(CREATE_PAGE_VISITS_TABLE);
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_CITIES + " (" +
                 COL_ID + " INTEGER PRIMARY KEY," +
                 COL_NAME_AR + " TEXT," +
@@ -75,16 +113,24 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_VEHICLE_TYPES + " (" +
                 "id_vehicle_type INTEGER PRIMARY KEY, " +
                 "vehicles_type TEXT NOT NULL," +
+                "has_shared INTEGER DEFAULT 1," +
+                "has_global INTEGER DEFAULT 1," +
+                "has_local INTEGER DEFAULT 1," +
                 "inactive INTEGER);");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_BOOKINGS + " (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "trip_id INTEGER," +
                 "booking_id INTEGER," +
+                "booking_date DATE," +
+                "number_of_seats INTEGER," +
+                "booking_name TEXT," +
+                "booking_status TEXT," +
                 "passenger_id INTEGER)");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_COUNTRY + " (" +
                 "country_id INTEGER PRIMARY KEY," +
+                "country_code TEXT," +
                 "country_name TEXT)");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_TYPE_TRAVELER_REQUESTS + " (" +
@@ -92,7 +138,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_TYPE_NAME + " TEXT," +
                 COL_INACTIVE + " INTEGER," +
                 COL_order_type + " INTEGER," +
-                "app_page INTEGER," + // تم إضافته هنا للمستخدم الجديد
+                "app_page INTEGER," +
                 COL_TYPE_ICON + " TEXT)");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + SERVICE_HOME + " (" +
@@ -117,8 +163,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 "name_passenger6 TEXT," +
                 "notes TEXT," +
                 "country TEXT," +
-                "updated_at TEXT," +          // تم إضافته هنا للمستخدم الجديد
-                "number_status INTEGER DEFAULT 1," + // تم إضافته هنا للمستخدم الجديد
+                "updated_at TEXT," +
+                "number_status INTEGER DEFAULT 1," +
                 "created_at TEXT)");
         db.execSQL("CREATE TABLE chat_messages (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -131,6 +177,13 @@ public class DBHelper extends SQLiteOpenHelper {
                 "is_wallet_flg INTEGER, " +
                 "is_active INTEGER DEFAULT 1, " +
                 "comfirm_wallet_pay_flag INTEGER DEFAULT 0, " +
+                "manul_pay_flg INTEGER DEFAULT 1," +
+                "auto_pay_flg INTEGER DEFAULT 0," +
+                "auto_pay_desc TEXT," +
+                "link_code TEXT," +
+                "auto_pay_title TEXT," +
+                "manul_pay_desc TEXT," +
+                "manul_pay_title TEXT," +
                 "cb_name TEXT, " +
                 "wallet_icon TEXT)");
 
@@ -138,49 +191,36 @@ public class DBHelper extends SQLiteOpenHelper {
                 "type_no INTEGER, " +
                 "code_no INTEGER, " +
                 "code_l_nm TEXT, " +
+                "sys_code TEXT, " +
+                "code_ordr INTEGER, " +
                 "show_in_app INTEGER DEFAULT 1, " +
                 "code_icon TEXT, " +
                 "PRIMARY KEY(type_no, code_no))");
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_COMPANY + " (" +
                 COL_COMPANY_ID + " INTEGER PRIMARY KEY, " +
                 "is_active INTEGER ," +
+                "has_shared INTEGER DEFAULT 1," +
+                "has_global INTEGER DEFAULT 1," +
+                "has_local INTEGER DEFAULT 1," +
                 COL_COMPANY_NAME + " TEXT)");
         db.execSQL(CREATE_ROUTES_TABLE);
-    }
+        String CREATE_DAY_TIMES_TABLE = "CREATE TABLE " + TABLE_DAY_TIMES + "("
+                + COL_DT_NO + " INTEGER PRIMARY KEY,"
+                + COL_DT_DSPLY + " TEXT,"
+                + COL_DT_START + " INTEGER,"
+                + COL_DT_END + " INTEGER" + ")";
+        db.execSQL(CREATE_DAY_TIMES_TABLE);
 
-
-    public List<Map<String, Object>> getAllCashBank(int is_wallet_flg) {
-        List<Map<String, Object>> list = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM cash_bank WHERE is_active = 1 and is_wallet_flg = ?", new String[]{String.valueOf(is_wallet_flg)});
-        if (cursor.moveToFirst()) {
-            do {
-                Map<String, Object> item = new HashMap<>();
-                item.put("cb_id", cursor.getInt(cursor.getColumnIndexOrThrow("cb_id")));
-                item.put("cb_name", cursor.getString(cursor.getColumnIndexOrThrow("cb_name")));
-                item.put("wallet_icon", cursor.getString(cursor.getColumnIndexOrThrow("wallet_icon")));
-                item.put("is_wallet_flg", cursor.getString(cursor.getColumnIndexOrThrow("is_wallet_flg")));
-                item.put("comfirm_wallet_pay_flag", cursor.getInt(cursor.getColumnIndexOrThrow("comfirm_wallet_pay_flag")));
-                item.put("is_active", cursor.getInt(cursor.getColumnIndexOrThrow("is_active")));
-
-                list.add(item);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return list;
-    }
-
-    public void saveCashBank(int id, String name, String icon, int is_wallet_flg, int comfirm_wallet_pay_flag, int is_active) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("cb_id", id);
-        values.put("cb_name", name);
-        values.put("wallet_icon", icon);
-        values.put("is_wallet_flg", is_wallet_flg);
-        values.put("comfirm_wallet_pay_flag", comfirm_wallet_pay_flag);
-        values.put("is_active", is_active);
-        db.insertWithOnConflict("cash_bank", null, values, SQLiteDatabase.CONFLICT_REPLACE);
-
+        String CREATE_CONTACT_INFO_TABLE = "CREATE TABLE contact_info ("
+                + "ci_id INTEGER PRIMARY KEY, "
+                + "ci_name TEXT, "
+                + "ci_phone TEXT, "
+                + "ci_type TEXT, "
+                + "ci_display TEXT, "
+                + "ci_order INTEGER, "
+                + "ci_icon TEXT)";
+        db.execSQL(CREATE_CONTACT_INFO_TABLE);
+        db.execSQL(CREATE_PAY_TYPES_TABLE);
     }
 
     @Override
@@ -245,8 +285,414 @@ public class DBHelper extends SQLiteOpenHelper {
         if (oldVersion < 16) {
             addColumnIfNotExists(db, "code_details", "show_in_app", "INTEGER DEFAULT 1");
         }
+        if (oldVersion < 17) {
+            addColumnIfNotExists(db, "code_details", "code_icon", "TEXT");
+        }
+        if (oldVersion < 18) {
+            addColumnIfNotExists(db, "country", "country_code", "TEXT");
+        }
+        if (oldVersion < 20) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_DAY_TIMES + "("
+                    + COL_DT_NO + " INTEGER PRIMARY KEY,"
+                    + COL_DT_DSPLY + " TEXT,"
+                    + COL_DT_START + " INTEGER,"
+                    + COL_DT_END + " INTEGER" + ")");
+        }
+        if (oldVersion < 21) {
+            addColumnIfNotExists(db, TABLE_VEHICLE_TYPES, "has_shared", "INTEGER DEFAULT 1");
+            addColumnIfNotExists(db, TABLE_VEHICLE_TYPES, "has_global", "INTEGER DEFAULT 1");
+            addColumnIfNotExists(db, TABLE_VEHICLE_TYPES, "has_local", "INTEGER DEFAULT 1");
+            addColumnIfNotExists(db, TABLE_COMPANY, "has_shared", "INTEGER DEFAULT 1");
+            addColumnIfNotExists(db, TABLE_COMPANY, "has_global", "INTEGER DEFAULT 1");
+            addColumnIfNotExists(db, TABLE_COMPANY, "has_local", "INTEGER DEFAULT 1");
+        }
+        if (oldVersion < 22) {
+            addColumnIfNotExists(db, "code_details", "sys_code", "TEXT");
+            addColumnIfNotExists(db, "code_details", "code_ordr", "INTEGER ");
+        }
+        if (oldVersion < 23) {
+            addColumnIfNotExists(db, "cash_bank", "manul_pay_title", "TEXT");
+            addColumnIfNotExists(db, "cash_bank", "manul_pay_desc", "TEXT");
+            addColumnIfNotExists(db, "cash_bank", "auto_pay_title", "TEXT");
+            addColumnIfNotExists(db, "cash_bank", "auto_pay_desc", "TEXT");
+            addColumnIfNotExists(db, "cash_bank", "manul_pay_flg", "INTEGER DEFAULT 1");
+            addColumnIfNotExists(db, "cash_bank", "auto_pay_flg", "INTEGER DEFAULT 0");
+        }
+        if (oldVersion < 24) {
+            addColumnIfNotExists(db, "cash_bank", "link_code", "TEXT");
+        }
+        if (oldVersion < 25) {
+            db.execSQL(CREATE_PAY_TYPES_TABLE);
+        }
+        if (oldVersion < 26) {
+            addColumnIfNotExists(db, TABLE_PAY_TYPES, "inactive", "INTEGER default 0");
+        }
+        if (oldVersion < 27) {
+            addColumnIfNotExists(db, TABLE_PAY_TYPES, "maxlength", "INTEGER");
+            addColumnIfNotExists(db, TABLE_PAY_TYPES, "note", "TEXT");
+        }
+        if (oldVersion < 28) {
+            addColumnIfNotExists(db, TABLE_BOOKINGS, "number_of_seats", "INTEGER");
+            addColumnIfNotExists(db, TABLE_BOOKINGS, "booking_name", "TEXT");
+            addColumnIfNotExists(db, TABLE_BOOKINGS, "booking_status", "TEXT");
+            addColumnIfNotExists(db, TABLE_BOOKINGS, "booking_date", "DATE");
+        }
+        if (oldVersion < 29) {
+            String CREATE_CONTACT_INFO_TABLE = "CREATE TABLE contact_info ("
+                    + "ci_id INTEGER PRIMARY KEY, "
+                    + "ci_name TEXT, "
+                    + "ci_icon TEXT)";
+            db.execSQL(CREATE_CONTACT_INFO_TABLE);
+        }
+
+        if (oldVersion < 30) {
+            addColumnIfNotExists(db, "contact_info", "ci_phone", "TEXT");
+        }
+        if (oldVersion < 33) {
+            addColumnIfNotExists(db, "contact_info", "ci_display", "TEXT");
+        }
+        if (oldVersion < 34) {
+            addColumnIfNotExists(db, "contact_info", "ci_order", "INTEGER");
+        }
+        if (oldVersion < 35) {
+            addColumnIfNotExists(db, "contact_info", "ci_type", "TEXT");
+        }
+        if (oldVersion < 36) {
+            String CREATE_PAGE_VISITS_TABLE = "CREATE TABLE " + TABLE_PAGE_VISITS + "("
+                    + COLUMN_PV_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + COLUMN_PV_PAGE_ID + " INTEGER,"
+                    + COLUMN_PV_USER_ID + " INTEGER,"
+                    + COLUMN_PV_VISIT_COUNT + " INTEGER,"
+                    + COLUMN_PV_LAST_VISIT + " TEXT,"
+                    + COLUMN_PV_IS_SYNCED + " INTEGER DEFAULT 0" + ")";
+            db.execSQL(CREATE_PAGE_VISITS_TABLE);
+        }
+    }
+
+    @SuppressLint("Range")
+    public List<Map<String, Object>> getUnsyncedPageVisits() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_PAGE_VISITS + " WHERE " + COLUMN_PV_IS_SYNCED + " = 0", null);
+        if (cursor.moveToFirst()) {
+            do {
+                Map<String, Object> map = new HashMap<>();
+                map.put("pv_id", cursor.getInt(cursor.getColumnIndex(COLUMN_PV_ID)));
+                map.put("page_id", cursor.getInt(cursor.getColumnIndex(COLUMN_PV_PAGE_ID)));
+                map.put("user_id", cursor.getInt(cursor.getColumnIndex(COLUMN_PV_USER_ID)));
+                map.put("visit_count", cursor.getInt(cursor.getColumnIndex(COLUMN_PV_VISIT_COUNT)));
+                list.add(map);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public void markAsSynced(int pvId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PV_IS_SYNCED, 1);
+        db.update(TABLE_PAGE_VISITS, values, COLUMN_PV_ID + " = ?", new String[]{String.valueOf(pvId)});
+    }
+
+    public void savePageVisit(int userId, int pageId, int visitCount) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+
+        values.put(COLUMN_PV_USER_ID, userId);
+        values.put(COLUMN_PV_PAGE_ID, pageId);
+        values.put(COLUMN_PV_VISIT_COUNT, visitCount);
+        values.put(COLUMN_PV_LAST_VISIT, currentTime);
+
+        db.insertWithOnConflict(TABLE_PAGE_VISITS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    public void saveContactInfo(JSONArray jsonArray) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete("contact_info", null, null);
+
+        try {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                ContentValues values = new ContentValues();
+                values.put("ci_id", obj.getInt("ci_id"));
+                values.put("ci_order", obj.getInt("ci_order"));
+                values.put("ci_type", obj.getString("ci_type"));
+                values.put("ci_phone", obj.getString("ci_phone"));
+                values.put("ci_name", obj.getString("ci_name"));
+                values.put("ci_icon", obj.getString("ci_icon"));
+                values.put("ci_display", obj.getString("ci_display"));
+
+                db.insert("contact_info", null, values);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        db.close();
+    }
+
+    public class ContactInfo {
+        private int ciId;
+        private int ci_order;
+        private String ci_type;
+        private String ci_phone;
+        private String ciName;
+        private String ciIcon;
+        private String ci_display;
+
+        public ContactInfo(int ciId, String ciName, String ciIcon, String ci_phone, String ci_type, String ci_display, int ci_order) {
+            this.ciId = ciId;
+            this.ciName = ciName;
+            this.ciIcon = ciIcon;
+            this.ci_phone = ci_phone;
+            this.ci_type = ci_type;
+            this.ci_display = ci_display;
+            this.ci_order = ci_order;
+        }
+
+        public int getCiId() {
+            return ciId;
+        }
+
+        public int getci_order() {
+            return ci_order;
+        }
+
+        public String getci_type() {
+            return ci_type;
+        }
+
+        public String getci_display() {
+            return ci_display;
+        }
+
+        public String getCiName() {
+            return ciName;
+        }
+
+        public String getCiPhone() {
+            return ci_phone;
+        }
+
+        public String getCiIcon() {
+            return ciIcon;
+        }
+    }
+
+    public List<ContactInfo> getAllContactInfo() {
+        List<ContactInfo> contactList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selectQuery = "SELECT * FROM contact_info ORDER BY ci_order ASC";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        try {
+            if (cursor.moveToFirst()) {
+                do {
+                    int id = cursor.getInt(cursor.getColumnIndexOrThrow("ci_id"));
+                    int ci_order = cursor.getInt(cursor.getColumnIndexOrThrow("ci_order"));
+                    String ci_type = cursor.getString(cursor.getColumnIndexOrThrow("ci_type"));
+                    String ci_phone = cursor.getString(cursor.getColumnIndexOrThrow("ci_phone"));
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow("ci_name"));
+                    String icon = cursor.getString(cursor.getColumnIndexOrThrow("ci_icon"));
+                    String ci_display = cursor.getString(cursor.getColumnIndexOrThrow("ci_display"));
+
+                    contactList.add(new ContactInfo(id, name, icon, ci_phone, ci_type, ci_display, ci_order));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return contactList;
+    }
+
+    public void saveCashBankPayTypes(JSONArray jsonArray) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.delete("cash_bank_pay_type", null, null);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                ContentValues values = new ContentValues();
+
+                values.put("cb_type_id", obj.getInt("cb_type_id"));
+                values.put("inactive", obj.getInt("inactive"));
+                values.put("pay_type_code", obj.getString("pay_type_code"));
+                values.put("type_title", obj.getString("type_title"));
+                values.put("note", obj.getString("note"));
+                values.put("cb_id", obj.getInt("cb_id"));
+                values.put("maxlength", obj.getInt("maxlength"));
+                values.put("type_desc", obj.getString("type_desc"));
+
+                db.insertWithOnConflict("cash_bank_pay_type", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    @SuppressLint("Range")
+    public List<Map<String, Object>> getPayTypesByCbId(int cbId) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_PAY_TYPES + " WHERE " + COL_CB_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(cbId)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                Map<String, Object> map = new HashMap<>();
+                map.put("cb_type_id", cursor.getInt(cursor.getColumnIndex(CB_TYPE_ID)));
+                map.put("inactive", cursor.getInt(cursor.getColumnIndex("inactive")));
+                map.put("pay_type_code", cursor.getString(cursor.getColumnIndex(COL_PAY_TYPE_CODE)));
+                map.put("type_title", cursor.getString(cursor.getColumnIndex(COL_TYPE_TITLE)));
+                map.put("cb_id", cursor.getInt(cursor.getColumnIndex(COL_CB_ID)));
+                map.put("maxlength", cursor.getInt(cursor.getColumnIndex("maxlength")));
+                map.put("type_desc", cursor.getString(cursor.getColumnIndex(COL_TYPE_DESC)));
+                map.put("note", cursor.getString(cursor.getColumnIndex("note")));
+                list.add(map);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return list;
+    }
+
+    public void saveDayTimes(JSONArray jsonArray) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_DAY_TIMES, null, null); // مسح القديم لتحديث البيانات
+        for (int i = 0; i < jsonArray.length(); i++) {
+            try {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                ContentValues values = new ContentValues();
+                values.put(COL_DT_NO, obj.getInt("dt_no"));
+                values.put(COL_DT_DSPLY, obj.getString("dt_dsply"));
+                values.put(COL_DT_START, obj.getInt("dt_start"));
+                values.put(COL_DT_END, obj.getInt("dt_end"));
+                db.insertWithOnConflict(TABLE_DAY_TIMES, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        db.close();
+    }
+
+    @SuppressLint("Range")
+    public JSONArray getAllDayTimes() {
+        JSONArray jsonArray = new JSONArray();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_DAY_TIMES, null);
+        try {
+            if (cursor.moveToFirst()) {
+                do {
+                    JSONObject obj = new JSONObject();
+                    obj.put("dt_no", cursor.getInt(cursor.getColumnIndex(COL_DT_NO)));
+                    obj.put("dt_dsply", cursor.getString(cursor.getColumnIndex(COL_DT_DSPLY)));
+                    obj.put("dt_start", cursor.getInt(cursor.getColumnIndex(COL_DT_START)));
+                    obj.put("dt_end", cursor.getInt(cursor.getColumnIndex(COL_DT_END)));
+                    jsonArray.put(obj);
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            cursor.close();
+        }
+        return jsonArray;
+    }
+
+
+    public List<Map<String, Object>> getAllCashBank(int is_wallet_flg) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM cash_bank WHERE is_active = 1 and is_wallet_flg = ?", new String[]{String.valueOf(is_wallet_flg)});
+        if (cursor.moveToFirst()) {
+            do {
+                Map<String, Object> item = new HashMap<>();
+                item.put("cb_id", cursor.getInt(cursor.getColumnIndexOrThrow("cb_id")));
+                item.put("cb_name", cursor.getString(cursor.getColumnIndexOrThrow("cb_name")));
+                item.put("wallet_icon", cursor.getString(cursor.getColumnIndexOrThrow("wallet_icon")));
+                item.put("is_wallet_flg", cursor.getString(cursor.getColumnIndexOrThrow("is_wallet_flg")));
+                item.put("comfirm_wallet_pay_flag", cursor.getInt(cursor.getColumnIndexOrThrow("comfirm_wallet_pay_flag")));
+                item.put("is_active", cursor.getInt(cursor.getColumnIndexOrThrow("is_active")));
+                item.put("auto_pay_flg", cursor.getInt(cursor.getColumnIndexOrThrow("auto_pay_flg")));
+                item.put("manul_pay_flg", cursor.getInt(cursor.getColumnIndexOrThrow("manul_pay_flg")));
+                item.put("manul_pay_title", cursor.getString(cursor.getColumnIndexOrThrow("manul_pay_title")));
+                item.put("manul_pay_desc", cursor.getString(cursor.getColumnIndexOrThrow("manul_pay_desc")));
+                item.put("auto_pay_title", cursor.getString(cursor.getColumnIndexOrThrow("auto_pay_title")));
+                item.put("auto_pay_desc", cursor.getString(cursor.getColumnIndexOrThrow("auto_pay_desc")));
+                list.add(item);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public List<Map<String, Object>> getAllCashBankNew() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM cash_bank WHERE is_active = 1 ", null);
+        if (cursor.moveToFirst()) {
+            do {
+                Map<String, Object> item = new HashMap<>();
+                item.put("cb_id", cursor.getInt(cursor.getColumnIndexOrThrow("cb_id")));
+                item.put("cb_name", cursor.getString(cursor.getColumnIndexOrThrow("cb_name")));
+                item.put("wallet_icon", cursor.getString(cursor.getColumnIndexOrThrow("wallet_icon")));
+                item.put("is_wallet_flg", cursor.getString(cursor.getColumnIndexOrThrow("is_wallet_flg")));
+                item.put("comfirm_wallet_pay_flag", cursor.getInt(cursor.getColumnIndexOrThrow("comfirm_wallet_pay_flag")));
+                item.put("is_active", cursor.getInt(cursor.getColumnIndexOrThrow("is_active")));
+                item.put("manul_pay_flg", cursor.getInt(cursor.getColumnIndexOrThrow("manul_pay_flg")));
+                item.put("auto_pay_flg", cursor.getInt(cursor.getColumnIndexOrThrow("auto_pay_flg")));
+                item.put("manul_pay_title", cursor.getString(cursor.getColumnIndexOrThrow("manul_pay_title")));
+                item.put("manul_pay_desc", cursor.getString(cursor.getColumnIndexOrThrow("manul_pay_desc")));
+                item.put("auto_pay_title", cursor.getString(cursor.getColumnIndexOrThrow("auto_pay_title")));
+                item.put("auto_pay_desc", cursor.getString(cursor.getColumnIndexOrThrow("auto_pay_desc")));
+                item.put("link_code", cursor.getString(cursor.getColumnIndexOrThrow("link_code")));
+
+                list.add(item);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public void saveCashBank(int id, String name, String icon, int is_wallet_flg, int comfirm_wallet_pay_flag,
+                             int is_active, int manul_pay_flg, int auto_pay_flg, String manul_pay_title, String manul_pay_desc,
+                             String auto_pay_title, String auto_pay_desc, String link_code) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("cb_id", id);
+        values.put("cb_name", name);
+        values.put("wallet_icon", icon);
+        values.put("is_wallet_flg", is_wallet_flg);
+        values.put("comfirm_wallet_pay_flag", comfirm_wallet_pay_flag);
+        values.put("is_active", is_active);
+        values.put("manul_pay_flg", manul_pay_flg);
+        values.put("auto_pay_flg", auto_pay_flg);
+        values.put("manul_pay_title", manul_pay_title);
+        values.put("manul_pay_desc", manul_pay_desc);
+        values.put("auto_pay_title", auto_pay_title);
+        values.put("auto_pay_desc", auto_pay_desc);
+        values.put("link_code", link_code);
+
+        db.insertWithOnConflict("cash_bank", null, values, SQLiteDatabase.CONFLICT_REPLACE);
 
     }
+
 
     public void saveCompaniesFromJson(JSONArray jsonArray) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -256,20 +702,34 @@ public class DBHelper extends SQLiteOpenHelper {
                 ContentValues values = new ContentValues();
 
                 values.put(COL_COMPANY_ID, obj.optInt("company_no"));
+                values.put("has_local", obj.optInt("has_local"));
+                values.put("has_global", obj.optInt("has_global"));
+                values.put("has_shared", obj.optInt("has_shared"));
                 values.put(COL_COMPANY_NAME, obj.optString("company_name"));
                 values.put("is_active", obj.optString("is_active"));
 
                 db.insertWithOnConflict(TABLE_COMPANY, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
-    public List<Map<String, Object>> getAllCompanies() {
+    public List<Map<String, Object>> getAllCompanies(String filterType) {
         List<Map<String, Object>> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM company WHERE is_active = 1", null);
+
+        String columnFilter = "";
+        if ("3".equalsIgnoreCase(filterType)) {
+            columnFilter = " AND has_local = 1";
+        } else if ("2".equalsIgnoreCase(filterType)) {
+            columnFilter = " AND has_global = 1";
+        } else if ("1".equalsIgnoreCase(filterType)) {
+            columnFilter = " AND has_shared = 1";
+        }
+
+        String query = "SELECT * FROM company WHERE is_active = 1" + columnFilter;
+        Cursor cursor = db.rawQuery(query, null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -277,6 +737,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 item.put("company_no", cursor.getInt(cursor.getColumnIndexOrThrow(COL_COMPANY_ID)));
                 item.put("company_name", cursor.getString(cursor.getColumnIndexOrThrow(COL_COMPANY_NAME)));
                 item.put("is_active", cursor.getString(cursor.getColumnIndexOrThrow("is_active")));
+                item.put("has_local", cursor.getString(cursor.getColumnIndexOrThrow("has_local")));
+                item.put("has_global", cursor.getString(cursor.getColumnIndexOrThrow("has_global")));
+                item.put("has_shared", cursor.getString(cursor.getColumnIndexOrThrow("has_shared")));
                 list.add(item);
             } while (cursor.moveToNext());
         }
@@ -284,10 +747,11 @@ public class DBHelper extends SQLiteOpenHelper {
         return list;
     }
 
+
     public List<Map<String, Object>> getCodeDetailsByType(int typeNo) {
         List<Map<String, Object>> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM code_details WHERE show_in_app = 1 and type_no = ?", new String[]{String.valueOf(typeNo)});
+        Cursor cursor = db.rawQuery("SELECT * FROM code_details WHERE show_in_app = 1 and type_no = ? order by code_ordr", new String[]{String.valueOf(typeNo)});
 
         if (cursor.moveToFirst()) {
             do {
@@ -303,20 +767,24 @@ public class DBHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    public void saveCodeDetails(int typeNo, int codeNo, String name, String icon, int show_in_app) {
+    public void saveCodeDetails(int typeNo, int codeNo, String name, String icon, int show_in_app, int code_ordr, String sys_code) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
         values.put("type_no", typeNo);
         values.put("code_no", codeNo);
         values.put("code_l_nm", name);
         values.put("code_icon", icon);
         values.put("show_in_app", show_in_app);
+        values.put("code_ordr", code_ordr);
+        values.put("sys_code", sys_code);
         db.insertWithOnConflict("code_details", null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     public void insertMessage(int userId, String text, boolean isMe, String time) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
         values.put("user_id", userId);
         values.put("message", text);
         values.put("is_me", isMe ? 1 : 0);
@@ -344,31 +812,27 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.close();
         return messages;
     }
-//    @Override
-//    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//
-//        if (oldVersion < 2) {
-//            addColumnIfNotExists(db, TABLE_TRAVELER, "number_status", "INTEGER DEFAULT 0");
-//            addColumnIfNotExists(db, TABLE_TRAVELER, "updated_at", "TEXT");
-//        }
-//
-//        if (oldVersion < 4) {
-//            db.execSQL("CREATE TABLE IF NOT EXISTS " + SERVICE_HOME + " (" +
-//                    "service_id INTEGER PRIMARY KEY," +
-//                    "service_name TEXT," +
-//                    "inactive INTEGER," +
-//                    "order_type INTEGER," +
-//                    "app_page INTEGER," +
-//                    "type_icon TEXT)");
-//
-//            addColumnIfNotExists(db, TABLE_TYPE_TRAVELER_REQUESTS, "app_page", "INTEGER");
+
+    //    private void addColumnIfNotExists(SQLiteDatabase db, String tableName, String columnName, String columnType) {
+//        try {
+//            db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " " + columnType);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
 //        }
 //    }
+    public void addColumnIfNotExists(SQLiteDatabase db, String tableName, String columnName, String columnType) {
+        Cursor cursor = db.rawQuery("PRAGMA table_info(" + tableName + ")", null);
+        boolean exists = false;
+        while (cursor.moveToNext()) {
+            if (columnName.equalsIgnoreCase(cursor.getString(1))) {
+                exists = true;
+                break;
+            }
+        }
+        cursor.close();
 
-    private void addColumnIfNotExists(SQLiteDatabase db, String tableName, String columnName, String columnType) {
-        try {
+        if (!exists) {
             db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " " + columnType);
-        } catch (Exception e) {
         }
     }
 
@@ -397,6 +861,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void insertOrUpdateTypeTravelerRequest(int typeId, String name, String icon, int inactive, int order_type, int app_Page) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
         values.put(COL_TYPE_ID, typeId);
         values.put(COL_TYPE_NAME, name);
         values.put(COL_TYPE_ICON, icon);
@@ -431,6 +896,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void insertOrUpdateServiceHome(int typeId, String name, String icon, int inactive, int order_type, int app_Page) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
         values.put("service_id", typeId);
         values.put("service_name", name);
         values.put("type_icon", icon);
@@ -447,7 +913,6 @@ public class DBHelper extends SQLiteOpenHelper {
             db = this.getWritableDatabase();
             db.beginTransaction();
 
-            db.delete("routes_table", null, null);
 
             for (int i = 0; i < routes.length(); i++) {
                 JSONObject route = routes.getJSONObject(i);
@@ -457,12 +922,13 @@ public class DBHelper extends SQLiteOpenHelper {
                 values.put("route_name", route.getString("route_name"));
                 values.put("car_code", route.optString("car_codes_id", ""));
                 values.put("route_city", route.optString("route_city", "")); // ⬅ إضافة هذا
+                db.insertWithOnConflict("routes_table", null, values, SQLiteDatabase.CONFLICT_REPLACE);
 
-                db.insert("routes_table", null, values);
             }
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             if (db != null) {
                 db.endTransaction();
@@ -536,40 +1002,64 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void insertVehicleType(int id, String name, int inactive) {
+    public void insertVehicleType(int id, String name, int inactive, int has_local, int has_global, int has_shared) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("id_vehicle_type", id);
         values.put("vehicles_type", name);
         values.put("inactive", inactive);
+        values.put("has_local", has_local);
+        values.put("has_global", has_global);
+        values.put("has_shared", has_shared);
+        db.insertWithOnConflict(TABLE_VEHICLE_TYPES, null, values, SQLiteDatabase.CONFLICT_REPLACE);
 
-        db.insert(TABLE_VEHICLE_TYPES, null, values);
     }
 
-    public List<VehicleType> getVehicleTypes(Integer inactive_vh) {
+    public List<VehicleType> getVehicleTypes(Integer inactive_vh, String filterType) {
         List<VehicleType> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor;
-        if (inactive_vh == null) {
-            cursor = db.rawQuery("SELECT * FROM " + TABLE_VEHICLE_TYPES, null);
-        } else {
-            cursor = db.rawQuery("SELECT * FROM " + TABLE_VEHICLE_TYPES + " WHERE inactive = ?", new String[]{String.valueOf(inactive_vh)});
+        String columnFilter = "";
+        if (filterType != null) {
+            if ("3".equalsIgnoreCase(filterType)) {
+                columnFilter = " AND has_local = 1";
+            } else if ("2".equalsIgnoreCase(filterType)) {
+                columnFilter = " AND has_global = 1";
+            } else if ("1".equalsIgnoreCase(filterType)) {
+                columnFilter = " AND has_shared = 1";
+            }
         }
+
+        String query;
+        String[] selectionArgs = null;
+        if (inactive_vh == null) {
+            query = "SELECT * FROM " + TABLE_VEHICLE_TYPES + " WHERE 1=1 " + columnFilter;
+        } else {
+            query = "SELECT * FROM " + TABLE_VEHICLE_TYPES + " WHERE inactive = ? " + columnFilter;
+
+            selectionArgs = new String[]{String.valueOf(inactive_vh)};
+        }
+
+        Cursor cursor = db.rawQuery(query, selectionArgs);
+
         if (cursor.moveToFirst()) {
             do {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow("id_vehicle_type"));
                 int inactive = cursor.getInt(cursor.getColumnIndexOrThrow("inactive"));
+                int has_local = cursor.getInt(cursor.getColumnIndexOrThrow("has_local"));
+                int has_global = cursor.getInt(cursor.getColumnIndexOrThrow("has_global"));
+                int has_shared = cursor.getInt(cursor.getColumnIndexOrThrow("has_shared"));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("vehicles_type"));
 
-                list.add(new VehicleType(id, name, inactive));
+                list.add(new VehicleType(id, name, inactive, has_local, has_global, has_shared));
             } while (cursor.moveToNext());
         }
 
         cursor.close();
         return list;
     }
+
 
     public void clearVehicleTypes() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -579,12 +1069,18 @@ public class DBHelper extends SQLiteOpenHelper {
     public static class VehicleType {
         int id;
         int inactive;
+        int has_local;
+        int has_global;
+        int has_shared;
         String name;
 
-        public VehicleType(int id, String name, int inactive) {
+        public VehicleType(int id, String name, int inactive, int has_local, int has_global, int has_shared) {
             this.id = id;
             this.inactive = inactive;
             this.name = name;
+            this.has_local = has_local;
+            this.has_global = has_global;
+            this.has_shared = has_shared;
         }
 
         public int getId() {
@@ -661,6 +1157,7 @@ public class DBHelper extends SQLiteOpenHelper {
             );
 
         } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -691,6 +1188,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     obj.put("created_at", cursor.getString(cursor.getColumnIndexOrThrow("created_at")));
                     list.add(obj);
                 } catch (JSONException e) {
+                    throw new RuntimeException(e);
                 }
             } while (cursor.moveToNext());
         }
@@ -710,11 +1208,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return lastId;
     }
 
-    public void addCountry(int countryId, String countryName) {
+    public void addCountry(int countryId, String countryName, String countrycode) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
+
         cv.put("country_id", countryId);
         cv.put("country_name", countryName);
+        cv.put("country_code", countrycode);
         db.insertWithOnConflict(TABLE_COUNTRY, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -722,11 +1222,17 @@ public class DBHelper extends SQLiteOpenHelper {
     public void insertOrUpdateCity(int id, String nameAr, String nameEn, int countryId, String cityCode) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
+        String cleanNameAr = (nameAr != null) ? nameAr.replaceAll("[\\u200E\\u200F]", "").trim() : "";
+        String cleanNameEn = (nameEn != null) ? nameEn.replaceAll("[\\u200E\\u200F]", "").trim().toLowerCase() : "";
+        String cleanCityCode = (cityCode != null) ? cityCode.replaceAll("[\\u200E\\u200F]", "").trim() : "";
+
         values.put(COL_ID, id);
-        values.put(COL_NAME_AR, nameAr);
-        values.put(city_code, cityCode);
-        values.put(COL_NAME_EN, nameEn.toLowerCase());
+        values.put(COL_NAME_AR, cleanNameAr);
+        values.put(city_code, cleanCityCode);
+        values.put(COL_NAME_EN, cleanNameEn);
         values.put(COL_COUNTRY_ID, countryId);
+
         db.insertWithOnConflict(TABLE_CITIES, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -788,13 +1294,14 @@ public class DBHelper extends SQLiteOpenHelper {
     public List<Country> getAllCountries() {
         List<Country> countries = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT country_id, country_name FROM " + TABLE_COUNTRY, null);
+        Cursor cursor = db.rawQuery("SELECT country_id, country_name, country_code FROM " + TABLE_COUNTRY, null);
 
         if (cursor.moveToFirst()) {
             do {
                 countries.add(new Country(
                         cursor.getInt(cursor.getColumnIndexOrThrow("country_id")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("country_name"))
+                        cursor.getString(cursor.getColumnIndexOrThrow("country_name")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("country_code"))
                 ));
             } while (cursor.moveToNext());
         }
@@ -807,6 +1314,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void insertMessage(int messageId, String message) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
         values.put("message_id", messageId);
         values.put("messages", message);
         db.insertWithOnConflict(TABLE_MESSAGES, null, values, SQLiteDatabase.CONFLICT_REPLACE);
@@ -824,14 +1332,52 @@ public class DBHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    public void addBooking(int tripId, int bookingId, int passengerId) {
+    public void addBooking(int tripId, int bookingId, int passengerId, int number_of_seats,
+                           String booking_date, String booking_status, String booking_name) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("trip_id", tripId);
         cv.put("booking_id", bookingId);
         cv.put("passenger_id", passengerId);
+        cv.put("number_of_seats", number_of_seats);
+        cv.put("booking_date", booking_date);
+        cv.put("booking_status", booking_status);
+        cv.put("booking_name", booking_name);
         db.insert("bookings", null, cv);
         db.close();
+    }
+
+    public void clearBookingsTable() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM bookings");
+        db.close();
+    }
+
+    public List<Map<String, Object>> getLastFiveBookings() { // تغيير النوع هنا إلى Object
+        List<Map<String, Object>> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM bookings ORDER BY id DESC LIMIT 5", null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Map<String, Object> booking = new HashMap<>();
+                // الأرقام نحفظها كـ Integer
+                booking.put("trip_id", cursor.getInt(cursor.getColumnIndexOrThrow("trip_id")));
+                booking.put("booking_id", cursor.getInt(cursor.getColumnIndexOrThrow("booking_id")));
+                booking.put("passenger_id", cursor.getInt(cursor.getColumnIndexOrThrow("passenger_id")));
+                booking.put("number_of_seats", cursor.getInt(cursor.getColumnIndexOrThrow("number_of_seats")));
+
+                // النصوص نحفظها كـ String مباشرة بدون Integer.valueOf
+                booking.put("booking_date", cursor.getString(cursor.getColumnIndexOrThrow("booking_date")));
+                booking.put("booking_status", cursor.getString(cursor.getColumnIndexOrThrow("booking_status")));
+                booking.put("booking_name", cursor.getString(cursor.getColumnIndexOrThrow("booking_name")));
+
+                list.add(booking);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return list;
     }
 
     public int getBookingId(int tripId, int passengerId) {
@@ -900,6 +1446,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 city = new City(id, name, countryId);
             }
         } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             if (cursor != null) cursor.close();
             if (db != null) db.close();
@@ -935,10 +1482,12 @@ public class DBHelper extends SQLiteOpenHelper {
     public static class Country {
         public int id;
         public String name;
+        public String country_code;
 
-        public Country(int id, String name) {
+        public Country(int id, String name, String countrycode) {
             this.id = id;
             this.name = name;
+            this.country_code = countrycode;
         }
     }
 

@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
 
@@ -24,7 +23,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
-import com.google.android.gms.tasks.Tasks;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,7 +59,7 @@ public class LocationWorker extends Worker {
             // 1️⃣ جلب المدينة من IP أولًا
             CountDownLatch latch = new CountDownLatch(1);
             final String[] cityFromIp = {null};
-            getCityNameFromIp(context, (cityAr, cityId) -> {
+            getCityNameFromIp(context, (cityAr, cityId, p_country) -> {
                 cityFromIp[0] = cityAr;
                 latch.countDown();
             });
@@ -83,7 +81,9 @@ public class LocationWorker extends Worker {
                         LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY,
                         new CancellationToken() {
                             @Override
-                            public boolean isCancellationRequested() { return false; }
+                            public boolean isCancellationRequested() {
+                                return false;
+                            }
 
                             @NonNull
                             @Override
@@ -134,106 +134,59 @@ public class LocationWorker extends Worker {
         }
     }
 
-    /** دالة مساعدة للتحقق من Google Play Services */
     private boolean isGooglePlayServicesAvailable(Context context) {
         int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context);
         return status == ConnectionResult.SUCCESS;
     }
 
-//    public static void getCityNameFromIp(Context context, UserUtils.PublicIpCallback callback) {
-//       UserUtils.getPublicIp(ipJson -> {
-//            if (ipJson == null) {
-//                callback.onIpReceived("حدد المدينة");
-//                return;
-//            }
-//
-//
-//            try {
-//                JSONObject ipObj = new JSONObject(ipJson);
-//                String cityEnFromIp = ipObj.optString("region_code");
-//
-//                if (cityEnFromIp == null || cityEnFromIp.isEmpty()) {
-//                    callback.onIpReceived("حدد المدينة");
-//                    return;
-//                }
-//
-//                // الآن نبحث في جدول SQLite
-//                DBHelper dbHelper = new DBHelper(context);
-//                SQLiteDatabase db = dbHelper.getReadableDatabase();
-//
-//                String query = "SELECT city_name_ar, city_id FROM cities WHERE LOWER(city_code) LIKE ?";
-//                Cursor cursor = db.rawQuery(query, new String[]{"%-" + cityEnFromIp.toLowerCase()});
-//
-//                if (cursor.moveToFirst()) {
-//                    String cityAr = cursor.getString(cursor.getColumnIndexOrThrow("city_name_ar"));
-//                    int cityId = cursor.getInt(cursor.getColumnIndexOrThrow("city_id")); // هنا تحصل على رقم المدينة
-//
-//                    SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-//                    prefs.edit().putString("default_city", cityAr).apply();
-//                    prefs.edit().putInt("default_city_id", cityId).apply();
-//
-//
-//                    callback.onIpReceived(cityAr);
-//
-//                } else {
-//                    callback.onIpReceived("حدد المدينة");
-//                }
-//
-//                cursor.close();
-//                db.close();
-//
-//            } catch (Exception e) {
-//                callback.onIpReceived("حدد المدينة"); // fallback
-//            }
-//        });
-//    }
-
     public static void getCityNameFromIp(Context context, UserUtils.PublicIpCallback callback) {
-        UserUtils.getPublicIp((ipJson,city_id) -> {
+        UserUtils.getPublicIp((ipJson, city_id, p_country) -> {
             if (ipJson == null) {
-                callback.onIpReceived("حدد المدينة", 0); // أضفنا 0 كـ ID افتراضي
+                callback.onIpReceived("حدد المدينة", 0, "");
                 return;
             }
 
             try {
                 JSONObject ipObj = new JSONObject(ipJson);
                 String cityEnFromIp = ipObj.optString("region_code");
-
+                String country_code = ipObj.optString("country_code");
                 if (cityEnFromIp == null || cityEnFromIp.isEmpty()) {
-                    callback.onIpReceived("حدد المدينة", 0);
+                    callback.onIpReceived("حدد المدينة", 0, "");
                     return;
                 }
 
                 DBHelper dbHelper = new DBHelper(context);
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-                String query = "SELECT city_name_ar, city_id FROM cities WHERE LOWER(city_code) LIKE ?";
+                String query = "SELECT city_name_ar, city_id FROM cities WHERE LOWER(city_code) LIKE ? LIMIT 1";
                 Cursor cursor = db.rawQuery(query, new String[]{"%-" + cityEnFromIp.toLowerCase()});
+
+//                String query_country = "SELECT country_id FROM country WHERE LOWER(country_code) LIKE ?";
+//                Cursor cursor_country = db.rawQuery(query_country, new String[]{"%-" + country_code.toLowerCase()});
 
                 if (cursor.moveToFirst()) {
                     String cityAr = cursor.getString(cursor.getColumnIndexOrThrow("city_name_ar"));
                     int cityId = cursor.getInt(cursor.getColumnIndexOrThrow("city_id"));
                     SharedPreferences prefs = SharedPrefsHelper.get(context);
 
-                    // الحفظ في الشيرد بريفرنسز
 //                    SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
                     prefs.edit()
                             .putString("default_city", cityAr)
-                            .putInt("default_city_id", cityId) // حفظ الـ ID
+                            .putString("country_code", country_code)
+                            .putInt("default_city_id", cityId)
                             .apply();
 
-                    // إرسال القيمتين للخارج
-                    callback.onIpReceived(cityAr, cityId);
+                    callback.onIpReceived(cityAr, cityId, country_code);
 
                 } else {
-                    callback.onIpReceived("حدد المدينة", 0);
+                    callback.onIpReceived("حدد المدينة", 0, "");
                 }
 
                 cursor.close();
                 db.close();
 
             } catch (Exception e) {
-                callback.onIpReceived("حدد المدينة", 0);
+                callback.onIpReceived("حدد المدينة", 0, "");
             }
         });
     }

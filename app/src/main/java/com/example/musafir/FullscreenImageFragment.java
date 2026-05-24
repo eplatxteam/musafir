@@ -39,7 +39,7 @@ public class FullscreenImageFragment extends Fragment {
 
     private ViewPager2 viewPager;
     private LinearLayout imagesContainer;
-    private TextView carNameText;
+    TextView carNameText;
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/nav_home"
@@ -9,7 +8,7 @@
 
     <item
         android:id="@+id/nav_reservation"
-        android:icon="@drawable/airplane_home"
+        android:icon="@drawable/airplanee"
         android:title="رحلاتي" />
     <item
         android:id="@+id/fab"

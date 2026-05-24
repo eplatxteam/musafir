@@ -11,14 +11,11 @@ import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,40 +110,24 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 phoneError.setVisibility(View.GONE);
                 UserUtils.setEditTextState(forgotPhoneEditText, false);
             }
-//            if (phone.isEmpty()) {
-//                phoneError.setVisibility(View.VISIBLE);
-//                phoneError.setText("يرجى إدخال رقم الهاتف");
-//                forgotPhoneEditText.setError("يرجى إدخال رقم الهاتف");
-//                UserUtils.setEditTextState(forgotPhoneEditText, true);
-//                valid = false;
-//            } else if (phone.startsWith("05") && phone.length() != 10) {
-//                phoneError.setVisibility(View.VISIBLE);
-//                phoneError.setText("يجب أن يتكون رقم الهاتف من 10 أرقام");
-//                forgotPhoneEditText.setError("يجب أن يتكون رقم الهاتف من 10 أرقام");
-//                UserUtils.setEditTextState(forgotPhoneEditText, true);
-//                valid = false;
-//            } else if (!phone.startsWith("05") && phone.length() != 9) {
-//                phoneError.setVisibility(View.VISIBLE);
-//                phoneError.setText("يجب أن يتكون رقم الهاتف من 9 أرقام");
-//                forgotPhoneEditText.setError("يجب أن يتكون رقم الهاتف من 9 أرقام");
-//                UserUtils.setEditTextState(forgotPhoneEditText, true);
-//                valid = false;
-//            } else if (!phone.matches("7[013789]\\d{7}")) {
-//                phoneError.setVisibility(View.VISIBLE);
-//                phoneError.setText("يرجى إدخال رقم صحيح يبدأ بـ 7");
-//                forgotPhoneEditText.setError("يرجى إدخال رقم صحيح يبدأ بـ 7");
-//                UserUtils.setEditTextState(forgotPhoneEditText, true);
-//                valid = false;
-//            } else {
-//                phoneError.setVisibility(View.GONE);
-//                UserUtils.setEditTextState(forgotPhoneEditText, false);
-//
-//            }
             if (valid) {
-                check_token(phone, new TokenCallback() {
+                String finalPhone;
+                int p_otp_typ;
+
+                if (phone.startsWith("05")) {
+                    finalPhone = "966" + phone.substring(1);
+                    p_otp_typ = 2;
+                } else if (phone.startsWith("7")) {
+                    finalPhone = "967" + phone;
+                    p_otp_typ = 3;
+                } else {
+                    finalPhone = phone;
+                    p_otp_typ = 2;
+                }
+                check_token(finalPhone, new TokenCallback() {
                     @Override
                     public void onTokenReceived(String token) {
-                        sendOtp(phone, token);
+                        sendOtp(finalPhone, token, p_otp_typ);
                     }
 
                     @Override
@@ -154,11 +135,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                         UserUtils.ToastMessages(ForgotPasswordActivity.this, error);
                     }
                 });
-
             }
-
         });
-
     }
 
     public interface TokenCallback {
@@ -167,12 +145,24 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         void onError(String error);
     }
 
-    private void sendOtp(String phone, String token) {
+    private void sendOtp(String phone, String token, int p_otp_typ) {
+        if (!UserUtils.isNetworkAvailable(this)) {
+            UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    UserUtils.ToastMessages(ForgotPasswordActivity.this, message);
+                }
+
+                @Override
+                public void onError(String error) {
+                }
+
+            });
+        }
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("جاري إرسال رمز التحقق...");
         progressDialog.setCancelable(false);
         progressDialog.show();
-
         new Thread(() -> {
             try {
                 URL url = new URL(BASE_URL + "send_otp/");
@@ -181,7 +171,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
-                String postData = "P_mobile=" + phone;
+                String postData = "P_mobile=" + phone + "&p_otp_typ=" + p_otp_typ;
                 OutputStream os = conn.getOutputStream();
                 os.write(postData.getBytes("UTF-8"));
                 os.flush();
@@ -212,17 +202,14 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                             serverMessage = jsonResponse.optString("msg_txt", "");
                         }
                     } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
                     if (responseCode == 200 && !otpToken.isEmpty() && !otpToken.contains("error")) {
-                        // حفظ توكن OTP في SharedPreferences
                         SharedPreferences prefs = SharedPrefsHelper.get(this);
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putString("otp_token", otpToken);
 
-//                        SharedPreferences.Editor editor = getSharedPreferences("MyAppPrefs", MODE_PRIVATE).edit();
-//                        editor.putString("otp_token", otpToken);
                         editor.apply();
-                        // الانتقال لشاشة التحقق مع تمرير رقم الهاتف
                         Intent intent = new Intent(ForgotPasswordActivity.this, otp_activity.class);
                         intent.putExtra("phone", phone);
                         intent.putExtra("otp_token", otpToken);
@@ -254,7 +241,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 UserUtils.sendLog(this, "sendOtp", e.toString(), e.toString(), "Forgot Password");
                 runOnUiThread(() -> {
                     progressDialog.dismiss();
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             UserUtils.ToastMessages(ForgotPasswordActivity.this, message);
@@ -285,8 +272,15 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 conn1.setRequestProperty("Content-Type", "application/json");
                 conn1.setDoOutput(true);
                 conn1.setDoInput(true);
-
-                String jsonInput = "{\"username\":\"" + phone + "\"}";
+                String finalPhone;
+                if (phone.startsWith("05")) {
+                    finalPhone = "966" + phone.substring(1);
+                } else if (phone.startsWith("7")) {
+                    finalPhone = "967" + phone;
+                } else {
+                    finalPhone = phone;
+                }
+                String jsonInput = "{\"username\":\"" + finalPhone + "\"}";
                 OutputStream os1 = conn1.getOutputStream();
                 os1.write(jsonInput.getBytes("UTF-8"));
                 os1.flush();
@@ -301,7 +295,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     result1.append(line1);
                 }
                 reader1.close();
-                Log.e("===", String.valueOf(responseCode1));
 
                 if (responseCode1 == 200) {
                     JSONObject jsonResponse1 = new JSONObject(result1.toString());
@@ -309,18 +302,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
                     runOnUiThread(() -> {
                         progressDialog.setMessage("تم التحقق من الرقم، جاري إرسال رمز التحقق...");
-//                        UserUtils.getMessageFromLocal(31, dbHelper, new UserUtils.MessageCallback() {
-//                            @Override
-//                            public void onSuccess(String message) {
-//                                UserUtils.ToastMessages(ForgotPasswordActivity.this, message);
-//
-//                            }
-//
-//                            @Override
-//                            public void onError(String error) {
-//                            }
-//
-//                        });
                         callback.onTokenReceived(token);
                         progressDialog.dismiss();
                     });
@@ -346,7 +327,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 UserUtils.sendLog(this, "check_token", e.toString(), e.toString(), "Forgot Password");
                 runOnUiThread(() -> {
                     progressDialog.dismiss();
-                    UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
+                    UserUtils.getMessageFromLocal(5, dbHelper, new UserUtils.MessageCallback() {
                         @Override
                         public void onSuccess(String message) {
                             callback.onError(message);

@@ -39,19 +39,18 @@
                     android:src="@drawable/empty2"
                     app:shapeAppearanceOverlay="@style/CircularImageView" />
 
-                <!--    <com.google.android.material.imageview.ShapeableImageView-->
-                <!--        android:id="@+id/vehicleImage"-->
-                <!--        android:layout_width="0dp"-->
-                <!--        android:layout_height="0dp"-->
-                <!--        android:scaleType="centerCrop"-->
-                <!--        android:src="@drawable/empty2"-->
-                <!--        app:layout_constraintDimensionRatio="H,4:3"-->
-                <!--        app:layout_constraintEnd_toEndOf="parent"-->
-                <!--        app:layout_constraintStart_toStartOf="parent"-->
-                <!--        app:layout_constraintTop_toTopOf="parent"-->
-                <!--        app:shapeAppearanceOverlay="@style/CircularImageView" />-->
+                <ImageView
+                    android:id="@+id/ivMultipleImagesBadge"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="bottom|right"
+                    android:layout_margin="12dp"
+                    android:background="@drawable/badge_background_details"
+                    android:backgroundTint="#99000000"
+                    android:padding="7dp"
+                    android:src="@drawable/baseline_collections_24"
+                    app:tint="@android:color/white" />
 
-                <!--</androidx.constraintlayout.widget.ConstraintLayout>-->
                 <TextView
                     android:id="@+id/tvStatus"
                     android:layout_width="wrap_content"
@@ -167,7 +166,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -215,44 +214,97 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginEnd="2dp"
-                    android:src="@drawable/price" />
-
-                <TextView
-                    android:id="@+id/textPrice"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:text="10,000 ريال يمني (YER)"
-                    android:textColor="@color/secondary"
-                    android:textSize="10dp"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    android:gravity="start|center_vertical">
 
-                <ImageView
-                    android:id="@+id/iconPrice"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="10dp"
-                    android:src="@drawable/price"
-                    app:tint="@android:color/holo_red_dark" />
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="5dp"
+                        android:src="@drawable/price"
+                        android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/originalPrice"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/textPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10,000 ريال يمني (YER)"
+                        android:textColor="@color/secondary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:text="20,000 ريال يمني (YER)"
-                    android:textColor="@android:color/holo_red_dark"
-                    android:textSize="10dp"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    android:gravity="end|center_vertical">
+
+                    <ImageView
+                        android:id="@+id/iconPrice"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:src="@drawable/price"
+                        android:visibility="gone"
+                        app:tint="@android:color/holo_red_dark" />
+
+                    <TextView
+                        android:id="@+id/originalPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="20,000 ريال يمني (YER)"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
             </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/warningBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                app:cardBackgroundColor="#E8F5E9"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#C8E6C9"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/verified_badge"
+                        app:tint="#2E7D32" />
+
+                    <TextView
+                        android:id="@+id/NotePrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp"
+                        android:text="price"
+                        android:textColor="@color/holo_green_dark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -316,6 +368,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
+                                android:textAlignment="center"
                                 android:textColor="@color/text_color_selector"
                                 android:textSize="12sp" />
 
@@ -366,6 +419,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
+                                android:textAlignment="center"
                                 android:textColor="@color/text_color_selector"
                                 android:textSize="12sp" />
 
@@ -416,6 +470,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
+                                android:textAlignment="center"
                                 android:textColor="@color/text_color_selector"
                                 android:textSize="12sp" />
 
@@ -572,6 +627,7 @@
                     android:layout_marginBottom="10dp"
                     android:clickable="true"
                     android:focusable="true"
+                    android:visibility="gone"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -644,7 +700,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:textColor="@color/black"
-                                android:textSize="16dp" />
+                                android:textSize="16dp"
+                                android:visibility="gone" />
 
                             <View
                                 android:layout_width="300dp"
@@ -652,7 +709,8 @@
                                 android:layout_gravity="center"
                                 android:layout_marginTop="12dp"
                                 android:layout_marginBottom="12dp"
-                                android:background="@color/gray2" />
+                                android:background="@color/gray2"
+                                android:visibility="gone" />
 
                             <TextView
                                 android:id="@+id/modelText"
@@ -676,7 +734,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:textColor="@color/black"
-                                android:textSize="16dp" />
+                                android:textSize="16dp"
+                                android:visibility="gone" />
 
                             <View
                                 android:layout_width="300dp"
@@ -684,7 +743,8 @@
                                 android:layout_gravity="center"
                                 android:layout_marginTop="12dp"
                                 android:layout_marginBottom="12dp"
-                                android:background="@color/gray2" />
+                                android:background="@color/gray2"
+                                android:visibility="gone" />
 
                             <TextView
                                 android:id="@+id/yearText"
@@ -776,18 +836,12 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBook"
+                    style="@style/PrimaryButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="46dp"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_button"
-                    android:elevation="0dp"
-                    android:stateListAnimator="@null"
                     android:text="احجز الآن"
-                    android:textAllCaps="false"
-                    android:textColor="@color/primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@null" />
+                    android:textAllCaps="false" />
 
                 <View
                     android:layout_width="wrap_content"

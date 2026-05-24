@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray"
@@ -75,6 +74,50 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginBottom="15dp"
+                    android:backgroundTint="@android:color/white"
+                    android:layoutDirection="rtl"
+                    android:padding="10dp"
+                    android:textDirection="rtl"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp">
+                    <!-- عنوان الرحلة وحالتها -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:src="@drawable/clock" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="start|center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tvOrderTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="منذ"
+                                android:textColor="@color/black"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
                     android:backgroundTint="@android:color/white"
                     android:layoutDirection="rtl"
                     android:padding="10dp"
@@ -93,7 +136,7 @@
                         <ImageView
                             android:layout_width="30dp"
                             android:layout_height="30dp"
-                            android:src="@drawable/location2"/>
+                            android:src="@drawable/location2" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -125,7 +168,6 @@
 
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
-
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
@@ -206,7 +248,7 @@
                         <ImageView
                             android:layout_width="30dp"
                             android:layout_height="30dp"
-                            android:src="@drawable/local"/>
+                            android:src="@drawable/local" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -432,7 +474,7 @@
                         <ImageView
                             android:layout_width="30dp"
                             android:layout_height="30dp"
-                            android:src="@drawable/price"/>
+                            android:src="@drawable/price" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -727,34 +769,6 @@
                         android:textSize="15sp" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="90dp"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <!--                    <com.google.android.material.button.MaterialButton-->
-                    <!--                        android:id="@+id/cancelPrice"-->
-                    <!--                        android:layout_width="0dp"-->
-                    <!--                        android:layout_height="46dp"-->
-                    <!--                        android:layout_margin="6dp"-->
-                    <!--                        android:layout_weight="1"-->
-                    <!--                        android:background="@drawable/bg_button"-->
-                    <!--                        android:elevation="0dp"-->
-                    <!--                        android:stateListAnimator="@null"-->
-                    <!--                        android:text="الغاء العرض"-->
-                    <!--                        android:textAllCaps="false"-->
-                    <!--                        android:visibility="gone"-->
-                    <!--                        android:textColor="@color/primary"-->
-                    <!--                        android:textSize="14sp"-->
-                    <!--                        app:backgroundTint="@null"-->
-                    <!--                        app:icon="@drawable/cancel"-->
-                    <!--                        app:iconGravity="textStart"-->
-                    <!--                        app:iconSize="25dp"-->
-                    <!--                        app:iconTint="@color/primary" />-->
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

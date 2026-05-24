@@ -3,7 +3,6 @@ package com.example.musafir;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -79,6 +78,7 @@ public class AllTravelerRequests extends Fragment {
                         try {
                             list.add(response.getJSONObject(i));
                         } catch (JSONException e) {
+                            throw new RuntimeException(e);
                         }
                     }
 

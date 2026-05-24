@@ -1,25 +1,19 @@
 package com.example.musafir;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.io.OutputStream;
@@ -52,10 +46,6 @@ public class Setting_Notification extends Fragment {
         View view = inflater.inflate(R.layout.activity_setting_notification, container, false);
         setHasOptionsMenu(true);
         routeNotfiy = view.findViewById(R.id.routeNotfiy);
-//        Toolbar toolbar = view.findViewById(R.id.main_toolbar);
-//        setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // هذا يفعّل زر الرجوع تلقائي
-//        toolbar.setNavigationOnClickListener(v -> onBackPressed());
         SharedPreferences prefs = SharedPrefsHelper.get(getContext());
 
 //        SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", getActivity().MODE_PRIVATE);
@@ -140,6 +130,7 @@ public class Setting_Notification extends Fragment {
 
                 conn.disconnect();
             } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }).start();
     }

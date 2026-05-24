@@ -53,21 +53,18 @@
                                 android:id="@+id/fromLayout"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
                                 android:gravity="center_vertical"
-                                app:layout_constraintTop_toTopOf="parent"
+                                android:orientation="horizontal"
                                 app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintRight_toRightOf="parent">
+                                app:layout_constraintRight_toRightOf="parent"
+                                app:layout_constraintTop_toTopOf="parent">
 
-                                <!-- أيقونة الموقع في أقصى اليمين -->
                                 <ImageView
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_marginLeft="6dp"
-                                    android:src="@drawable/location2"
-                                  />
+                                    android:src="@drawable/location2" />
 
-                                <!-- النصوص -->
                                 <LinearLayout
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
@@ -84,8 +81,8 @@
                                     <LinearLayout
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:gravity="center_vertical">
+                                        android:gravity="center_vertical"
+                                        android:orientation="horizontal">
 
                                         <TextView
                                             android:id="@+id/textFromCity"
@@ -108,7 +105,6 @@
 
                             </LinearLayout>
 
-                            <!-- السيارة في المنتصف -->
                             <ImageView
                                 android:id="@+id/carIcon"
                                 android:layout_width="80dp"
@@ -119,38 +115,37 @@
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
 
-                            <!-- إلى (يسار) -->
                             <LinearLayout
                                 android:id="@+id/toLayout"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
                                 android:gravity="start"
-                                app:layout_constraintTop_toTopOf="parent"
+                                android:orientation="vertical"
                                 app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintLeft_toLeftOf="parent">
+                                app:layout_constraintLeft_toLeftOf="parent"
+                                app:layout_constraintTop_toTopOf="parent">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="إلى"
-                                    android:textStyle="bold"
+                                    android:textColor="@color/navIcon"
                                     android:textSize="12sp"
-                                    android:textColor="@color/navIcon" />
+                                    android:textStyle="bold" />
 
                                 <LinearLayout
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:gravity="center_vertical">
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
 
                                     <TextView
                                         android:id="@+id/textToCity"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="حدد المدينة"
-                                        android:textSize="16sp"
-                                        android:textColor="@color/black" />
+                                        android:textColor="@color/black"
+                                        android:textSize="16sp" />
 
                                     <ImageView
                                         android:layout_width="wrap_content"
@@ -163,6 +158,7 @@
                             </LinearLayout>
 
                         </androidx.constraintlayout.widget.ConstraintLayout>
+
                         <TextView
                             android:id="@+id/fromCityError"
                             android:layout_width="wrap_content"
@@ -190,7 +186,6 @@
                             android:layout_marginVertical="12dp"
                             android:background="@drawable/line_2" />
 
-                        <!-- أيام الأسبوع -->
                         <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -250,7 +245,6 @@
                             android:layout_marginEnd="5dp"
                             android:src="@drawable/seat" />
 
-                        <!-- نص: عدد المقاعد -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -293,22 +287,6 @@
 
                     </LinearLayout>
 
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-
-                    </LinearLayout>
-
-                    <!--                    <LinearLayout-->
-                    <!--                        android:layout_width="0dp"-->
-                    <!--                        android:layout_height="match_parent"-->
-                    <!--                        android:layout_margin="4dp"-->
-                    <!--                        android:layout_weight="1"-->
-                    <!--                        android:orientation="horizontal">-->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -366,8 +344,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginEnd="5dp"
-                                android:src="@drawable/time_machine_1"
-                               />
+                                android:src="@drawable/time_machine_1" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -410,11 +387,14 @@
                                     android:layoutDirection="rtl"
                                     android:orientation="horizontal"
                                     android:padding="4dp" />
-
                             </HorizontalScrollView>
-
-
                         </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/NoteDay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="11sp" />
 
                         <TextView
                             android:id="@+id/dtNoError"
@@ -425,31 +405,126 @@
                             android:visibility="gone" />
                     </LinearLayout>
 
-                    <RadioGroup
-                        android:id="@+id/radioTripType"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
-                        android:orientation="horizontal">
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
 
-                        <RadioButton
-                            android:id="@+id/radioPrivate"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="خاصة"
-                            android:textColor="@color/black"
-                            android:textSize="18sp" />
+                        <!--                        <RadioGroup-->
+                        <!--                            android:id="@+id/radioTripType"-->
+                        <!--                            android:layout_width="match_parent"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:layout_marginTop="18dp"-->
+                        <!--                            android:orientation="horizontal">-->
 
-                        <RadioButton
-                            android:id="@+id/radioShared"
-                            android:layout_width="wrap_content"
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardPrivate"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:text="تشاركية"
-                            android:textColor="@color/black"
-                            android:textSize="18sp" />
-                    </RadioGroup>
+                            android:layout_margin="4dp"
+                            android:layout_weight="1"
+                            app:cardBackgroundColor="#FFFBEB"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="@color/primary"
+                            app:strokeWidth="1dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:padding="8dp">
+
+                                <RadioButton
+                                    android:id="@+id/radioPrivate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/primary"
+                                    android:checked="true"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="4dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="خاصة"
+                                        android:textColor="@color/black"
+                                        android:textSize="14sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:id="@+id/textPrivate"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/secondary"
+                                        android:textSize="10sp" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- خيار رحلة تشاركية -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardShared"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="4dp"
+                            android:layout_weight="1"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="#EAECF0"
+                            app:strokeWidth="1dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:padding="8dp">
+
+                                <RadioButton
+                                    android:id="@+id/radioShared"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/primary"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="4dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="تشاركية"
+                                        android:textColor="@color/black"
+                                        android:textSize="14sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:id="@+id/textShared"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/secondary"
+                                        android:textSize="10sp" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+                        <!--                        </RadioGroup>-->
+
+                    </LinearLayout>
+
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -463,8 +538,7 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="center_vertical"
                             android:layout_marginEnd="5dp"
-                            android:src="@drawable/icons8_copybook_1"
-                            />
+                            android:src="@drawable/icons8_copybook_1" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -500,8 +574,9 @@
                             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
                             android:gravity="top|start"
                             android:inputType="textMultiLine"
-                            android:maxLines="6"
-                            android:minLines="6"
+                            android:maxLength="100"
+                            android:maxLines="2"
+                            android:minLines="2"
                             android:padding="12dp"
                             android:scrollbars="vertical"
                             android:textColor="@android:color/black"
@@ -558,7 +633,6 @@
                             </LinearLayout>
 
                             <com.google.android.material.textfield.TextInputLayout
-
                                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -583,8 +657,8 @@
                                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
                                     android:gravity="top|start"
                                     android:inputType="textMultiLine"
-                                    android:maxLines="6"
-                                    android:minLines="6"
+                                    android:maxLines="2"
+                                    android:minLines="2"
                                     android:padding="12dp"
                                     android:scrollbars="vertical"
                                     android:textColor="@android:color/black"
@@ -594,20 +668,51 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <com.google.android.material.button.MaterialButton
+                    <RelativeLayout
                         android:id="@+id/addbtn"
                         android:layout_width="match_parent"
                         android:layout_height="46dp"
                         android:layout_marginBottom="10dp"
-                        android:background="@drawable/bg_button"
-                        android:elevation="0dp"
-                        android:stateListAnimator="@null"
-                        android:text="طلب الرحلة"
-                        android:textAllCaps="false"
-                        android:textColor="@color/primary2"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        app:backgroundTint="@null" />
+                        android:background="@drawable/bg_button2"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingHorizontal="16dp">
+
+                        <TextView
+                            android:id="@+id/textTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:text="طلب الرحلة"
+                            android:textColor="@android:color/white"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:src="@drawable/protect"
+                                app:tint="@color/primary2" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:text="رحلتك آمنة معنا"
+                                android:textColor="@color/white"
+                                android:textSize="10sp" />
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>

@@ -36,100 +36,336 @@
                     android:scaleType="fitXY"
                     android:src="@drawable/empty2"
                     app:shapeAppearanceOverlay="@style/CircularImageView" />
+
+                <ImageView
+                    android:id="@+id/ivMultipleImagesBadge"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="bottom|right"
+                    android:layout_margin="12dp"
+                    android:background="@drawable/badge_background_details"
+                    android:backgroundTint="#99000000"
+                    android:padding="7dp"
+                    android:src="@drawable/baseline_collections_24"
+                    app:tint="@android:color/white" />
             </FrameLayout>
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/IdBooking"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="6dp"
-                    android:background="@drawable/badge_background_details3"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="4dp"
-                    android:textAlignment="center"
-                    android:textColor="@color/primary2"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_status"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="4dp"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#F0F0F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvDriverCompany"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/rptbold"
+                            android:text="شركة المتصدر"
+                            android:textColor="@color/secondary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tvName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/rptregular"
+                                android:text="صدام غالب مشعل"
+                                android:textColor="#666666"
+                                android:textSize="14sp" />
+
+                            <ImageView
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:layout_marginStart="6dp"
+                                android:src="@drawable/verified_badge"
+                                app:tint="@color/primary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCallDriver"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:layout_marginEnd="16dp"
+                        android:padding="0dp"
+                        android:visibility="gone"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/phone"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="24dp"
+                        app:iconTint="@color/primary"
+                        app:strokeColor="#E0E0E0" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/rateBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="38dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:stateListAnimator="@null"
+                        android:text="تقييم"
+                        android:textColor="@color/primary2"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        app:backgroundTint="@color/primary3"
+                        app:cornerRadius="20dp"
+                        app:elevation="0dp"
+                        app:icon="@drawable/rating"
+                        app:iconSize="16dp"
+                        app:iconTint="@color/primary2"
+                        app:rippleColor="@color/primary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal"
+                android:weightSum="3">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
                     android:layout_weight="1"
-                    android:orientation="vertical">
+                    app:cardBackgroundColor="#FFF9E7"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp">
 
-                    <TextView
-                        android:id="@+id/tvDriverCompany"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/booking"
+                            app:tint="@color/primary2" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="رقم الرحلة"
+                                android:textColor="#777777"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/IdBooking"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/primary2"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- كرت تاريخ الحجز (تم تعديله ليطابق الأول) -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/clock"
+                            app:tint="#888888" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="وقت الحجز"
+                                android:textColor="#777777"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/tvOrderTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="منذ 30 دقيقة"
+                                android:textColor="#333333"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/state_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="#FFF5F5"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:id="@+id/imgStatus"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/protect"
+                            app:tint="#D32F2F" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="حالة الرحلة"
+                                android:textColor="#777777"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/tvStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#D32F2F"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/downloadTicketLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/secondary2"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginEnd="12dp"
+                        android:src="@drawable/download"
+                        app:tint="#FFB909" />
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text"
-                        android:textSize="18sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/rptbold"
+                            android:text="تحميل التذكرة"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/rptregular"
+                            android:text="اضغط لتنزيل تذكرتك بصيغة PDF"
+                            android:textColor="#BBBBBB"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
 
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_call_driver"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="45dp"
-                    android:layout_height="40dp"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp"
-                    android:padding="0dp"
-                    android:visibility="gone"
-                    app:icon="@drawable/phone"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    app:iconSize="30dp"
-                    app:iconTint="@color/primary" />
-            </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardPaymentStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="10dp"
                 app:cardBackgroundColor="@android:color/white"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
@@ -147,8 +383,7 @@
                         android:src="@drawable/wallet"
                         app:layout_constraintBottom_toBottomOf="@id/tvPaymentTitle"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/tvPaymentTitle"
-                        app:tint="@color/black" />
+                        app:layout_constraintTop_toTopOf="@id/tvPaymentTitle" />
 
                     <TextView
                         android:id="@+id/tvPaymentTitle"
@@ -223,7 +458,7 @@
                             app:icon="@drawable/baseline_add_24"
                             app:iconGravity="start"
                             app:iconSize="16dp"
-                            app:iconTint="@color/white"
+                            app:iconTint="@color/primary2"
                             app:rippleColor="#33FFFFFF" />
 
                         <com.google.android.material.button.MaterialButton
@@ -272,7 +507,50 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/warningBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    app:cardBackgroundColor="#E8F5E9"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#C8E6C9"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="5dp">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/verified_badge"
+                            app:tint="#2E7D32" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:text="سعر الشركة"
+                            android:textColor="#2E7D32"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/NotePrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="12sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -480,7 +758,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="أسماء المسافرين"
-                                android:textColor="@color/primary2"
+                                android:textColor="@color/secondary2"
                                 android:textSize="20dp"
                                 android:textStyle="bold" />
 
@@ -536,7 +814,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="تتبع الطلب"
-                                android:textColor="@color/primary2"
+                                android:textColor="@color/secondary2"
                                 android:textSize="20dp"
                                 android:textStyle="bold" />
 
@@ -679,53 +957,6 @@
                         android:textSize="16sp" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="30dp"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/downloadTicketLayout"
-                        android:layout_width="0dp"
-                        android:layout_height="46dp"
-                        android:layout_margin="6dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_button"
-                        android:elevation="0dp"
-                        android:stateListAnimator="@null"
-                        android:text="تحميل التذكرة"
-                        android:textAllCaps="false"
-                        android:textColor="@color/primary"
-                        android:textSize="14sp"
-                        android:visibility="gone"
-                        app:backgroundTint="@null"
-                        app:icon="@drawable/download"
-                        app:iconGravity="textStart"
-                        app:iconSize="25dp"
-                        app:iconTint="@color/primary" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/rateBtn"
-                        android:layout_width="0dp"
-                        android:layout_height="46dp"
-                        android:layout_margin="6dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_button3"
-                        android:elevation="0dp"
-                        android:stateListAnimator="@null"
-                        android:text="تقييم الرحلة"
-                        android:textAllCaps="false"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:visibility="gone"
-                        app:backgroundTint="@null"
-                        app:icon="@drawable/rating"
-                        app:iconGravity="textStart"
-                        app:iconSize="25dp" />
-                </LinearLayout>
 
             </LinearLayout>
 
@@ -747,14 +978,14 @@
                 <View
                     android:layout_width="4dp"
                     android:layout_height="24dp"
-                    android:background="#EF4444" />
+                    android:background="@color/text" />
 
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:layout_marginStart="12dp"
                     android:src="@drawable/cancel"
-                    app:tint="#EF4444" />
+                    app:tint="@color/text" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -766,8 +997,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="إلغاء الحجز الحالي"
-                        android:textColor="#EF4444"
+                        android:text="طلب إلغاء الحجز"
+                        android:textColor="@color/text"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
@@ -776,7 +1007,7 @@
                         android:layout_height="wrap_content"
                         android:alpha="0.7"
                         android:text="لا يمكن التراجع عن هذه الخطوة"
-                        android:textColor="#B91C1C"
+                        android:textColor="@color/text"
                         android:textSize="11sp" />
                 </LinearLayout>
 

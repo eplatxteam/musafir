@@ -48,6 +48,7 @@
                         android:textColor="@color/primary"
                         android:textSize="20dp"
                         android:textStyle="bold" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -81,12 +82,13 @@
                             android:background="@drawable/edittext_background"
                             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
                             android:imeOptions="actionNext"
-                            android:maxLength="30"
                             android:inputType="text"
+                            android:maxLength="30"
                             android:padding="10dp"
                             android:singleLine="true"
                             android:textSize="16sp" />
                     </com.google.android.material.textfield.TextInputLayout>
+
                     <TextView
                         android:id="@+id/vehicle_nameError"
                         android:layout_width="wrap_content"
@@ -95,6 +97,7 @@
                         android:textColor="@android:color/holo_red_dark"
                         android:textSize="14sp"
                         android:visibility="gone" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -222,8 +225,8 @@
                             android:background="@drawable/edittext_background"
                             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ اأبتثجحخدذرزسشصضطظعغفقكلمنهويءةئإأآؤى"
                             android:imeOptions="actionNext"
-                            android:maxLength="30"
                             android:inputType="text"
+                            android:maxLength="30"
                             android:padding="10dp"
                             android:singleLine="true"
                             android:textSize="16sp" />
@@ -427,25 +430,24 @@
                     </LinearLayout>
 
 
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2">
 
-                        <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/vh_price"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="2">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/vh_price"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/edittext_background"
-                                android:imeOptions="actionNext"
-                                android:inputType="number"
-                                android:maxLength="7"
-                                android:padding="10dp"
-                                android:singleLine="true"
-                                android:textSize="16sp" />
-                        </com.google.android.material.textfield.TextInputLayout>
+                            android:background="@drawable/edittext_background"
+                            android:imeOptions="actionNext"
+                            android:inputType="number"
+                            android:maxLength="7"
+                            android:padding="10dp"
+                            android:singleLine="true"
+                            android:textSize="16sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -460,7 +462,7 @@
                             android:layout_weight="1"
                             android:textColor="@android:color/holo_red_dark"
                             android:textSize="14sp"
-                            android:visibility="gone"/>
+                            android:visibility="gone" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -1016,22 +1018,16 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitBtn"
+                style="@style/PrimaryButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="46dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginBottom="70dp"
-                android:background="@drawable/bg_button"
                 android:gravity="center"
                 android:text="إضافة المركبة"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                android:textColor="@color/primary2"
-                android:textSize="18sp"
-                android:stateListAnimator="@null"
-                android:elevation="0dp"
-                app:backgroundTint="@null" />
+                android:textAllCaps="false" />
 
         </LinearLayout>
     </ScrollView>

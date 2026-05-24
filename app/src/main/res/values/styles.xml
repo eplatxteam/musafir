@@ -14,14 +14,19 @@
 
 
     </style>
+
     <style name="BottomNavSelected">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/rptregular</item>
+        <item name="android:fontFamily">@font/rptregular</item>
     </style>
 
     <style name="BottomNavNormal">
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">12sp</item>
+        <item name="fontFamily">@font/rptregular</item>
+        <item name="android:fontFamily">@font/rptregular</item>
     </style>
 
     <style name="CircularImageView">
@@ -44,6 +49,15 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="MenuTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="DialogSlideUpAnimation">
@@ -73,5 +87,41 @@
         <item name="cornerSize">12dp</item>
     </style>
 
+    <style name="OtpEditTextStyle">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">55dp</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:background">@drawable/edittext_background</item>
+        <item name="android:inputType">number</item>
+<!--        <item name="android:maxLength">1</item>-->
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="RoundedImageView">
+        <item name="cornerSize">15dp</item>
+    </style>
+
+    <style name="materialButtonOutlined">
+        <item name="cornerSize">15dp</item>
+    </style>
+
+    <!-- نمط الأزرار الأساسية (الذهبي/الأصفر) -->
+    <style name="PrimaryButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="fontFamily">@font/rptregular</item>
+        <item name="android:background">@drawable/ripple_button</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="iconTint">@color/primary2</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconSize">20dp</item>
+        <item name="elevation">0dp</item>
+    </style>
 </resources>
 

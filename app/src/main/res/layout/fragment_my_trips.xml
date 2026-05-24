@@ -1,44 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray">  <androidx.recyclerview.widget.RecyclerView
+    android:background="@color/gray">
+
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewTrips"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
         android:fillViewport="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
     <LinearLayout
         android:id="@+id/noDataTextTrip"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center"
+        android:orientation="vertical"
         android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <ImageView
             android:layout_width="250dp"
             android:layout_height="250dp"
-            android:src="@drawable/travelcar"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:src="@drawable/no_trips_background" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="لا توجد رحلات"
             android:textColor="#888888"
-            android:textSize="20sp"
-            android:layout_gravity="center"/>
+            android:textSize="20sp" />
     </LinearLayout>
+
     <LinearLayout
-        android:gravity="center"
         android:id="@+id/noInternet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -50,20 +53,29 @@
             android:src="@drawable/wifi" />
 
         <TextView
-            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:gravity="center"
             android:text="تأكد من إتصاللك بالإنترنت. \nأو حاول مرة أخرى"
             android:textColor="#888888"
             android:textSize="20sp" />
     </LinearLayout>
+
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottieWavetrip"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scaleType="fitXY"
         app:lottie_autoPlay="true"
         app:lottie_loop="false"
-        app:lottie_rawRes="@raw/loadinganimation"
-        android:scaleType="fitXY"/>
+        app:lottie_rawRes="@raw/loadinganimation" />
+
+    <ProgressBar
+        android:id="@+id/paginationLoader"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="15dp"
+        android:indeterminateTint="@color/primary" />
 </FrameLayout>

@@ -1,12 +1,12 @@
 package com.example.musafir;
 
 import static android.app.Activity.RESULT_OK;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DownloadManager;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,71 +14,68 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.fragment.app.FragmentManager;
 
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.InputFilter;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.airbnb.lottie.LottieAnimationView;
-
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
+import com.google.android.material.card.MaterialCardView;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 
 public class AddTravelerRequests extends Fragment {
 
     EditText country, fromAddress, notes;
     Button addRequest;
+    int passport_required;
+
     String BASE_URL = UserUtils.BASE_URL;
     //    ----------------------------------------------------------------
     int type_tr_id = -1;
+
+    private static final int PICK_IMAGE_REQUEST = 1001;
+    private ImageView currentUploadTarget;
 
     @Override
     public void onResume() {
@@ -152,7 +149,7 @@ public class AddTravelerRequests extends Fragment {
         downloadDocument = view.findViewById(R.id.downloadDocument);
 
         lottieWaveRef = view.findViewById(R.id.lottieWaveRef);
-
+        DBHelper dbHelper = new DBHelper(getContext());
         BroadcastReceiver onComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -162,7 +159,7 @@ public class AddTravelerRequests extends Fragment {
                     lottieWaveRef.cancelAnimation();
                     lottieWaveRef.setVisibility(View.GONE);
 
-                    UserUtils.ToastMessages(getActivity(), "تم تحميل الملف بنجاح");
+                    UserUtils.ToastMessages(getActivity(), UserUtils.getMessageFromLocalNew(316, dbHelper));
 
                     getActivity().unregisterReceiver(this);
                 }
@@ -215,11 +212,6 @@ public class AddTravelerRequests extends Fragment {
                 contentGo.setVisibility(View.VISIBLE);
                 contentBack.setVisibility(View.GONE);
             }
-//            else if (checkedId == R.id.back) {
-//                Trip_Type = 3;
-//                contentGo.setVisibility(View.GONE);
-//                contentBack.setVisibility(View.VISIBLE);
-//            }
         });
         radioisHosting.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.Guarantee) {
@@ -227,11 +219,6 @@ public class AddTravelerRequests extends Fragment {
             } else if (checkedId == R.id.host) {
                 is_hosting = 2;
             }
-//            else if (checkedId == R.id.back) {
-//                Trip_Type = 3;
-//                contentGo.setVisibility(View.GONE);
-//                contentBack.setVisibility(View.VISIBLE);
-//            }
         });
 
         DateGo.setOnClickListener(v -> showDatePicker(DateGo));
@@ -265,17 +252,46 @@ public class AddTravelerRequests extends Fragment {
             downloadDocument.setVisibility(View.GONE);
             containerHosting.setVisibility(View.GONE);
         }
-
+        InputFilter arabicFilter = (source, start, end, dest, dstart, dend) -> {
+            for (int i = start; i < end; i++) {
+                char c = source.charAt(i);
+                if (!((c >= 0x0621 && c <= 0x064A) || c == ' ')) {
+                    return "";
+                }
+            }
+            return null;
+        };
         passengerCount = 1;
-        addNameField(1);
+//        addNameField(1);
+        addNameField(namesContainer, "اسم المسافر 1", "", new InputFilter[]{arabicFilter, new InputFilter.LengthFilter(30)});
 
-        DBHelper dbHelper = new DBHelper(getContext());
+        TextView txtPlus = view.findViewById(R.id.txtPlus);
+        txtPlus.setOnClickListener(v -> {
+            if (passengerCount < 6) {
+                passengerCount++;
+                passengersTextView.setText(String.valueOf(passengerCount));
+                addNameField(namesContainer, "الاسم الكامل للمسافر " + passengerCount, "", new InputFilter[]{arabicFilter, new InputFilter.LengthFilter(30)});
+            } else {
+                UserUtils.getMessageFromLocal(161, dbHelper, new UserUtils.MessageCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        UserUtils.ToastMessages(getActivity(), message);
 
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                    }
+                });
+            }
+        });
         btnPlus.setOnClickListener(v -> {
             if (passengerCount < 6) {
                 passengerCount++;
                 passengersTextView.setText(String.valueOf(passengerCount));
-                addNameField(passengerCount);
+                addNameField(namesContainer, "اسم المسافر " + passengerCount, "", new InputFilter[]{arabicFilter, new InputFilter.LengthFilter(30)});
+
+//                addNameField(passengerCount);
             } else {
                 UserUtils.getMessageFromLocal(161, dbHelper, new UserUtils.MessageCallback() {
                     @Override
@@ -299,42 +315,36 @@ public class AddTravelerRequests extends Fragment {
             }
         });
 
-        // زر الإرسال
         addRequest.setOnClickListener(v -> {
+            if (!isAdded() || getActivity() == null) return;
 
             boolean valid = true;
             View firstErrorView = null;
+
             for (int i = 0; i < namesContainer.getChildCount(); i++) {
+                View mainCard = namesContainer.getChildAt(i);
+                LinearLayout vLayout = (LinearLayout) ((MaterialCardView) mainCard).getChildAt(0);
+                LinearLayout nRow = (LinearLayout) vLayout.getChildAt(0);
 
-                LinearLayout item = (LinearLayout) namesContainer.getChildAt(i);
+                EditText nameField = (EditText) nRow.getChildAt(0);
 
-                EditText nameField = (EditText) item.getChildAt(0);
+                View btnUpload = (View) nameField.getTag(R.id.tag_upload_button);
 
-                // الوصول الصحيح لنص الحالة
-                LinearLayout iconContainer = (LinearLayout) item.getChildAt(1);
-                TextView statusText = (TextView) iconContainer.getChildAt(1);
-
-                Uri imageUri = (Uri) nameField.getTag();
-                if (imageUri == null) {
-                    statusText.setText("يرجى رفع صورة الجواز");
-                    statusText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                    valid = false;
-                    if (firstErrorView == null) firstErrorView = statusText;
-                } else {
-                    statusText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                String name = nameField.getText().toString().trim();
+                if (name.isEmpty()) {
+                    nameField.setError("يرجى إدخال الاسم");
+                    return;
                 }
 
-                // تحقق من الاسم
-                if (nameField.getText().toString().trim().isEmpty()) {
-                    nameField.setError("يرجى إدخال اسم المسافر");
-                    UserUtils.setEditTextState(nameField, true);
-                    valid = false;
-                    if (firstErrorView == null) firstErrorView = nameField;
-                } else {
-                    UserUtils.setEditTextState(nameField, false);
+                if (nameField.getTag() == null || !(nameField.getTag() instanceof Uri)) {
+                    UserUtils.ToastMessages(getActivity(), "يرجى ارفاق صورة الجواز لـ " + name);
+                    if (btnUpload instanceof MaterialCardView) {
+                        ((MaterialCardView) btnUpload).setStrokeColor(ColorStateList.valueOf(Color.RED));
+                        ((MaterialCardView) btnUpload).setStrokeWidth(4);
+                    }
+                    return;
                 }
             }
-
 
             if (type_tr_id != 81 && type_tr_id != 83) {
                 if (country.getText().toString().trim().isEmpty()) {
@@ -426,8 +436,11 @@ public class AddTravelerRequests extends Fragment {
                     parentScroll.post(() -> ((ScrollView) parentScroll).smoothScrollTo(0, finalFirstErrorView.getTop()));
                 }
             }
+
             if (valid) {
-                sendTravelerRequest();
+                if (isAdded()) {
+                    sendTravelerRequest();
+                }
             }
         });
 
@@ -462,19 +475,45 @@ public class AddTravelerRequests extends Fragment {
             public void onReceive(Context context, Intent intent) {
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (id == downloadId) {
-                    // إيقاف وتحجيم اللوتي
-                    lottieWaveRef.cancelAnimation();
-                    lottieWaveRef.setVisibility(View.GONE);
-
-                    UserUtils.ToastMessages(getActivity(), "تم تحميل الملف بنجاح");
-
-                    // إلغاء التسجيل بعد الاكتمال
-                    getActivity().unregisterReceiver(this);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            lottieWaveRef.cancelAnimation();
+                            lottieWaveRef.setVisibility(View.GONE);
+                            UserUtils.ToastMessages(getActivity(), "تم تحميل الملف بنجاح");
+                            openDownloadedFile(id);
+                        });
+                    }
+                    context.unregisterReceiver(this);
                 }
             }
         };
 
-        ContextCompat.registerReceiver(getActivity(), onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_NOT_EXPORTED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getActivity().registerReceiver(onComplete,
+                    new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                    Context.RECEIVER_EXPORTED);
+        }
+    }
+
+    private void openDownloadedFile(long downloadId) {
+        DownloadManager manager = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+        Uri uri = manager.getUriForDownloadedFile(downloadId);
+        DBHelper dbHelper = new DBHelper(getContext());
+        if (uri != null) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "application/pdf");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                UserUtils.ToastMessages(getActivity(), UserUtils.getMessageFromLocalNew(314, dbHelper));
+            }
+        } else {
+            UserUtils.ToastMessages(getActivity(), UserUtils.getMessageFromLocalNew(315, dbHelper));
+        }
     }
 
     private void showDatePicker(EditText targetEditText) {
@@ -501,75 +540,125 @@ public class AddTravelerRequests extends Fragment {
         datePickerDialog.show();
     }
 
-    private void addNameField(int position) {
-        LinearLayout container = new LinearLayout(getContext());
-        container.setOrientation(LinearLayout.HORIZONTAL);
-        container.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
-        container.setPadding(0, 10, 0, 10);
+    private void addNameField(LinearLayout container, String hint, String initialText, InputFilter[] filters) {
+        Context context = getContext();
+        if (context == null) return;
+        int dp8 = (int) (8 * context.getResources().getDisplayMetrics().density);
+        int dp2 = (int) (2 * context.getResources().getDisplayMetrics().density);
+        int dp30 = (int) (30 * context.getResources().getDisplayMetrics().density);
+        int dp48 = (int) (48 * context.getResources().getDisplayMetrics().density);
+        int dp12 = (int) (12 * context.getResources().getDisplayMetrics().density);
 
-        EditText nameField = new EditText(getContext());
-        UserUtils.setEditTextState(nameField, false);
+        com.google.android.material.card.MaterialCardView mainCard = new com.google.android.material.card.MaterialCardView(context);
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        cardParams.setMargins(dp2, dp8, dp2, dp8);
+        mainCard.setLayoutParams(cardParams);
+        mainCard.setRadius(dp8);
+        mainCard.setCardElevation(0f); // كما طلبتِ 0dp
+        mainCard.setCardBackgroundColor(Color.parseColor("#FFFFFF")); // لون الكرت الرئيسي أبيض
+        mainCard.setStrokeWidth(2); // إضافة إطار خفيف ليعطي شكل Modern
+        mainCard.setStrokeColor(Color.parseColor("#E0E0E0"));
 
-        nameField.setHint("اسم المسافر " + position);
-        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT, 1
-        );
-        nameField.setLayoutParams(nameParams);
-        nameField.setTextColor(getResources().getColor(android.R.color.black));
-        nameField.setBackgroundResource(R.drawable.edittext_background);
-        nameField.setPadding(35, 35, 35, 35);
-        nameField.setSingleLine(true);
-        nameField.setTextSize(16);
-        nameField.setFilters(new InputFilter[]{new InputFilter.LengthFilter(30)});
+        LinearLayout verticalLayout = new LinearLayout(context);
+        verticalLayout.setOrientation(LinearLayout.VERTICAL);
+        verticalLayout.setPadding(20, 20, 20, 20);
 
-        LinearLayout iconContainer = new LinearLayout(getContext());
-        iconContainer.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams iconContainerParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        iconContainer.setLayoutParams(iconContainerParams);
+        LinearLayout nameRow = new LinearLayout(context);
+        nameRow.setOrientation(LinearLayout.HORIZONTAL);
+        nameRow.setGravity(Gravity.CENTER_VERTICAL);
 
-        ImageView uploadIcon = new ImageView(getContext());
-        uploadIcon.setImageResource(R.drawable.ic_upload);
-        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        uploadIcon.setLayoutParams(iconParams);
-        uploadIcon.setPadding(0, 0, 5, 0);
+        EditText nameInput = new EditText(context);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f);
+        nameInput.setLayoutParams(lp);
+        nameInput.setHint(hint);
+        nameInput.setText(initialText);
+        nameInput.setTextSize(16);
+        nameInput.setBackground(null); // إلغاء الخط الافتراضي
+        nameInput.setFilters(filters);
+        UserUtils.setEditTextState(nameInput, false);
+        nameInput.setPadding(20, 20, 20, 20);
 
-        // نص الحالة تحت الأيقونة
-        TextView statusText = new TextView(getContext());
-        statusText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-        statusText.setTextSize(12);
-        statusText.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
-        statusText.setText("صورة الجواز");
-        statusText.setTextColor(getResources().getColor(R.color.black));
-        statusText.setPadding(0, 5, 0, 0);
+        com.google.android.material.card.MaterialCardView uploadCard = new com.google.android.material.card.MaterialCardView(context);
+        LinearLayout.LayoutParams uploadCardParams = new LinearLayout.LayoutParams(WRAP_CONTENT, 110);
+        uploadCardParams.setMarginStart(dp8);
+        uploadCard.setLayoutParams(uploadCardParams);
+        uploadCard.setRadius(dp8);
+        uploadCard.setCardElevation(0f);
+        uploadCard.setCardBackgroundColor(Color.parseColor("#F5F5F5"));
+        uploadCard.setStrokeWidth(0);
 
+        LinearLayout uploadContent = new LinearLayout(context);
+        uploadContent.setOrientation(LinearLayout.HORIZONTAL);
+        uploadContent.setGravity(Gravity.CENTER);
+        uploadContent.setPadding(20, 0, 25, 0);
+        uploadCard.setTag(nameInput);
+// الأيقونة (المجلد الذهبي)
+        ImageView folderIcon = new ImageView(context);
+        folderIcon.setImageResource(R.drawable.ic_upload); // تأكد من اسم الأيقونة لديك
+        folderIcon.setColorFilter(Color.parseColor("#CC9407")); // لون ذهبي
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(50, 50);
+        iconParams.setMarginEnd(5);
+        folderIcon.setLayoutParams(iconParams);
 
-        uploadIcon.setTag(position);
-        uploadIcon.setOnClickListener(v -> {
-            currentUploadTarget = uploadIcon;
+        TextView tvAttach = new TextView(context);
+        tvAttach.setText("صورة الجواز");
+        tvAttach.setTextSize(12);
+        Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.rptregular);
+//        tvAttach.setTypeface(typeface);
+        tvAttach.setPadding(20, 20, 20, 20);
+        tvAttach.setTextColor(Color.BLACK);
+        tvAttach.setTypeface(typeface, Typeface.BOLD);
+
+        uploadContent.addView(folderIcon);
+        uploadContent.addView(tvAttach);
+        uploadCard.addView(uploadContent);
+
+        folderIcon.setTag(nameInput);
+        folderIcon.setTag(R.id.tag_upload_card, uploadCard);
+        uploadCard.setOnClickListener(v -> {
+            currentUploadTarget = folderIcon;
             openGallery();
         });
 
+        nameRow.addView(nameInput);
+//        nameRow.addView(statusIcon);
+        nameRow.addView(uploadCard);
 
-        iconContainer.addView(uploadIcon);
-        iconContainer.addView(statusText);
+        verticalLayout.addView(nameRow);
 
-        container.addView(nameField);
-        container.addView(iconContainer);
+//        nameInput.setTag(R.id.tag_status_icon, statusIcon);
+        nameInput.setTag(R.id.tag_upload_button, uploadCard);
 
-        namesContainer.addView(container);
+        DBHelper dbHelper = new DBHelper(getContext());
+
+        TextView notePrice = new TextView(context);
+        notePrice.setId(R.id.NotePrice); // تعيين الـ ID الذي طلبته
+        LinearLayout.LayoutParams noteParams = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        noteParams.setMargins(20, 0, 20, 5); // هوامش جانبية لتتناسق مع الاسم
+        notePrice.setLayoutParams(noteParams);
+        notePrice.setTextSize(11);
+        notePrice.setTextColor(Color.GRAY);
+        notePrice.setText(UserUtils.getMessageFromLocalNew(363, dbHelper));
+
+        verticalLayout.addView(notePrice);
+//        if (passport_required == 1) {
+//        TextView passportNote = new TextView(context);
+//        LinearLayout.LayoutParams passportNoteParams = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+//        passportNoteParams.setMargins(20, 0, 20, 5);
+//        passportNote.setLayoutParams(passportNoteParams);
+//        passportNote.setTextSize(11);
+//        passportNote.setTextColor(Color.GRAY);
+
+//        passportNote.setText(UserUtils.getMessageFromLocalNew(364, dbHelper));
+
+//        verticalLayout.addView(passportNote);
+//        }
+        nameInput.setTag(R.id.NotePrice, notePrice);
+        mainCard.addView(verticalLayout);
+        container.addView(mainCard);
+
+//        nameInput.setTag(R.id.tag_status_icon, statusIcon);
+        nameInput.setTag(R.id.tag_upload_button, uploadCard);
     }
 
     @Override
@@ -577,50 +666,40 @@ public class AddTravelerRequests extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-
             Uri imageUri = data.getData();
+            if (imageUri == null || currentUploadTarget == null) return;
 
-            LinearLayout iconContainer = (LinearLayout) currentUploadTarget.getParent();
-
-            LinearLayout container = (LinearLayout) iconContainer.getParent();
-
-            EditText nameField = (EditText) container.getChildAt(0);
-
-            TextView statusText = (TextView) iconContainer.getChildAt(1);
-
-            nameField.setTag(imageUri);
-
+            // 1. تحديث الأيقونة التي ضغط عليها المستخدم
             currentUploadTarget.setImageResource(R.drawable.upload_success);
+            currentUploadTarget.setColorFilter(Color.parseColor("#4CAF50"));
 
-            statusText.setVisibility(View.GONE);
+            // 2. الوصول للـ nameField المرتبط بهذا الصف بطريقة آمنة
+            View uploadContent = (View) currentUploadTarget.getParent();
+            View uploadCard = (View) uploadContent.getParent();
+            LinearLayout nameRow = (LinearLayout) uploadCard.getParent();
+
+            // الاسم دائماً أول عنصر في nameRow
+            if (nameRow.getChildAt(0) instanceof EditText) {
+                EditText nameField = (EditText) nameRow.getChildAt(0);
+                nameField.setTag(imageUri); // تخزين مسار الصورة
+
+                // إظهار علامة الصح الجانبية (statusIcon) باستخدام الـ Tag
+                ImageView statusIcon = (ImageView) nameField.getTag(R.id.tag_status_icon);
+                if (statusIcon != null) {
+                    statusIcon.setVisibility(View.VISIBLE);
+                }
+
+                // إزالة حدود الخطأ الحمراء
+                if (uploadCard instanceof MaterialCardView) {
+                    ((MaterialCardView) uploadCard).setStrokeWidth(0);
+                }
+            }
         }
     }
-
-
-    private static final int PICK_IMAGE_REQUEST = 1001;
-    private ImageView currentUploadTarget;
-
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
-
-
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (resultCode == Activity.RESULT_OK && data != null) {
-//            Uri selectedImage = data.getData();
-//            if (currentUploadTarget != null) {
-//                currentUploadTarget.setImageResource(R.drawable.upload_success);
-//
-//                // حفظ URI في EditText المرتبط
-//                LinearLayout parent = (LinearLayout) currentUploadTarget.getParent();
-//                EditText nameField = (EditText) parent.getChildAt(0);
-//                nameField.setTag(selectedImage);
-//            }
-//        }
-//    }
 
 
     private void removeLastNameField() {
@@ -650,7 +729,6 @@ public class AddTravelerRequests extends Fragment {
 
     private void sendTravelerRequest() {
         DBHelper dbHelper = new DBHelper(getContext());
-
         UserUtils.showSuccessGif(2, requireActivity(), null);
 
         new Thread(() -> {
@@ -667,7 +745,6 @@ public class AddTravelerRequests extends Fragment {
                 conn.setDoOutput(true);
                 SharedPreferences prefs = SharedPrefsHelper.get(getContext());
 
-//                SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
                 String token = prefs.getString("auth_token", null);
                 int userId = prefs.getInt("user_id", -1);
                 if (token != null) {
@@ -676,10 +753,8 @@ public class AddTravelerRequests extends Fragment {
 
                 DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
 
-                // الحقول الأساسية
                 writeFormField(dos, "passenger_id", String.valueOf(userId), boundary);
                 writeFormField(dos, "type_tr_id", String.valueOf(type_tr_id), boundary);
-//                writeFormField(dos, "type_service", String.valueOf(type_service), boundary);
                 writeFormField(dos, "number_passenger", String.valueOf(passengerCount), boundary);
                 writeFormField(dos, "country", country.getText().toString().trim(), boundary);
                 writeFormField(dos, "notes", notes.getText().toString().trim(), boundary);
@@ -705,12 +780,15 @@ public class AddTravelerRequests extends Fragment {
                     writeFormField(dos, "type_flight", String.valueOf(Trip_Type), boundary);
                 }
 
-                // أسماء وصور المسافرين
                 for (int i = 0; i < namesContainer.getChildCount(); i++) {
-                    LinearLayout child = (LinearLayout) namesContainer.getChildAt(i);
-                    EditText nameField = (EditText) child.getChildAt(0);
+                    MaterialCardView mainCard = (MaterialCardView) namesContainer.getChildAt(i);
+                    LinearLayout vLayout = (LinearLayout) mainCard.getChildAt(0);
+                    LinearLayout nameRow = (LinearLayout) vLayout.getChildAt(0);
+                    EditText nameField = (EditText) nameRow.getChildAt(0);
+
                     Uri imageUri = (Uri) nameField.getTag();
                     int index = i + 1;
+
                     writeFormField(dos, "name_passenger" + index, nameField.getText().toString().trim(), boundary);
 
                     if (imageUri != null) {
@@ -718,7 +796,6 @@ public class AddTravelerRequests extends Fragment {
                     }
                 }
 
-                // إنهاء boundary
                 dos.writeBytes("--" + boundary + "--\r\n");
                 dos.flush();
                 dos.close();
@@ -740,59 +817,55 @@ public class AddTravelerRequests extends Fragment {
 
                     if (responseCode == 200 || responseCode == 201) {
                         if (getActivity() != null) {
-                            if (getActivity() != null) {
-                                Bundle bundle = new Bundle();
-                                bundle.putString("type_tr_name", type_tr_name);
-                                bundle.putString("tr_status", "قيد المعالجة");
-                                bundle.putString("number_passenger", passengersTextView.getText().toString().trim());
-                                bundle.putInt("type_icon", icon_tr);
-                                bundle.putInt("number_status", 1);
-                                bundle.putString("notes", notes.getText().toString().trim());
-                                bundle.putString("country", country.getText().toString().trim());
+                            Bundle bundle = new Bundle();
+                            bundle.putString("type_tr_name", type_tr_name);
+                            bundle.putString("tr_status", "قيد المعالجة");
+                            bundle.putString("number_passenger", passengersTextView.getText().toString().trim());
+                            bundle.putString("type_icon", String.valueOf(icon_tr));
+                            bundle.putInt("number_status", 1);
+                            bundle.putString("notes", notes.getText().toString().trim());
+                            bundle.putString("country", country.getText().toString().trim());
 
-                                for (int i = 0; i < namesContainer.getChildCount(); i++) {
-                                    LinearLayout child = (LinearLayout) namesContainer.getChildAt(i);
-                                    EditText nameField = (EditText) child.getChildAt(0);
+                            for (int i = 0; i < namesContainer.getChildCount(); i++) {
+                                MaterialCardView mainCard = (MaterialCardView) namesContainer.getChildAt(i);
+                                LinearLayout vLayout = (LinearLayout) mainCard.getChildAt(0);
+                                LinearLayout nameRow = (LinearLayout) vLayout.getChildAt(0);
+                                EditText nameField = (EditText) nameRow.getChildAt(0);
 
-                                    String key = "name_passenger" + (i + 1);
-                                    String value = nameField.getText().toString().trim();
+                                String key = "name_passenger" + (i + 1);
+                                String value = nameField.getText().toString().trim();
 
-                                    bundle.putString(key, value);
-                                }
-                                Fragment fragment = new TravelerRequestsDetails();
-                                fragment.setArguments(bundle);
-                                ((FragmentActivity) getContext()).getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.full_screen_container, fragment)
-                                        .addToBackStack(null)
-                                        .commit();
-                                UserUtils.getMessageFromLocal(142, dbHelper, new UserUtils.MessageCallback() {
-                                    @Override
-                                    public void onSuccess(String message) {
-                                        UserUtils.ToastMessages(getActivity(), message);
-                                    }
-
-                                    @Override
-                                    public void onError(String error) {
-                                    }
-                                });
-
+                                bundle.putString(key, value);
                             }
-                        }
 
+                            Fragment fragment = new TravelerRequestsDetails();
+
+
+                            fragment.setArguments(bundle);
+
+                            if (getActivity() instanceof HomePage) {
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                ((HomePage) getContext()).openFullScreenFragment(fragment, "تفاصيل الحجز", R.drawable.checklist, 2);
+                            }
+
+                            UserUtils.getMessageFromLocal(142, dbHelper, new UserUtils.MessageCallback() {
+                                @Override
+                                public void onSuccess(String message) {
+                                    UserUtils.ToastMessages(getActivity(), message);
+                                }
+
+                                @Override
+                                public void onError(String error) {
+                                }
+                            });
+                        }
 
                     } else {
                         UserUtils.sendLog(getContext(), "sendTravelerRequest", response, s, "AddTravelerRequests");
-                        UserUtils.getMessageFromLocal(141, dbHelper, new UserUtils.MessageCallback() {
-                            @Override
-                            public void onSuccess(String message) {
-                                UserUtils.ToastMessages(getActivity(), message);
-                            }
+                        UserUtils.showErrorDialog(getActivity(), UserUtils.getMessageFromLocalNew(141, dbHelper), null, null,
+                                "تعذر إتمام الطلب", 1,null);
 
-                            @Override
-                            public void onError(String error) {
-                            }
-                        });
                     }
                 });
                 UserUtils.hideSuccessGif(getActivity());
@@ -802,16 +875,9 @@ public class AddTravelerRequests extends Fragment {
                     getActivity().runOnUiThread(() -> {
                         UserUtils.hideSuccessGif(getActivity());
                         UserUtils.sendLog(getContext(), "sendTravelerRequest", String.valueOf(e), e.getMessage(), "AddTravelerRequests");
-                        UserUtils.getMessageFromLocal(4, dbHelper, new UserUtils.MessageCallback() {
-                            @Override
-                            public void onSuccess(String message) {
-                                UserUtils.ToastMessages(getActivity(), message);
-                            }
+                        UserUtils.showErrorDialog(getActivity(), UserUtils.getMessageFromLocalNew(5, dbHelper), null,
+                                null, "تعذر إتمام الطلب", 1,null);
 
-                            @Override
-                            public void onError(String error) {
-                            }
-                        });
                     });
                 }
             }
@@ -819,25 +885,59 @@ public class AddTravelerRequests extends Fragment {
     }
 
     private void writeFileField(DataOutputStream out, String fieldName, Uri fileUri, String boundary) throws IOException {
-        String originalName = getFileNameFromUri(fileUri); // الاسم الأصلي
-        String uniqueID = UUID.randomUUID().toString();   // جزء فريد
-        String fileName = uniqueID + "_" + originalName;   // الاسم النهائي الفريد
-        String mimeType = getContext().getContentResolver().getType(fileUri);
+
+        String originalName = getFileNameFromUri(fileUri);
+        String uniqueID = UUID.randomUUID().toString();
+        String fileName = uniqueID + "_" + originalName;
 
         out.writeBytes("--" + boundary + "\r\n");
         out.writeBytes("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"\r\n");
-        out.writeBytes("Content-Type: " + mimeType + "\r\n");
+        out.writeBytes("Content-Type: image/jpeg\r\n");
         out.writeBytes("\r\n");
+
         InputStream inputStream = getContext().getContentResolver().openInputStream(fileUri);
-        byte[] buffer = new byte[4096];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            out.write(buffer, 0, bytesRead);
-        }
+
+        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeStream(inputStream);
+
         inputStream.close();
+
+        if (bitmap != null) {
+
+            int maxWidth = 1280;
+            int maxHeight = 1280;
+
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+
+            float ratio = Math.min(
+                    (float) maxWidth / width,
+                    (float) maxHeight / height
+            );
+
+            if (ratio < 1) {
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+
+                bitmap = android.graphics.Bitmap.createScaledBitmap(
+                        bitmap,
+                        width,
+                        height,
+                        true
+                );
+            }
+
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 75, baos);
+
+            out.write(baos.toByteArray());
+
+            baos.close();
+            bitmap.recycle();
+        }
 
         out.writeBytes("\r\n");
     }
+
 
     private String getFileNameFromUri(Uri uri) {
         String result = null;
